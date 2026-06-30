@@ -1,0 +1,244 @@
+import { useState, useCallback, useEffect, useRef } from 'react'
+import { Link } from 'react-router-dom'
+import { Mic, MicOff, ArrowLeft, Trash2, Loader2, Maximize2, Wifi, WifiOff, Minimize2 } from 'lucide-react'
+import { useWebSocket } from '../hooks/useWebSocket'
+import { useAudioRecorder } from '../hooks/useAudioRecorder'
+
+type RecordingState = 'idle' | 'connecting' | 'recording' | 'processing'
+
+export default function DualDisplayPage() {
+  const [state, setState] = useState<RecordingState>('idle')
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const recordingRef = useRef(false) // 音訊回呼即時讀取（避免 stale closure）
+
+  const {
+    isConnected,
+    partialText,
+    finalText,
+    error: wsError,
+    connect,
+    startRecording: wsStartRecording,
+    stopRecording: wsStopRecording,
+    sendAudio,
+    clearText,
+  } = useWebSocket()
+
+  const {
+    volumeLevel,
+    error: recorderError,
+    startRecording: startAudioRecording,
+    stopRecording: stopAudioRecording,
+    onAudioData,
+  } = useAudioRecorder()
+
+  // 設置音訊數據回調（只在錄音中送出；sendAudio 內部會檢查連線）
+  useEffect(() => {
+    onAudioData((data) => {
+      if (recordingRef.current) sendAudio(data)
+    })
+  }, [onAudioData, sendAudio])
+
+  // 監聽全螢幕變化
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  // 組合顯示文字
+  const displayText = partialText
+    ? `${finalText}${finalText ? '\n' : ''}${partialText}`
+    : finalText
+
+  // 字幕模式：只保留最近 1~2 句（看過的舊句直接淡出消失，不塞滿畫面）
+  const recentSentences = displayText
+    .split(/(?<=[。！？!?\n])/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(-2)
+
+  const error = wsError || recorderError
+
+  const handleMicClick = useCallback(async () => {
+    if (state === 'recording') {
+      // 停止錄音
+      setState('processing')
+      recordingRef.current = false
+      stopAudioRecording()
+      wsStopRecording()
+      setTimeout(() => setState('idle'), 800)
+    } else if (state === 'idle') {
+      // 開始錄音
+      setState('connecting')
+      try {
+        await connect()              // 連上才往下（connect 回傳 Promise，已修 stale closure）
+        await startAudioRecording()
+        wsStartRecording()
+        recordingRef.current = true
+        setState('recording')
+      } catch (err) {
+        console.error('開始串流失敗:', err)
+        recordingRef.current = false
+        setState('idle')
+      }
+    }
+  }, [state, connect, startAudioRecording, stopAudioRecording, wsStartRecording, wsStopRecording])
+
+  const handleClear = useCallback(() => {
+    clearText()
+  }, [clearText])
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen()
+    } else {
+      document.exitFullscreen()
+    }
+  }, [])
+
+  // 狀態提示文字
+  const statusText = {
+    idle: '點擊麥克風開始',
+    connecting: '正在連接...',
+    recording: '正在聆聽...',
+    processing: '處理中...',
+  }[state]
+
+  // 字幕內容：最近 2 句，最新清晰、上一句淡化（共用於上下兩半）
+  const Subtitle = () =>
+    recentSentences.length ? (
+      <div className="w-full max-w-4xl mx-auto space-y-1">
+        {recentSentences.map((s, i) => {
+          const isNewest = i === recentSentences.length - 1
+          return (
+            <p
+              key={i}
+              className={`font-content text-2xl md:text-4xl leading-relaxed text-center whitespace-pre-wrap transition-all duration-500 ${
+                isNewest ? 'text-white' : 'text-white/25'
+              }`}
+            >
+              {s}
+              {isNewest && partialText && <span className="text-gray-500 animate-pulse">|</span>}
+            </p>
+          )
+        })}
+      </div>
+    ) : (
+      <p className="font-content text-2xl md:text-3xl text-gray-500 text-center">{statusText}</p>
+    )
+
+  return (
+    <div className="h-screen flex flex-col bg-gray-900">
+      {/* Header - hide in fullscreen */}
+      {!isFullscreen && (
+        <header className="p-3 flex items-center justify-between border-b border-gray-700 bg-gray-800">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>返回</span>
+          </Link>
+          <h1 className="font-title text-lg font-bold text-white">
+            雙向顯示模式
+          </h1>
+          <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-1 text-xs ${
+              isConnected ? 'text-green-500' : 'text-gray-500'
+            }`}>
+              {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+            </div>
+            <button
+              onClick={toggleFullscreen}
+              className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              title="全螢幕"
+            >
+              <Maximize2 className="w-4 h-4 text-gray-400" />
+            </button>
+          </div>
+        </header>
+      )}
+
+      {/* Error Banner */}
+      {error && (
+        <div className="px-4 py-2 bg-red-900/50 text-red-400 text-sm text-center">
+          {error}
+        </div>
+      )}
+
+      {/* Top Half - Flipped 180° for person across（字幕模式：最近 2 句、舊句淡出）*/}
+      <div className="flex-1 min-h-0 flex items-center justify-center p-6 border-b border-gray-700 overflow-hidden">
+        <div className="text-flipped w-full">
+          <Subtitle />
+        </div>
+      </div>
+
+      {/* Bottom Half - Normal for self */}
+      <div className="flex-1 min-h-0 flex items-center justify-center p-6 overflow-hidden">
+        <div className="w-full">
+          <Subtitle />
+        </div>
+      </div>
+
+      {/* Control Bar */}
+      <div className="p-4 flex items-center justify-center gap-4 bg-gray-800 border-t border-gray-700">
+        {/* Clear Button */}
+        <button
+          onClick={handleClear}
+          className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
+          title="清除"
+        >
+          <Trash2 className="w-5 h-5 text-gray-300" />
+        </button>
+
+        {/* Volume Indicator */}
+        {state === 'recording' && (
+          <div className="w-16 h-1 bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-green-500 transition-all duration-75"
+              style={{ width: `${volumeLevel * 100}%` }}
+            />
+          </div>
+        )}
+
+        {/* Mic Button */}
+        <button
+          onClick={handleMicClick}
+          disabled={state === 'processing' || state === 'connecting'}
+          className={`
+            w-16 h-16 rounded-full flex items-center justify-center transition-all
+            ${state === 'idle'
+              ? 'bg-blue-600 hover:bg-blue-700 text-white'
+              : state === 'recording'
+              ? 'bg-red-500 text-white recording-pulse recording-glow'
+              : 'bg-gray-600 text-white cursor-not-allowed'
+            }
+          `}
+        >
+          {state === 'processing' || state === 'connecting' ? (
+            <Loader2 className="w-7 h-7 animate-spin" />
+          ) : state === 'recording' ? (
+            <MicOff className="w-7 h-7" />
+          ) : (
+            <Mic className="w-7 h-7" />
+          )}
+        </button>
+
+        {/* Fullscreen Toggle (always visible) */}
+        <button
+          onClick={toggleFullscreen}
+          className="p-3 bg-gray-700 hover:bg-gray-600 rounded-full transition-colors"
+          title={isFullscreen ? '退出全螢幕' : '全螢幕'}
+        >
+          {isFullscreen ? (
+            <Minimize2 className="w-5 h-5 text-gray-300" />
+          ) : (
+            <Maximize2 className="w-5 h-5 text-gray-300" />
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
