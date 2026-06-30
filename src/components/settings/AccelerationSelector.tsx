@@ -54,7 +54,7 @@ export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
   descriptionMode = "tooltip",
   grouped = false,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getSetting, updateSetting, isUpdating } = useSettings();
 
   const [whisperOptions, setWhisperOptions] = useState<DropdownOption[]>([]);
@@ -91,11 +91,13 @@ export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
       setOrtOptions(
         ortVals.map((v) => ({
           value: v,
-          label: ORT_LABELS[v as OrtAcceleratorSetting] ?? v,
+          label: v === "auto"
+            ? (i18n.language.startsWith("zh") ? "自動" : "Auto")
+            : (ORT_LABELS[v as OrtAcceleratorSetting] ?? v),
         })),
       );
     });
-  }, [t]);
+  }, [t, i18n.language]);
 
   const currentAccelerator = getSetting("whisper_accelerator") ?? "auto";
   const currentGpuDevice = getSetting("whisper_gpu_device") ?? -1;

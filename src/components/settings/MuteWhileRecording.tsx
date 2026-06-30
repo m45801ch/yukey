@@ -24,6 +24,7 @@ export const MuteWhileRecording: React.FC<MuteWhileRecordingToggleProps> =
         description={t("settings.debug.muteWhileRecording.description")}
         descriptionMode={descriptionMode}
         grouped={grouped}
+        alignToRightBorder={false}
       />
     );
   });

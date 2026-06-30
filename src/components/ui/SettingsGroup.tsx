@@ -23,8 +23,8 @@ export const SettingsGroup: React.FC<SettingsGroupProps> = ({
           )}
         </div>
       )}
-      <div className="bg-background border border-mid-gray/20 rounded-lg overflow-visible">
-        <div className="divide-y divide-mid-gray/20">{children}</div>
+      <div className="bg-background-ui border border-mid-gray/15 rounded-lg overflow-visible relative hover:z-20 focus-within:z-20 transition-all duration-150 glow-card-3d">
+        <div className="divide-y divide-mid-gray/10">{children}</div>
       </div>
     </div>
   );

@@ -1,125 +1,71 @@
 import React from "react";
-import { useTranslation } from "react-i18next";
-import { Cog, FlaskConical, History, Info, Sparkles, Cpu } from "lucide-react";
-import HandyTextLogo from "./icons/HandyTextLogo";
-import HandyHand from "./icons/HandyHand";
-import { useSettings } from "../hooks/useSettings";
-import {
-  GeneralSettings,
-  AdvancedSettings,
-  HistorySettings,
-  DebugSettings,
-  AboutSettings,
-  PostProcessingSettings,
-  ModelsSettings,
-} from "./settings";
+import { LayoutDashboard, History, BookOpen, Sparkles, Cog } from "lucide-react";
+import { Overview } from "./pages/Overview";
+import { HistoryPage } from "./pages/HistoryPage";
+import { VocabPage } from "./pages/VocabPage";
+import { StylePage } from "./pages/StylePage";
 
-export type SidebarSection = keyof typeof SECTIONS_CONFIG;
+import yukeyStartImg from "../assets/yukey-start.png";
 
-interface IconProps {
-  width?: number | string;
-  height?: number | string;
-  size?: number | string;
-  className?: string;
-  [key: string]: any;
-}
-
-interface SectionConfig {
-  labelKey: string;
-  icon: React.ComponentType<IconProps>;
-  component: React.ComponentType;
-  enabled: (settings: any) => boolean;
-}
-
-export const SECTIONS_CONFIG = {
-  general: {
-    labelKey: "sidebar.general",
-    icon: HandyHand,
-    component: GeneralSettings,
-    enabled: () => true,
-  },
-  models: {
-    labelKey: "sidebar.models",
-    icon: Cpu,
-    component: ModelsSettings,
-    enabled: () => true,
-  },
-  advanced: {
-    labelKey: "sidebar.advanced",
-    icon: Cog,
-    component: AdvancedSettings,
-    enabled: () => true,
-  },
-  history: {
-    labelKey: "sidebar.history",
-    icon: History,
-    component: HistorySettings,
-    enabled: () => true,
-  },
-  postprocessing: {
-    labelKey: "sidebar.postProcessing",
-    icon: Sparkles,
-    component: PostProcessingSettings,
-    enabled: (settings) => settings?.post_process_enabled ?? false,
-  },
-  debug: {
-    labelKey: "sidebar.debug",
-    icon: FlaskConical,
-    component: DebugSettings,
-    enabled: (settings) => settings?.debug_mode ?? false,
-  },
-  about: {
-    labelKey: "sidebar.about",
-    icon: Info,
-    component: AboutSettings,
-    enabled: () => true,
-  },
-} as const satisfies Record<string, SectionConfig>;
+export type SidebarSection = "overview" | "history" | "vocab" | "style";
 
 interface SidebarProps {
   activeSection: SidebarSection;
   onSectionChange: (section: SidebarSection) => void;
+  onOpenSettings: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   onSectionChange,
+  onOpenSettings,
 }) => {
-  const { t } = useTranslation();
-  const { settings } = useSettings();
-
-  const availableSections = Object.entries(SECTIONS_CONFIG)
-    .filter(([_, config]) => config.enabled(settings))
-    .map(([id, config]) => ({ id: id as SidebarSection, ...config }));
+  const SECTIONS = [
+    { id: "overview", label: "概覽", icon: LayoutDashboard },
+    { id: "history", label: "歷史紀錄", icon: History },
+    { id: "vocab", label: "詞彙字典", icon: BookOpen },
+    { id: "style", label: "修飾風格", icon: Sparkles },
+  ] as const;
 
   return (
-    <div className="flex flex-col w-40 h-full border-e border-mid-gray/20 items-center px-2">
-      <HandyTextLogo width={120} className="m-4" />
-      <div className="flex flex-col w-full items-center gap-1 pt-2 border-t border-mid-gray/20">
-        {availableSections.map((section) => {
+    <div className="flex flex-col w-44 h-full border-e border-mid-gray/20 bg-background-ui/5 items-center justify-between px-2 py-4 select-none">
+      {/* 頂部 Logo 替換為 yukey-start 圖片 */}
+      <div className="w-full text-center py-2 flex flex-col items-center justify-center">
+        <img src={yukeyStartImg} alt="yukey" className="h-[40px] object-contain my-1" />
+      </div>
+
+      {/* 中間分頁導覽清單 */}
+      <div className="flex flex-col w-full items-center gap-1.5 flex-1 pt-6">
+        {SECTIONS.map((section) => {
           const Icon = section.icon;
           const isActive = activeSection === section.id;
 
           return (
-            <div
+            <button
               key={section.id}
-              className={`flex gap-2 items-center p-2 w-full rounded-lg cursor-pointer transition-colors ${
+              onClick={() => onSectionChange(section.id as SidebarSection)}
+              className={`flex gap-3 items-center px-3 py-2.5 w-full rounded-xl cursor-pointer transition-all text-start ${
                 isActive
-                  ? "bg-logo-primary/80"
-                  : "hover:bg-mid-gray/20 hover:opacity-100 opacity-85"
+                  ? "active-sidebar-item-3d text-white font-bold"
+                  : "hover:bg-mid-gray/10 text-text/80 hover:text-text"
               }`}
-              onClick={() => onSectionChange(section.id)}
             >
-              <Icon width={24} height={24} className="shrink-0" />
-              <p
-                className="text-sm font-medium truncate"
-                title={t(section.labelKey)}
-              >
-                {t(section.labelKey)}
-              </p>
-            </div>
+              <Icon className="w-5 h-5 shrink-0" />
+              <span className="text-sm font-bold">{section.label}</span>
+            </button>
           );
         })}
+      </div>
+
+      {/* 左下角小齒輪設定按鈕 */}
+      <div className="w-full pt-4 border-t border-mid-gray/20">
+        <button
+          onClick={onOpenSettings}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mid-gray/10 text-text/80 hover:text-text transition-colors text-start cursor-pointer font-bold"
+        >
+          <Cog className="w-5 h-5 shrink-0" />
+          <span className="text-sm">設定</span>
+        </button>
       </div>
     </div>
   );

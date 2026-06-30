@@ -276,7 +276,10 @@ export const HandyKeysShortcutInput: React.FC<HandyKeysShortcutInputProps> = ({
             className="px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 hover:bg-logo-primary/10 rounded-md cursor-pointer hover:border-logo-primary"
             onClick={startRecording}
           >
-            {formatKeyCombination(binding.current_binding, osType)}
+            {formatKeyCombination(binding.current_binding, osType)
+              .replace(/Escape/gi, "ESC")
+              .replace(/Esc/gi, "ESC")
+            }
           </div>
         )}
         <ResetButton

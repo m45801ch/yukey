@@ -4,9 +4,9 @@
   /* Design tokens */
   --color-text: #0f0f0f;
   --color-background: #fbfbfb;
-  --color-background-ui: #da5893;
-  --color-logo-primary: #faa2ca;
-  --color-logo-stroke: #382731;
+  --color-background-ui: #0284c7;
+  --color-logo-primary: #38bdf8;
+  --color-logo-stroke: #0f172a;
   --color-text-stroke: #f6f6f6;
   --color-mid-gray: #808080;
 }
@@ -57,16 +57,45 @@
   text-align: center;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Colors - Dark Theme */
-    --color-text: #fbfbfb;
-    --color-background: #2c2b29;
-    --color-logo-primary: #f28cbb;
-    --color-logo-stroke: #fad1ed;
-    /* Just a bit darker than the (already dark) background, keeping its warm tint */
-    --color-log-surface: color-mix(in srgb, var(--color-background), black 15%);
-  }
+/* ==================== 三大全新設計模板主題配色 ==================== */
+
+/* 1. 科技極簡「黑潮/深靛藍」高對比模式 (theme-dark-tech) */
+.theme-dark-tech {
+  --color-text: #f1f5f9;
+  --color-background: #0b0f19;
+  --color-background-ui: #1e293b;
+  --color-logo-primary: #38bdf8;
+  --color-logo-stroke: #0284c7;
+  --color-text-stroke: #1e293b;
+  --color-mid-gray: #64748b;
+  --color-log-surface: #151d30;
+  color-scheme: dark;
+}
+
+/* 2. 現代優雅「棉花糖粉霧/微漸層」極簡明亮模式 (theme-premium-light) */
+.theme-premium-light {
+  --color-text: #0f172a;
+  --color-background: #f8fafc;
+  --color-background-ui: #ffffff;
+  --color-logo-primary: #f472b6;
+  --color-logo-stroke: #faa2ca;
+  --color-text-stroke: #f1f5f9;
+  --color-mid-gray: #64748b;
+  --color-log-surface: #f1f5f9;
+  color-scheme: light;
+}
+
+/* 3. 自然治癒「森林苔綠與燕麥」日系侘寂模式 (theme-zen-natural) */
+.theme-zen-natural {
+  --color-text: #2b2d2f;
+  --color-background: #f4f4f0;
+  --color-background-ui: #fcfcf9;
+  --color-logo-primary: #3e6b5c;
+  --color-logo-stroke: #a3b899;
+  --color-text-stroke: #e6e6df;
+  --color-mid-gray: #787a7c;
+  --color-log-surface: #e6e6df;
+  color-scheme: light;
 }
 
 /* macOS - tint native overlay scrollbar thumb */
@@ -113,3 +142,196 @@
   stroke: var(--color-logo-stroke);
   stroke-width: 1;
 }
+
+/* ==================== 高級交互與微動畫 (UI/UX Pro Max) ==================== */
+
+/* 1. 全域背景與文字轉場 (滑順切換主題) */
+:root {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+:root *, :root *::before, :root *::after {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* 2. 科技極簡 (theme-dark-tech) 專屬光暈陰影 */
+.theme-dark-tech .shadow-sm,
+.theme-dark-tech .rounded-lg {
+  box-shadow: 0 4px 20px -2px rgba(56, 189, 248, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+}
+.theme-dark-tech .bg-background-ui:hover {
+  box-shadow: 0 0 15px 1px rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+/* 3. 現代優雅 (theme-premium-light) 專屬柔粉光暈與羽化陰影 */
+.theme-premium-light .shadow-sm,
+.theme-premium-light .rounded-lg {
+  box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.02);
+}
+.theme-premium-light .bg-background-ui:hover {
+  box-shadow: 0 12px 20px -2px rgba(244, 114, 182, 0.14);
+  border-color: rgba(244, 114, 182, 0.25);
+  transform: translateY(-1px);
+}
+
+/* 4. 自然治癒 (theme-zen-natural) 專屬質樸微陰影 */
+.theme-zen-natural .shadow-sm,
+.theme-zen-natural .rounded-lg {
+  box-shadow: 0 6px 12px -3px rgba(62, 107, 92, 0.06);
+}
+.theme-zen-natural .bg-background-ui:hover {
+  box-shadow: 0 8px 16px -2px rgba(62, 107, 92, 0.1);
+  border-color: rgba(62, 107, 92, 0.2);
+  transform: translateY(-1px);
+}
+
+/* 5. 點擊回彈微動畫 (All Buttons & Interactive Items) */
+button, 
+.cursor-pointer, 
+.interactive-item {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+button:hover, 
+.cursor-pointer:hover {
+  transform: scale(1.02);
+}
+button:active, 
+.cursor-pointer:active {
+  transform: scale(0.96) !important;
+}
+
+/* 6. 側邊欄高亮卡片光暈 (Sidebar Navigation active item neon glow) */
+.theme-dark-tech .bg-logo-primary {
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+.theme-premium-light .bg-logo-primary {
+  box-shadow: 0 0 12px rgba(244, 114, 182, 0.4);
+}
+.theme-zen-natural .bg-logo-primary {
+  box-shadow: 0 0 12px rgba(62, 107, 92, 0.4);
+}
+
+/* 7. 卡牌列表過渡滑動效果 */
+.bg-background-ui {
+  transform: translateY(0);
+}
+
+/* ==================== 3D立體感立體陰影與光暈效果卡片 ==================== */
+.glow-card-3d {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+  transform: translateY(0);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+.glow-card-3d:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+.theme-dark-tech .glow-card-3d:hover {
+  box-shadow: 0 20px 30px -10px rgba(56, 189, 248, 0.25), 0 0 18px 2px rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  background-color: rgba(30, 41, 59, 0.4);
+}
+.theme-premium-light .glow-card-3d:hover {
+  box-shadow: 0 20px 30px -10px rgba(244, 114, 182, 0.25), 0 0 18px 2px rgba(244, 114, 182, 0.15);
+  border-color: rgba(244, 114, 182, 0.4);
+  background-color: rgba(255, 255, 255, 0.8);
+}
+.theme-zen-natural .glow-card-3d:hover {
+  box-shadow: 0 20px 30px -10px rgba(62, 107, 92, 0.2), 0 0 18px 2px rgba(62, 107, 92, 0.15);
+  border-color: rgba(62, 107, 92, 0.4);
+  background-color: rgba(252, 252, 249, 0.8);
+}
+
+/* Active 3D card glows */
+.theme-dark-tech .active-glow-3d {
+  box-shadow: 0 15px 25px -8px rgba(56, 189, 248, 0.3), 0 0 16px 2px rgba(56, 189, 248, 0.2) !important;
+}
+.theme-premium-light .active-glow-3d {
+  box-shadow: 0 15px 25px -8px rgba(244, 114, 182, 0.3), 0 0 16px 2px rgba(244, 114, 182, 0.2) !important;
+}
+.theme-zen-natural .active-glow-3d {
+  box-shadow: 0 15px 25px -8px rgba(62, 107, 92, 0.25), 0 0 16px 2px rgba(62, 107, 92, 0.2) !important;
+}
+
+/* Active 3D Sidebar item styling */
+.active-sidebar-item-3d {
+  position: relative;
+  transform: scale(1.03) translateZ(0);
+  font-weight: 800 !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.theme-dark-tech .active-sidebar-item-3d {
+  background: linear-gradient(135deg, var(--color-logo-primary), #0284c7) !important;
+  box-shadow: 0 4px 15px -2px rgba(56, 189, 248, 0.5), 0 2px 6px rgba(56, 189, 248, 0.3);
+}
+.theme-premium-light .active-sidebar-item-3d {
+  background: linear-gradient(135deg, var(--color-logo-primary), #db2777) !important;
+  box-shadow: 0 4px 15px -2px rgba(244, 114, 182, 0.5), 0 2px 6px rgba(244, 114, 182, 0.3);
+}
+.theme-zen-natural .active-sidebar-item-3d {
+  background: linear-gradient(135deg, var(--color-logo-primary), #2d4f44) !important;
+  box-shadow: 0 4px 15px -2px rgba(62, 107, 92, 0.4), 0 2px 6px rgba(62, 107, 92, 0.3);
+}
+
+/* Settings Modal left sidebar items */
+.active-settings-item-3d {
+  position: relative;
+  transform: scale(1.03) translateZ(0);
+  font-weight: 800 !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border: 1px solid var(--color-logo-primary) !important;
+}
+
+.theme-dark-tech .active-settings-item-3d {
+  background: rgba(56, 189, 248, 0.15) !important;
+  color: var(--color-logo-primary) !important;
+  box-shadow: 0 4px 12px -3px rgba(56, 189, 248, 0.3);
+}
+.theme-premium-light .active-settings-item-3d {
+  background: rgba(244, 114, 182, 0.15) !important;
+  color: var(--color-logo-primary) !important;
+  box-shadow: 0 4px 12px -3px rgba(244, 114, 182, 0.3);
+}
+.theme-zen-natural .active-settings-item-3d {
+  background: rgba(62, 107, 92, 0.15) !important;
+  color: var(--color-logo-primary) !important;
+  box-shadow: 0 4px 12px -3px rgba(62, 107, 92, 0.3);
+}
+
+/* 3D Capsule Toggle Switches */
+.capsule-toggle-3d {
+  width: 2.75rem; /* 44px */
+  height: 1.5rem; /* 24px */
+  background-color: rgba(128, 128, 128, 0.2);
+  border: 1px solid rgba(128, 128, 128, 0.15);
+  border-radius: 9999px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.capsule-toggle-3d::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  height: 20px;
+  width: 20px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Checked states */
+input:checked + .capsule-toggle-3d::after {
+  transform: translateX(20px);
+}
+
+input:checked + .capsule-toggle-3d {
+  background: var(--color-logo-primary) !important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--color-logo-primary), transparent 40%), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+}
+
+

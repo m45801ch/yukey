@@ -23,23 +23,30 @@ export const MicrophoneSelector: React.FC<MicrophoneSelectorProps> = React.memo(
       refreshAudioDevices,
     } = useSettings();
 
+    const rawMicrophone = getSetting("selected_microphone") || "default";
     const selectedMicrophone =
-      getSetting("selected_microphone") === "default"
-        ? "Default"
-        : getSetting("selected_microphone") || "Default";
+      rawMicrophone.toLowerCase() === "default"
+        ? "系統預設麥克風"
+        : rawMicrophone;
 
     const handleMicrophoneSelect = async (deviceName: string) => {
-      await updateSetting("selected_microphone", deviceName);
+      const value = deviceName === "系統預設麥克風" ? "default" : deviceName;
+      await updateSetting("selected_microphone", value);
     };
 
     const handleReset = async () => {
       await resetSetting("selected_microphone");
     };
 
-    const microphoneOptions = audioDevices.map((device) => ({
-      value: device.name,
-      label: device.name,
-    }));
+    const microphoneOptions = [
+      { value: "系統預設麥克風", label: "系統預設麥克風" },
+      ...audioDevices
+        .filter((device) => device.name.toLowerCase() !== "default")
+        .map((device) => ({
+          value: device.name,
+          label: device.name,
+        }))
+    ];
 
     return (
       <SettingContainer

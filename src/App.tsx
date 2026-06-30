@@ -12,7 +12,12 @@ import "./App.css";
 import AccessibilityPermissions from "./components/AccessibilityPermissions";
 import Footer from "./components/footer";
 import Onboarding, { AccessibilityOnboarding } from "./components/onboarding";
-import { Sidebar, SidebarSection, SECTIONS_CONFIG } from "./components/Sidebar";
+import { Sidebar, SidebarSection } from "./components/Sidebar";
+import { SettingsModal } from "./components/SettingsModal";
+import { Overview } from "./components/pages/Overview";
+import { HistoryPage } from "./components/pages/HistoryPage";
+import { VocabPage } from "./components/pages/VocabPage";
+import { StylePage } from "./components/pages/StylePage";
 import { useSettings } from "./hooks/useSettings";
 import { useSettingsStore } from "./stores/settingsStore";
 import { commands } from "@/bindings";
@@ -20,10 +25,22 @@ import { getLanguageDirection, initializeRTL } from "@/lib/utils/rtl";
 
 type OnboardingStep = "accessibility" | "model" | "done";
 
-const renderSettingsContent = (section: SidebarSection) => {
-  const ActiveComponent =
-    SECTIONS_CONFIG[section]?.component || SECTIONS_CONFIG.general.component;
-  return <ActiveComponent />;
+const renderPageContent = (
+  section: SidebarSection,
+  onNavigateToSettings?: (tab: string) => void,
+) => {
+  switch (section) {
+    case "overview":
+      return <Overview onNavigateToSettings={onNavigateToSettings} />;
+    case "history":
+      return <HistoryPage />;
+    case "vocab":
+      return <VocabPage />;
+    case "style":
+      return <StylePage />;
+    default:
+      return <Overview onNavigateToSettings={onNavigateToSettings} />;
+  }
 };
 
 function App() {
@@ -31,11 +48,17 @@ function App() {
   const [onboardingStep, setOnboardingStep] = useState<OnboardingStep | null>(
     null,
   );
-  // Track if this is a returning user who just needs to grant permissions
-  // (vs a new user who needs full onboarding including model selection)
   const [isReturningUser, setIsReturningUser] = useState(false);
   const [currentSection, setCurrentSection] =
-    useState<SidebarSection>("general");
+    useState<SidebarSection>("overview");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<any>("general");
+
+  const openSettingsWithTab = (tab: string) => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  };
+
   const { settings, updateSetting } = useSettings();
   const direction = getLanguageDirection(i18n.language);
   const refreshAudioDevices = useSettingsStore(
@@ -264,18 +287,25 @@ function App() {
           },
         }}
       />
+      
+      {/* 全螢幕設定 Modal 覆蓋層 */}
+      {isSettingsOpen && (
+        <SettingsModal defaultTab={settingsTab} onClose={() => setIsSettingsOpen(false)} />
+      )}
+
       {/* Main content area that takes remaining space */}
       <div className="flex-1 flex overflow-hidden">
         <Sidebar
           activeSection={currentSection}
           onSectionChange={setCurrentSection}
+          onOpenSettings={() => openSettingsWithTab("general")}
         />
         {/* Scrollable content area */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden bg-background">
           <div className="flex-1 overflow-y-auto">
-            <div className="flex flex-col items-center p-4 gap-4">
+            <div className="flex flex-col p-6 h-full">
               <AccessibilityPermissions />
-              {renderSettingsContent(currentSection)}
+              {renderPageContent(currentSection, openSettingsWithTab)}
             </div>
           </div>
         </div>

@@ -6,11 +6,6 @@ import { useSettings } from "../../../hooks/useSettings";
 import { commands } from "@/bindings";
 import { toast } from "sonner";
 
-const KEYBOARD_IMPLEMENTATION_OPTIONS: DropdownOption[] = [
-  { value: "tauri", label: "Tauri Global Shortcut" },
-  { value: "handy_keys", label: "Handy Keys" },
-];
-
 interface KeyboardImplementationSelectorProps {
   descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
@@ -19,10 +14,24 @@ interface KeyboardImplementationSelectorProps {
 export const KeyboardImplementationSelector: React.FC<
   KeyboardImplementationSelectorProps
 > = ({ descriptionMode = "tooltip", grouped = false }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getSetting, isUpdating, refreshSettings } = useSettings();
   const currentImplementation =
     getSetting("keyboard_implementation") ?? "tauri";
+
+  const options = React.useMemo<DropdownOption[]>(() => {
+    const isZh = i18n.language.startsWith("zh");
+    return [
+      {
+        value: "tauri",
+        label: isZh ? "Tauri 原生全域快捷鍵" : "Tauri Global Shortcut",
+      },
+      {
+        value: "handy_keys",
+        label: isZh ? "Handy Keys 獨立低延遲快捷鍵" : "Handy Keys",
+      },
+    ];
+  }, [i18n.language]);
 
   const handleSelect = async (value: string) => {
     if (value === currentImplementation) return;
@@ -60,7 +69,7 @@ export const KeyboardImplementationSelector: React.FC<
       layout="horizontal"
     >
       <Dropdown
-        options={KEYBOARD_IMPLEMENTATION_OPTIONS}
+        options={options}
         selectedValue={currentImplementation}
         onSelect={handleSelect}
         disabled={isUpdating("keyboard_implementation")}

@@ -4,10 +4,10 @@ export interface Language {
 }
 
 export const LANGUAGES: Language[] = [
-  { value: "auto", label: "Auto Detect" },
+  { value: "auto", label: "自動偵測 (Auto Detect)" },
   { value: "en", label: "English" },
-  { value: "zh-Hans", label: "Simplified Chinese" },
-  { value: "zh-Hant", label: "Traditional Chinese" },
+  { value: "zh-Hans", label: "简体中文" },
+  { value: "zh-Hant", label: "繁體中文" },
   { value: "yue", label: "Cantonese" },
   { value: "de", label: "German" },
   { value: "es", label: "Spanish" },

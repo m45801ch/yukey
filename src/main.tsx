@@ -6,6 +6,20 @@ import App from "./App";
 // Set platform before render so CSS can scope per-platform (e.g. scrollbar styles)
 document.documentElement.dataset.platform = platform();
 
+// Initialize theme from localStorage
+(() => {
+  const theme = localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
+  const root = document.documentElement;
+  root.classList.remove("theme-dark-tech", "theme-premium-light", "theme-zen-natural");
+  root.classList.add(theme);
+  
+  if (theme === "theme-dark-tech") {
+    root.style.colorScheme = "dark";
+  } else {
+    root.style.colorScheme = "light";
+  }
+})();
+
 // Initialize i18n
 import "./i18n";
 

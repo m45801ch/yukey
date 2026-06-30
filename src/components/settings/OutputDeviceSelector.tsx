@@ -26,23 +26,30 @@ export const OutputDeviceSelector: React.FC<OutputDeviceSelectorProps> =
         refreshOutputDevices,
       } = useSettings();
 
+      const rawOutput = getSetting("selected_output_device") || "default";
       const selectedOutputDevice =
-        getSetting("selected_output_device") === "default"
-          ? "Default"
-          : getSetting("selected_output_device") || "Default";
+        rawOutput.toLowerCase() === "default"
+          ? "系統預設"
+          : rawOutput;
 
       const handleOutputDeviceSelect = async (deviceName: string) => {
-        await updateSetting("selected_output_device", deviceName);
+        const value = deviceName === "系統預設" ? "default" : deviceName;
+        await updateSetting("selected_output_device", value);
       };
 
       const handleReset = async () => {
         await resetSetting("selected_output_device");
       };
 
-      const outputDeviceOptions = outputDevices.map((device: AudioDevice) => ({
-        value: device.name,
-        label: device.name,
-      }));
+      const outputDeviceOptions = [
+        { value: "系統預設", label: "系統預設" },
+        ...outputDevices
+          .filter((device) => device.name.toLowerCase() !== "default")
+          .map((device: AudioDevice) => ({
+            value: device.name,
+            label: device.name,
+          }))
+      ];
 
       return (
         <SettingContainer

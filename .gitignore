@@ -42,3 +42,15 @@ blob-report/
 
 # Nix build output
 result
+
+# Models and Binary weights
+*.onnx
+*.bin
+src-tauri/resources/models/
+src-tauri/target/
+target/
+
+# Local env files
+.env
+.env.*
+.env.local

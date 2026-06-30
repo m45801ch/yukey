@@ -193,22 +193,8 @@ fn initialize_core_logic(app_handle: &AppHandle) {
             let _ = app_handle.set_activation_policy(tauri::ActivationPolicy::Accessory);
         }
     }
-    // Get the current theme to set the appropriate initial icon
-    let initial_theme = tray::get_current_theme(app_handle);
-
-    // Choose the appropriate initial icon based on theme
-    let initial_icon_path = tray::get_icon_path(initial_theme, tray::TrayIconState::Idle);
-
     let tray = TrayIconBuilder::new()
-        .icon(
-            Image::from_path(
-                app_handle
-                    .path()
-                    .resolve(initial_icon_path, tauri::path::BaseDirectory::Resource)
-                    .unwrap(),
-            )
-            .unwrap(),
-        )
+        .icon(tray::get_icon_image(tray::TrayIconState::Idle))
         .tooltip(tray::tray_tooltip())
         .show_menu_on_left_click(true)
         .icon_as_template(true)
@@ -749,9 +735,9 @@ pub fn run(cli_args: CliArgs) {
             // for portable mode (redirects WebView2 cache to portable Data dir)
             let mut win_builder =
                 tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("/".into()))
-                    .title("Handy")
-                    .inner_size(680.0, 570.0)
-                    .min_inner_size(680.0, 570.0)
+                    .title("yukey")
+                    .inner_size(1226.0, 760.0)
+                    .min_inner_size(1226.0, 760.0)
                     .resizable(true)
                     .maximizable(false)
                     .visible(false);
@@ -862,3 +848,5 @@ pub fn run(cli_args: CliArgs) {
             let _ = (app, event); // suppress unused warnings on non-macOS
         });
 }
+// Force compile with new tray icons assets
+

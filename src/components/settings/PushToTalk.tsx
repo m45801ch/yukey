@@ -24,6 +24,7 @@ export const PushToTalk: React.FC<PushToTalkProps> = React.memo(
         description={t("settings.general.pushToTalk.description")}
         descriptionMode={descriptionMode}
         grouped={grouped}
+        alignToRightBorder={false}
       />
     );
   },

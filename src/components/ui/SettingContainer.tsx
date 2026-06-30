@@ -119,24 +119,23 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
     );
   }
 
-  // Horizontal layout (default)
   const horizontalContainerClasses = grouped
-    ? "flex items-center justify-between px-4 p-2"
-    : "flex items-center justify-between px-4 p-2 rounded-lg border border-mid-gray/20";
+    ? "flex items-center justify-between gap-4 px-4 py-3"
+    : "flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-mid-gray/15 bg-background-ui";
 
-  if (descriptionMode === "tooltip") {
-    return (
-      <div className={horizontalContainerClasses}>
-        <div className="max-w-2/3">
-          <div className="flex items-center gap-2">
-            <h3
-              className={`text-sm font-medium ${disabled ? "opacity-50" : ""}`}
-            >
-              {title}
-            </h3>
+  return (
+    <div className={horizontalContainerClasses}>
+      <div className="max-w-2/3">
+        <div className="flex items-center gap-2">
+          <h3
+            className={`text-sm font-semibold text-text ${disabled ? "opacity-50" : ""}`}
+          >
+            {title}
+          </h3>
+          {descriptionMode === "tooltip" && (
             <div
               ref={tooltipRef}
-              className="relative"
+              className="relative flex items-center"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
               onClick={toggleTooltip}
@@ -171,24 +170,15 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
                 </Tooltip>
               )}
             </div>
-          </div>
+          )}
         </div>
-        <div className="relative">{children}</div>
+        {descriptionMode === "inline" && (
+          <p className={`text-xs text-mid-gray mt-0.5 leading-relaxed ${disabled ? "opacity-50" : ""}`}>
+            {description}
+          </p>
+        )}
       </div>
-    );
-  }
-
-  return (
-    <div className={horizontalContainerClasses}>
-      <div className="max-w-2/3">
-        <h3 className={`text-sm font-medium ${disabled ? "opacity-50" : ""}`}>
-          {title}
-        </h3>
-        <p className={`text-sm ${disabled ? "opacity-50" : ""}`}>
-          {description}
-        </p>
-      </div>
-      <div className="relative">{children}</div>
+      <div className="relative flex-shrink-0 w-[242px] flex items-center justify-end gap-1.5">{children}</div>
     </div>
   );
 };

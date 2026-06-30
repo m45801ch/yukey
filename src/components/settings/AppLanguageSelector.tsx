@@ -20,7 +20,7 @@ export const AppLanguageSelector: React.FC<AppLanguageSelectorProps> =
 
     const languageOptions = SUPPORTED_LANGUAGES.map((lang) => ({
       value: lang.code,
-      label: `${lang.nativeName} (${lang.name})`,
+      label: lang.nativeName === lang.name ? lang.nativeName : `${lang.nativeName} (${lang.name})`,
     }));
 
     const handleLanguageChange = (langCode: string) => {
@@ -35,11 +35,14 @@ export const AppLanguageSelector: React.FC<AppLanguageSelectorProps> =
         descriptionMode={descriptionMode}
         grouped={grouped}
       >
-        <Dropdown
-          options={languageOptions}
-          selectedValue={currentLanguage}
-          onSelect={handleLanguageChange}
-        />
+        <div className="flex items-center gap-1.5">
+          <Dropdown
+            options={languageOptions}
+            selectedValue={currentLanguage}
+            onSelect={handleLanguageChange}
+          />
+          <div className="w-[32px] flex-shrink-0" />
+        </div>
       </SettingContainer>
     );
   });

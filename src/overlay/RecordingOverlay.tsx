@@ -22,9 +22,29 @@ const RecordingOverlay: React.FC = () => {
   const direction = getLanguageDirection(i18n.language);
 
   useEffect(() => {
+    const applyOverlayTheme = (themeName?: string) => {
+      const theme = themeName || localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
+      const root = document.documentElement;
+      root.classList.remove("theme-dark-tech", "theme-premium-light", "theme-zen-natural");
+      root.classList.add(theme);
+      if (theme === "theme-dark-tech") {
+        root.style.colorScheme = "dark";
+      } else {
+        root.style.colorScheme = "light";
+      }
+    };
+
+    applyOverlayTheme();
+
     const setupEventListeners = async () => {
+      // Listen for global theme-changed event
+      const unlistenTheme = await listen<string>("theme-changed", (event) => {
+        applyOverlayTheme(event.payload);
+      });
+
       // Listen for show-overlay event from Rust
       const unlistenShow = await listen("show-overlay", async (event) => {
+        applyOverlayTheme();
         // Sync language from settings each time overlay is shown
         await syncLanguageFromSettings();
         const overlayState = event.payload as OverlayState;
@@ -53,20 +73,24 @@ const RecordingOverlay: React.FC = () => {
 
       // Cleanup function
       return () => {
+        unlistenTheme();
         unlistenShow();
         unlistenHide();
         unlistenLevel();
       };
     };
 
-    setupEventListeners();
+    const cleanupPromise = setupEventListeners();
+    return () => {
+      cleanupPromise.then((cleanup) => cleanup());
+    };
   }, []);
 
   const getIcon = () => {
     if (state === "recording") {
-      return <MicrophoneIcon />;
+      return <MicrophoneIcon color="currentColor" />;
     } else {
-      return <TranscriptionIcon />;
+      return <TranscriptionIcon color="currentColor" />;
     }
   };
 
@@ -109,7 +133,7 @@ const RecordingOverlay: React.FC = () => {
               commands.cancelOperation();
             }}
           >
-            <CancelIcon />
+            <CancelIcon color="currentColor" />
           </div>
         )}
       </div>

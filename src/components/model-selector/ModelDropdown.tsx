@@ -61,7 +61,7 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
                   </div>
                 </div>
                 {currentModelId === model.id && (
-                  <div className="text-xs text-logo-primary">
+                  <div className="text-xs text-logo-primary whitespace-nowrap flex-shrink-0 ms-2">
                     {t("modelSelector.active")}
                   </div>
                 )}
