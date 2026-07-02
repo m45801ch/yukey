@@ -697,9 +697,7 @@ impl TranscriptionManager {
                         }
                         LoadedEngine::Paraformer(paraformer_engine) => paraformer_engine
                             .transcribe(&audio, &TranscribeOptions::default())
-                            .map_err(|e| {
-                                anyhow::anyhow!("Paraformer transcription failed: {}", e)
-                            })
+                            .map_err(|e| anyhow::anyhow!("Paraformer transcription failed: {}", e)),
                     }
                 },
             ));

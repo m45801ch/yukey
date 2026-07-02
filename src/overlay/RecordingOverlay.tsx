@@ -23,9 +23,16 @@ const RecordingOverlay: React.FC = () => {
 
   useEffect(() => {
     const applyOverlayTheme = (themeName?: string) => {
-      const theme = themeName || localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
+      const theme =
+        themeName ||
+        localStorage.getItem("yukey_app_theme") ||
+        "theme-zen-natural";
       const root = document.documentElement;
-      root.classList.remove("theme-dark-tech", "theme-premium-light", "theme-zen-natural");
+      root.classList.remove(
+        "theme-dark-tech",
+        "theme-premium-light",
+        "theme-zen-natural",
+      );
       root.classList.add(theme);
       if (theme === "theme-dark-tech") {
         root.style.colorScheme = "dark";

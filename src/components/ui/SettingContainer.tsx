@@ -173,12 +173,16 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
           )}
         </div>
         {descriptionMode === "inline" && (
-          <p className={`text-xs text-mid-gray mt-0.5 leading-relaxed ${disabled ? "opacity-50" : ""}`}>
+          <p
+            className={`text-xs text-mid-gray mt-0.5 leading-relaxed ${disabled ? "opacity-50" : ""}`}
+          >
             {description}
           </p>
         )}
       </div>
-      <div className="relative flex-shrink-0 w-[242px] flex items-center justify-end gap-1.5">{children}</div>
+      <div className="relative flex-shrink-0 w-[242px] flex items-center justify-end gap-1.5">
+        {children}
+      </div>
     </div>
   );
 };

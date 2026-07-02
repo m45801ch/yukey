@@ -272,7 +272,7 @@ export const ModelsSettings: React.FC = () => {
                         className="w-full px-2 py-1 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-md focus:outline-none focus:ring-1 focus:ring-logo-primary"
                       />
                     </div>
-                    <div className="max-h-48 overflow-y-auto">
+                    <div className="max-h-48 overflow-y-auto overflow-x-hidden">
                       <button
                         type="button"
                         onClick={() => {

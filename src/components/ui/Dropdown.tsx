@@ -86,9 +86,11 @@ export const Dropdown: React.FC<DropdownProps> = ({
         </svg>
       </button>
       {isOpen && !disabled && (
-        <div className={`absolute top-full left-0 right-0 mt-1 bg-background border border-mid-gray/80 rounded-md shadow-lg z-50 overflow-x-hidden ${
-          options.length > 5 ? "max-h-60 overflow-y-auto" : "overflow-hidden"
-        }`}>
+        <div
+          className={`absolute top-full left-0 right-0 mt-1 bg-background border border-mid-gray/80 rounded-md shadow-lg z-50 overflow-x-hidden ${
+            options.length > 5 ? "max-h-60 overflow-y-auto" : "overflow-hidden"
+          }`}
+        >
           {options.length === 0 ? (
             <div className="px-2 py-1 text-sm text-mid-gray">
               {t("common.noOptionsFound")}

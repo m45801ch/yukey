@@ -44,7 +44,9 @@ export const AboutSettings: React.FC = () => {
           grouped={true}
         >
           {/* eslint-disable-next-line i18next/no-literal-string */}
-          <span className="text-sm font-mono font-semibold text-logo-primary">v0.1.0</span>
+          <span className="text-sm font-mono font-semibold text-logo-primary">
+            v0.1.0
+          </span>
         </SettingContainer>
 
         <SettingContainer
@@ -77,7 +79,9 @@ export const AboutSettings: React.FC = () => {
           <div className="text-sm text-mid-gray flex flex-col gap-1 mt-1">
             <span>• 原始專案作者：CJ Pais</span>
             <span>• 授權條款：MIT License</span>
-            <span className="text-xs text-mid-gray/80 mt-1 font-mono">Copyright (c) 2025 CJ Pais</span>
+            <span className="text-xs text-mid-gray/80 mt-1 font-mono">
+              Copyright (c) 2025 CJ Pais
+            </span>
           </div>
         </SettingContainer>
       </SettingsGroup>

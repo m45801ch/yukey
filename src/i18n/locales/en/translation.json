@@ -92,6 +92,14 @@
       "cohere-int8": {
         "name": "Cohere",
         "description": "A large, slower, but very accurate multilingual model."
+      },
+      "paraformer-zh": {
+        "name": "Paraformer ZH",
+        "description": "Standard Chinese speech recognition. High accuracy."
+      },
+      "paraformer-zh-small": {
+        "name": "Paraformer ZH Small",
+        "description": "Lightweight Chinese speech recognition. Fast speed."
       }
     },
     "errors": {
@@ -117,7 +125,9 @@
         "checkFailed": "Failed to check permissions. Please try again.",
         "requestFailed": "Failed to request permission. Please try again."
       }
-    }
+    },
+    "loading": "Loading models...",
+    "noModels": "No models available. Please check your connection and try again."
   },
   "modelSelector": {
     "custom": "Custom",

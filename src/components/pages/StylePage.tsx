@@ -1,418 +1,661 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useSettings } from "@/hooks/useSettings";
 import { commands } from "@/bindings";
-import { Sparkles, Check, Plus, Edit2, Trash2, RotateCcw } from "lucide-react";
-import { Input } from "../ui/Input";
+import { Plus, Edit2, Trash2, RotateCcw, Check } from "lucide-react";
 import { Textarea } from "../ui/Textarea";
 import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
 
-// 內建的固定風格樣板默認值與說明
-const DEFAULT_PRESETS = [
-  {
-    id: "default_improve_transcriptions",
-    name: "Improve Transcriptions",
-    description: "清理與修正轉錄內容，修正拼寫、大小寫及標點符號，並將口頭數字轉換為阿拉伯數字。",
-    prompt: "Clean this transcript:\n1. Fix spelling, capitalization, and punctuation errors\n2. Convert number words to digits (twenty-five → 25, ten percent → 10%, five dollars → $5)\n3. Replace spoken punctuation with symbols (period → ., comma → ,, question mark → ?)\n4. Remove filler words (um, uh, like as filler)\n5. Keep the language in the original version (if it was french, keep it in french for example)\n\nPreserve exact meaning and word order. Do not paraphrase or reorder content.\n\nReturn only the cleaned transcript.\n\nTranscript:\n${output}"
-  },
-  {
-    id: "preset_rewrite",
-    name: "AI 預設潤色",
-    description: "修飾口語與語氣，修正標點與口誤，使語意連貫流暢。",
-    prompt: "你是語音輸入潤色助手。請理解用戶的口語轉寫意圖，修正其中的口誤、重複詞、贅字以及標點符號，將其整理為流暢、自然且符合書面語句的中文，不要改變原意。\n\n${output}",
-  },
-  {
-    id: "preset_business",
-    name: "正式商務",
-    description: "將隨意的語音口述轉換為語氣正式、措辭得體的商業郵件或訊息。",
-    prompt: "請將用戶輸入的語音轉寫文字，轉換成語氣正式、措辭得體、段落清晰的商業書信或專業工作回報。修飾過於隨意的口語，使其符合專業職場的溝通標準。\n\n${output}",
-  },
-  {
-    id: "preset_code_comment",
-    name: "程式碼註解",
-    description: "將口頭邏輯描述，提煉為簡潔、格式規範的程式碼註解或開發說明文件。",
-    prompt: "請將用戶輸入的開發邏輯或口語描述，提煉並改寫為簡潔、清晰、格式規範的程式碼註解（使用Markdown代碼塊或標準註解符號）或技術說明文檔。\n\n${output}",
-  },
-  {
-    id: "preset_translate_en",
-    name: "中英對譯",
-    description: "智慧辨識輸入語言並轉換，中文語音翻譯為英文，英文翻譯為中文。",
-    prompt: "你是語音翻譯助手。如果輸入是中文，請將其翻譯為流暢自然的英文；如果輸入是英文，請將其翻譯為流暢自然的中文。只輸出翻譯結果即可。\n\n${output}",
-  }
-];
+import {
+  PromptPluginSettings,
+  loadPromptSettings,
+  savePromptSettings,
+  getAvailableMainPrompts,
+  getAvailableModes,
+  getAvailableDictionaries,
+  buildPrompt,
+} from "@/prompt/prompt_builder";
+import { exportBackupZip, importBackupZip } from "@/utils/backup";
 
 export const StylePage: React.FC = () => {
   const { t } = useTranslation();
-  const { getSetting, updateSetting, refreshSettings } = useSettings();
+  const { getSetting, updateSetting, refreshSettings, isUpdating } = useSettings();
 
-  const prompts = getSetting("post_process_prompts") || [];
-  const selectedPromptId = getSetting("post_process_selected_prompt_id") || "";
+  const [activeTab, setActiveTab] = useState(0);
+  const [settings, setSettings] = useState<PromptPluginSettings>(loadPromptSettings());
 
-  // 編輯與新增風格的狀態
+  // 用於新增/編輯模式或詞庫的對話方塊狀態
   const [editorOpen, setEditorOpen] = useState(false);
-  const [editingCardId, setEditingCardId] = useState<string | null>(null);
-  const [cardName, setCardName] = useState("");
-  const [cardPrompt, setCardPrompt] = useState("");
+  const [editingType, setEditingType] = useState<"main" | "mode" | "dict" | null>(null);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [editorName, setEditorName] = useState("");
+  const [editorDescription, setEditorDescription] = useState("");
+  const [editorContent, setEditorContent] = useState("");
 
-  // 合併 Preset 與後端 prompts 供卡牌展示
-  const allCards = useMemo(() => {
-    const cards: Array<{
-      id: string;
-      name: string;
-      description: string;
-      prompt: string;
-      isPreset: boolean;
-      isInitialized: boolean;
-      isModified: boolean;
-      defaultPrompt: string;
-    }> = [];
+  // 熱詞管理相關狀態
+  const [newWord, setNewWord] = useState("");
+  const customWords: string[] = getSetting("custom_words") || [];
 
-    // 1. 先處理 5 個預設的 Presets
-    DEFAULT_PRESETS.forEach((preset) => {
-      // 檢查後端 prompts 是否已存在相同名稱的 prompt
-      const backendPrompt = prompts.find((p) => p.name === preset.name);
-      
-      if (backendPrompt) {
-        // 已在後端初始化
-        const previewPrompt = backendPrompt.prompt.split("\n\n# 語音識別糾錯對照表")[0].split("\n# 本地熱詞")[0];
-        cards.push({
-          id: backendPrompt.id,
-          name: backendPrompt.name,
-          description: preset.description,
-          prompt: previewPrompt,
-          isPreset: true,
-          isInitialized: true,
-          isModified: previewPrompt.trim() !== preset.prompt.trim(),
-          defaultPrompt: preset.prompt,
-        });
-      } else {
-        // 尚未在後端初始化
-        cards.push({
-          id: preset.id, // 暫時的前端 ID
-          name: preset.name,
-          description: preset.description,
-          prompt: preset.prompt,
-          isPreset: true,
-          isInitialized: false,
-          isModified: false,
-          defaultPrompt: preset.prompt,
-        });
-      }
-    });
+  const tabs = [
+    { name: "主 Prompt", index: 0 },
+    { name: "修飾模式", index: 1 },
+    { name: "Hotwords", index: 2 },
+    { name: "專業詞庫", index: 3 },
+    { name: "自訂規則", index: 4 },
+    { name: "備份與還原", index: 5 },
+  ];
 
-    // 2. 處理自訂的 Prompts (後端存在但名稱不在 5 個預設中的)
-    prompts.forEach((p) => {
-      const isPresetName = DEFAULT_PRESETS.some((preset) => preset.name === p.name);
-      if (!isPresetName) {
-        const previewPrompt = p.prompt.split("\n\n# 語音識別糾錯對照表")[0].split("\n# 本地熱詞")[0];
-        cards.push({
-          id: p.id,
-          name: p.name,
-          description: "自訂風格，隨時編輯。",
-          prompt: previewPrompt,
-          isPreset: false,
-          isInitialized: true,
-          isModified: false,
-          defaultPrompt: "",
-        });
-      }
-    });
-
-    return cards;
-  }, [prompts]);
-
-  // 選取風格卡片，並同步寫入 System Prompt
-  const handleSelectCard = async (card: typeof allCards[0]) => {
-    let backendPromptId = card.id;
-
-    // 如果該預設風格尚未在後端建立，先建立它
-    if (card.isPreset && !card.isInitialized) {
-      try {
-        const result = await commands.addPostProcessPrompt(card.name, card.prompt);
-        if (result.status === "ok") {
-          backendPromptId = result.data.id;
-          await refreshSettings();
-        }
-      } catch (e) {
-        console.error("Failed to initialize preset in backend", e);
-        return;
-      }
-    }
-
-    // 獲取當前詞彙頁面中已快取的對照字尾
-    const correctionsSuffix = localStorage.getItem("yukey_prompt_corrections_suffix") || "";
-    const finalPromptText = card.prompt + correctionsSuffix;
-
-    try {
-      await commands.updatePostProcessPrompt(backendPromptId, card.name, finalPromptText);
-      await refreshSettings();
-      await updateSetting("post_process_selected_prompt_id", backendPromptId);
-      toast.success(`已切換 AI 風格為：「${card.name}」`);
-    } catch (e) {
-      console.error("Failed to update selected prompt content", e);
-    }
-  };
-
-  // 打開自訂風格新增編輯器
-  const handleOpenCreator = () => {
-    setEditingCardId(null);
-    setCardName("");
-    setCardPrompt("");
-    setEditorOpen(true);
-  };
-
-  // 打開修改編輯器 (Preset 與自訂皆可編輯)
-  const handleOpenEditor = (card: typeof allCards[0]) => {
-    setEditingCardId(card.id);
-    setCardName(card.name);
-    setCardPrompt(card.prompt);
-    setEditorOpen(true);
-  };
-
-  // 儲存卡片 (自訂與 Preset 皆儲存到後端)
-  const handleSaveCard = async () => {
-    if (!cardName.trim() || !cardPrompt.trim()) return;
-
-    let processedPrompt = cardPrompt.trim();
-    // 如果提示詞中未包含 ${output} 預設字眼，則自動拼接到尾部
-    if (!processedPrompt.includes("${output}")) {
-      processedPrompt = `${processedPrompt}\n\n\${output}`;
-    }
+  // 儲存設定並「立刻」套用編譯後的 Prompt 到後端
+  const applyPromptSettings = async (newSettings: PromptPluginSettings, wordsList: string[] = customWords) => {
+    savePromptSettings(newSettings);
+    setSettings(newSettings);
     
     try {
-      const correctionsSuffix = localStorage.getItem("yukey_prompt_corrections_suffix") || "";
-      const finalPromptText = processedPrompt + correctionsSuffix;
+      const finalPrompt = buildPrompt(newSettings, wordsList);
+      const PLUGIN_PROMPT_NAME = "OpenLess Plugin System";
+      const prompts = getSetting("post_process_prompts") || [];
+      const existingPrompt = prompts.find(p => p.name === PLUGIN_PROMPT_NAME);
 
-      if (editingCardId) {
-        const isPresetId = DEFAULT_PRESETS.some((preset) => preset.id === editingCardId);
-        const card = allCards.find((c) => c.id === editingCardId);
+      let backendPromptId = "";
 
-        if (isPresetId && card && !card.isInitialized) {
-          // 尚未在後端建立的預設卡片 -> 直接建立新 Prompt
-          const result = await commands.addPostProcessPrompt(cardName.trim(), finalPromptText);
-          if (result.status === "ok") {
-            await updateSetting("post_process_selected_prompt_id", result.data.id);
-            toast.success("風格更新成功");
-          }
-        } else {
-          // 已在後端建立的卡片 -> 直接更新
-          await commands.updatePostProcessPrompt(editingCardId, cardName.trim(), finalPromptText);
-          toast.success("風格更新成功");
-        }
+      if (existingPrompt) {
+        await commands.updatePostProcessPrompt(
+          existingPrompt.id,
+          PLUGIN_PROMPT_NAME,
+          finalPrompt
+        );
+        backendPromptId = existingPrompt.id;
       } else {
-        // 全新新增自訂風格
-        const result = await commands.addPostProcessPrompt(cardName.trim(), finalPromptText);
+        const result = await commands.addPostProcessPrompt(
+          PLUGIN_PROMPT_NAME,
+          finalPrompt
+        );
         if (result.status === "ok") {
-          await updateSetting("post_process_selected_prompt_id", result.data.id);
-          toast.success("已新增自訂風格，且設為啟用中");
+          backendPromptId = result.data.id;
+        } else {
+          throw new Error("Failed to create plugin prompt");
         }
       }
+
       await refreshSettings();
-      setEditorOpen(false);
+      await updateSetting("post_process_selected_prompt_id", backendPromptId);
     } catch (e) {
-      console.error("Failed to save card", e);
+      console.error("Failed to auto-apply prompt settings", e);
     }
   };
 
-  // 刪除自訂卡片
-  const handleDeleteCard = async (id: string, name: string) => {
-    if (!confirm(`確定要刪除「${name}」風格卡片嗎？`)) return;
-    try {
-      await commands.deletePostProcessPrompt(id);
-      await refreshSettings();
-      // 如果被刪除的是當前啟用中，自動重置為第一個
-      if (selectedPromptId === id) {
-        updateSetting("post_process_selected_prompt_id", null);
+  // 防抖 (Debounce) 自動套用自訂規則，避免打字時頻繁寫入後端
+  useEffect(() => {
+    const saved = loadPromptSettings();
+    if (settings.customRules !== saved.customRules) {
+      const handler = setTimeout(() => {
+        applyPromptSettings(settings);
+        toast.success("自訂規則已自動儲存套用！");
+      }, 1000); // 停止輸入 1 秒後自動套用
+
+      return () => clearTimeout(handler);
+    }
+  }, [settings.customRules]);
+
+  const openEditor = (type: "main" | "mode" | "dict", key: string | null = null) => {
+    setEditingType(type);
+    setEditingKey(key);
+    
+    if (key) {
+      if (type === "main") {
+        const mains = getAvailableMainPrompts(settings);
+        setEditorName(mains[key]?.name || "");
+        setEditorDescription(mains[key]?.description || "");
+        setEditorContent(mains[key]?.content || "");
+      } else if (type === "mode") {
+        const modes = getAvailableModes(settings);
+        setEditorName(modes[key]?.name || "");
+        setEditorDescription(modes[key]?.description || "");
+        setEditorContent(modes[key]?.content || "");
+      } else {
+        const dicts = getAvailableDictionaries(settings);
+        setEditorName(dicts[key]?.name || "");
+        setEditorDescription(dicts[key]?.description || "");
+        setEditorContent(dicts[key]?.content || "");
       }
-      toast.success("風格卡片已刪除");
-    } catch (e) {
-      console.error("Failed to delete custom card", e);
+    } else {
+      setEditorName("");
+      setEditorDescription("");
+      setEditorContent("");
     }
+    
+    setEditorOpen(true);
   };
 
-  // 恢復預設值 (卡牌直接點擊一鍵復原)
-  const handleResetPreset = async (id: string) => {
-    const presetInfo = allCards.find((c) => c.id === id);
-    if (!presetInfo) return;
-    try {
-      const correctionsSuffix = localStorage.getItem("yukey_prompt_corrections_suffix") || "";
-      const finalPromptText = presetInfo.defaultPrompt + correctionsSuffix;
-      await commands.updatePostProcessPrompt(id, presetInfo.name, finalPromptText);
-      await refreshSettings();
-      toast.success(`「${presetInfo.name}」已恢復為預設設定`);
-    } catch (e) {
-      console.error("Failed to reset preset prompt", e);
+  const saveEditor = async () => {
+    if (!editorName.trim() || !editorContent.trim()) return;
+
+    const key = editingKey || `custom_${Date.now()}`;
+    const newSettings = { ...settings };
+
+    const itemData = {
+      name: editorName.trim(),
+      description: editorDescription.trim() || `${editorName.trim()}說明。`,
+      content: editorContent.trim()
+    };
+
+    if (editingType === "main") {
+      newSettings.customMainPrompts = {
+        ...newSettings.customMainPrompts,
+        [key]: itemData
+      };
+    } else if (editingType === "mode") {
+      newSettings.customModes = {
+        ...newSettings.customModes,
+        [key]: itemData
+      };
+    } else if (editingType === "dict") {
+      newSettings.customDictionaries = {
+        ...newSettings.customDictionaries,
+        [key]: itemData
+      };
     }
+
+    setEditorOpen(false);
+    await applyPromptSettings(newSettings);
+    toast.success("變更已自動套用！");
   };
 
-  // 檢查該卡片是否被選中（當前啟用中）
-  const isCardActive = (card: typeof allCards[0]) => {
-    if (selectedPromptId) {
-      if (card.isInitialized) {
-        return selectedPromptId === card.id;
+  const deleteCustomItem = async (type: "main" | "mode" | "dict", key: string) => {
+    if (!confirm(`確定要刪除此項目嗎？`)) return;
+    
+    const newSettings = { ...settings };
+    if (type === "main") {
+      const { [key]: _, ...rest } = newSettings.customMainPrompts;
+      newSettings.customMainPrompts = rest;
+      if (newSettings.activeMainPrompt === key) {
+        newSettings.activeMainPrompt = "default";
       }
-      return false;
+    } else if (type === "mode") {
+      const { [key]: _, ...rest } = newSettings.customModes;
+      newSettings.customModes = rest;
+      if (newSettings.activeMode === key) {
+        newSettings.activeMode = "general";
+      }
+    } else {
+      const { [key]: _, ...rest } = newSettings.customDictionaries;
+      newSettings.customDictionaries = rest;
+      newSettings.activeDictionaries = newSettings.activeDictionaries.filter(k => k !== key);
     }
-    // 預設第一個卡片 Improve Transcriptions
-    return card.name === "Improve Transcriptions";
+    await applyPromptSettings(newSettings);
+    toast.success("項目已刪除並重新套用！");
+  };
+
+  const resetDefaultItem = async (type: "main" | "mode" | "dict", key: string) => {
+    if (!confirm(`確定要將此預設項目恢復為原始出廠設定嗎？`)) return;
+    
+    const newSettings = { ...settings };
+    if (type === "main") {
+      return;
+    } else if (type === "mode") {
+      const { [key]: _, ...rest } = newSettings.customModes;
+      newSettings.customModes = rest;
+    } else {
+      const { [key]: _, ...rest } = newSettings.customDictionaries;
+      newSettings.customDictionaries = rest;
+    }
+    await applyPromptSettings(newSettings);
+    toast.success("已還原預設設定並自動套用！");
+  };
+
+  // 整合熱詞新增邏輯 (同步更新系統 settings 中的 custom_words，並立刻自動套用編譯)
+  const handleAddWord = async () => {
+    const trimmedWord = newWord.trim();
+    const sanitizedWord = trimmedWord.replace(/[<>"'&]/g, "");
+    if (
+      sanitizedWord &&
+      !sanitizedWord.includes(" ") &&
+      sanitizedWord.length <= 50
+    ) {
+      if (customWords.includes(sanitizedWord)) {
+        toast.error(`熱詞 "${sanitizedWord}" 已存在於清單中`);
+        return;
+      }
+      const updated = [...customWords, sanitizedWord];
+      await updateSetting("custom_words", updated);
+      setNewWord("");
+      await applyPromptSettings(settings, updated);
+      toast.success("熱詞添加並套用成功");
+    }
+  };
+
+  // 整合熱詞刪除邏輯
+  const handleRemoveWord = async (wordToRemove: string) => {
+    const updated = customWords.filter((word) => word !== wordToRemove);
+    await updateSetting("custom_words", updated);
+    await applyPromptSettings(settings, updated);
+    toast.success("熱詞已移除並重新套用");
+  };
+
+  // 匯出壓縮包 ZIP
+  const handleExport = async () => {
+    await exportBackupZip(settings, customWords);
+  };
+
+  // 匯入還原壓縮包 ZIP
+  const handleImport = async () => {
+    const backup = await importBackupZip();
+    if (backup) {
+      await updateSetting("custom_words", backup.customWords);
+      setSettings(backup.promptSettings);
+      await applyPromptSettings(backup.promptSettings, backup.customWords);
+    }
+  };
+
+  const isDefaultItem = (key: string | null) => {
+    if (!key) return false;
+    return key === "default" || key === "general" || key === "business" || key === "meeting" || key === "verbatim" || key === "chat" || 
+      key === "ai" || key === "coding" || key === "medical" || key === "legal" || key === "engineering" || key === "education";
   };
 
   return (
     <div className="w-full space-y-6 pb-8 select-none text-text">
-      {/* 頂部標題 */}
-      <div className="flex justify-between items-center text-start">
-        <div>
-          <h2 className="text-lg font-bold">AI 修飾風格選擇</h2>
-          <p className="text-xs text-mid-gray mt-1">選擇用於最佳化轉錄的範本或建立新範本。在提示詞文字中使用 <code>{"${output}"}</code> 來引用轉錄結果。</p>
-        </div>
-        <Button onClick={handleOpenCreator} variant="primary" size="md" className="flex items-center gap-1.5">
-          <Plus className="w-4 h-4" />
-          <span>新建風格</span>
-        </Button>
+      {/* 頂部標題（移除右上角儲存按鈕） */}
+      <div className="text-start">
+        <p className="text-xs text-mid-gray">
+          透過模組化的設定，精確控制 AI 語音轉文字的修飾行為與詞彙。所有變更均會自動儲存並即時生效。
+        </p>
       </div>
 
-      {/* 編輯器 Modal 抽屜 */}
-      {editorOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="w-full max-w-xl bg-background border border-mid-gray/20 rounded-2xl p-6 space-y-4 shadow-2xl text-start">
-            <div className="flex justify-between items-center border-b border-mid-gray/10 pb-2">
-              <h3 className="text-md font-semibold text-logo-primary">
-                {editingCardId ? "編輯風格" : "新建 AI 修飾風格"}
-              </h3>
-              {editingCardId && (
-                (() => {
-                  const card = allCards.find((c) => c.id === editingCardId);
-                  const isPreset = card?.isPreset;
-                  if (isPreset) {
-                    return (
-                      <button
-                        onClick={() => {
-                          if (card?.defaultPrompt) {
-                            setCardPrompt(card.defaultPrompt);
-                            toast.success("已將輸入框內容重設為預設提示詞");
-                          }
-                        }}
-                        className="p-1 px-2 rounded-md hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary transition-colors cursor-pointer flex items-center gap-1 text-xs font-bold border border-mid-gray/20"
-                        title="恢復預設提示詞"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5" />
-                        <span>恢復預設</span>
-                      </button>
-                    );
-                  }
-                  return null;
-                })()
-              )}
+      {/* Tabs 導航 */}
+      <div className="flex border-b border-mid-gray/20">
+        {tabs.map((tab) => (
+          <button
+            key={tab.index}
+            onClick={() => setActiveTab(tab.index)}
+            className={`px-4 py-2 text-sm font-semibold transition-colors ${
+              activeTab === tab.index
+                ? "text-logo-primary border-b-2 border-logo-primary"
+                : "text-mid-gray hover:text-text"
+            }`}
+          >
+            {tab.name}
+          </button>
+        ))}
+      </div>
+
+      {/* 內容區塊 */}
+      <div className="pt-2 text-start">
+        {/* Tab 1: 主 Prompt */}
+        {activeTab === 0 && (
+          <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-md font-bold">核心系統提示詞</h3>
+                <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">提示：點擊卡片直接切換套用；按兩下卡片可觀看或編輯提示詞。</p>
+              </div>
+              <Button onClick={() => openEditor("main")} size="sm" variant="secondary" className="flex gap-1">
+                <Plus className="w-3.5 h-3.5" /> 新增主 Prompt
+              </Button>
             </div>
             
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+              {Object.entries(getAvailableMainPrompts(settings)).map(([key, main]) => {
+                const isActive = settings.activeMainPrompt === key;
+                const isDefault = key === "default";
+                return (
+                  <div
+                    key={key}
+                    onClick={() => applyPromptSettings({ ...settings, activeMainPrompt: key })}
+                    onDoubleClick={() => openEditor("main", key)}
+                    title={isDefault ? "按兩下可觀看完整內容" : "按兩下可編輯內容"}
+                    className={`p-4 rounded-xl border cursor-pointer flex flex-col justify-between transition-all relative group min-h-28 ${
+                      isActive
+                        ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
+                        : "border-mid-gray/20 hover:border-logo-primary/40 border"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-sm">{main.name}</span>
+                          <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
+                            {isDefault ? "預設唯讀" : "自訂"}
+                          </span>
+                        </div>
+                        {isActive && (
+                          <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Check className="w-3 h-3" /> 使用中
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-mid-gray line-clamp-3 leading-relaxed">{main.description}</p>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3 justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => openEditor("main", key)} className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary" title={isDefault ? "觀看內容" : "編輯內容"}>
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      {!isDefault && (
+                        <button onClick={() => deleteCustomItem("main", key)} className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500" title="刪除">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 2: 修飾模式 */}
+        {activeTab === 1 && (
+          <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-md font-bold">情境修飾模式</h3>
+                <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">提示：點擊卡片直接切換套用；按兩下卡片可編輯內容</p>
+              </div>
+              <Button onClick={() => openEditor("mode")} size="sm" variant="secondary" className="flex gap-1">
+                <Plus className="w-3.5 h-3.5" /> 新增模式
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+              {Object.entries(getAvailableModes(settings)).map(([key, mode]) => {
+                const isActive = settings.activeMode === key;
+                const isCustom = key.startsWith("custom_");
+                const isModifiedDefault = !isCustom && !!settings.customModes[key];
+                return (
+                  <div
+                    key={key}
+                    onClick={() => applyPromptSettings({ ...settings, activeMode: key })}
+                    onDoubleClick={() => openEditor("mode", key)}
+                    title="按兩下可編輯內容"
+                    className={`p-4 rounded-xl border cursor-pointer flex flex-col justify-between transition-all relative group min-h-28 ${
+                      isActive
+                        ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
+                        : "border-mid-gray/20 hover:border-logo-primary/40 border"
+                    }`}
+                  >
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-sm">{mode.name}</span>
+                          {!isCustom && (
+                            <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
+                              {isModifiedDefault ? "已修改" : "內建"}
+                            </span>
+                          )}
+                        </div>
+                        {isActive && (
+                          <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Check className="w-3 h-3" /> 使用中
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-mid-gray line-clamp-3 leading-relaxed">{mode.description}</p>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3 justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => openEditor("mode", key)} className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary" title="編輯內容">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      {isCustom ? (
+                        <button onClick={() => deleteCustomItem("mode", key)} className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500" title="刪除模式">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        isModifiedDefault && (
+                          <button onClick={() => resetDefaultItem("mode", key)} className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary" title="還原預設值">
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 3: Hotwords */}
+        {activeTab === 2 && (
+          <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-5 bg-background-ui/5">
+            <div className="space-y-2 text-start">
+              <h3 className="text-md font-bold text-logo-primary">專屬熱詞管理</h3>
+              <p className="text-xs text-mid-gray">
+                輸入您常用的英文名詞、公司名稱、人名等。在此處變更將同步至「語音識別引擎（Whisper）」與「AI 潤色提示詞」。
+              </p>
+              
+              <div className="flex gap-2 max-w-lg pt-2">
+                <Input
+                  type="text"
+                  className="flex-1"
+                  value={newWord}
+                  onChange={(e) => setNewWord(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddWord()}
+                  placeholder="例如：Kubernetes (不含空格)"
+                  variant="compact"
+                  disabled={isUpdating("custom_words")}
+                />
+                <Button
+                  onClick={handleAddWord}
+                  disabled={
+                    !newWord.trim() ||
+                    newWord.includes(" ") ||
+                    isUpdating("custom_words")
+                  }
+                  variant="primary"
+                  size="md"
+                >
+                  新增熱詞
+                </Button>
+              </div>
+            </div>
+
+            <div className="min-h-36 max-h-60 overflow-y-auto p-4 rounded-xl border border-mid-gray/10 bg-mid-gray/5 flex flex-wrap gap-2 items-start content-start">
+              {customWords.length === 0 ? (
+                <span className="text-xs text-mid-gray py-8 w-full text-center">
+                  尚無新增的自訂熱詞，您可在此處或「詞彙字典」頁面中加入。
+                </span>
+              ) : (
+                customWords.map((word) => (
+                  <button
+                    key={word}
+                    onClick={() => handleRemoveWord(word)}
+                    disabled={isUpdating("custom_words")}
+                    className="px-2.5 py-1 rounded-lg text-xs bg-mid-gray/15 hover:bg-logo-primary/20 border border-mid-gray/20 hover:border-logo-primary/40 flex items-center gap-1.5 transition-colors cursor-pointer text-text"
+                  >
+                    <span>{word}</span>
+                    <span className="text-[10px] text-mid-gray hover:text-logo-primary font-bold">
+                      &times;
+                    </span>
+                  </button>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: 專業詞庫 */}
+        {activeTab === 3 && (
+          <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-md font-bold">專業領域詞庫</h3>
+                <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">提示：點擊卡片直接勾選啟用；按兩下卡片可編輯詞彙內容</p>
+              </div>
+              <Button onClick={() => openEditor("dict")} size="sm" variant="secondary" className="flex gap-1">
+                <Plus className="w-3.5 h-3.5" /> 新增詞庫
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+              {Object.entries(getAvailableDictionaries(settings)).map(([key, dict]) => {
+                const isActive = settings.activeDictionaries.includes(key);
+                const isCustom = key.startsWith("custom_");
+                const isModifiedDefault = !isCustom && !!settings.customDictionaries[key];
+                return (
+                  <div
+                    key={key}
+                    onClick={() => {
+                      const newDicts = isActive
+                        ? settings.activeDictionaries.filter((k) => k !== key)
+                        : [...settings.activeDictionaries, key];
+                      applyPromptSettings({ ...settings, activeDictionaries: newDicts });
+                    }}
+                    onDoubleClick={() => openEditor("dict", key)}
+                    title="按兩下可編輯內容"
+                    className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between group min-h-28 ${
+                      isActive
+                        ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
+                        : "border-mid-gray/20 hover:border-logo-primary/40 border"
+                    }`}
+                  >
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-4 h-4 rounded flex items-center justify-center ${isActive ? 'bg-logo-primary border-logo-primary text-white' : 'border border-mid-gray'}`}>
+                            {isActive && <Check className="w-3 h-3 stroke-[3]" />}
+                          </div>
+                          <span className="font-bold text-sm">{dict.name}</span>
+                          {!isCustom && (
+                            <span className="text-[9px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
+                              {isModifiedDefault ? "已修改" : "內建"}
+                            </span>
+                          )}
+                        </div>
+                        {isActive && (
+                          <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                            啟用中
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-mid-gray pl-6 leading-relaxed line-clamp-3">
+                        {dict.description}
+                      </p>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-3 justify-end opacity-0 group-hover:opacity-100 transition-opacity" onClick={e => e.stopPropagation()}>
+                      <button onClick={() => openEditor("dict", key)} className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary" title="編輯內容">
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+                      {isCustom ? (
+                        <button onClick={() => deleteCustomItem("dict", key)} className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500" title="刪除詞庫">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        isModifiedDefault && (
+                          <button onClick={() => resetDefaultItem("dict", key)} className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary" title="還原預設值">
+                            <RotateCcw className="w-3.5 h-3.5" />
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Tab 5: 自訂規則 */}
+        {activeTab === 4 && (
+          <div className="space-y-3 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
+            <h3 className="text-md font-bold">使用者自訂規則</h3>
+            <p className="text-xs text-mid-gray">
+              在此輸入您個人的排版與修飾偏好指令。例如：「不要使用破折號」、「遇到『的』請盡量換成『地』」。
+            </p>
+            <Textarea
+              value={settings.customRules}
+              onChange={(e) => {
+                setSettings({ ...settings, customRules: e.target.value });
+              }}
+              placeholder="請輸入自訂規則..."
+              className="w-full h-40 text-sm"
+            />
+          </div>
+        )}
+
+        {/* Tab 6: 備份與還原 */}
+        {activeTab === 5 && (
+          <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-5 bg-background-ui/5">
+            <div>
+              <h3 className="text-md font-bold text-logo-primary">資料備份與搬移</h3>
+              <p className="text-xs text-mid-gray mt-1">
+                一鍵將您的「自訂修飾風格、詞庫、熱詞清單、糾錯規則」打包成壓縮檔 (ZIP) 匯出備份，或從壓縮檔還原資料。
+              </p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button onClick={handleExport} variant="primary" size="md">
+                <span>📤 一鍵打包匯出 (ZIP)</span>
+              </Button>
+              <Button onClick={handleImport} variant="secondary" size="md">
+                <span>📥 選擇檔案導入還原 (ZIP)</span>
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Editor Modal */}
+      {editorOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg bg-background border border-mid-gray/20 rounded-2xl p-6 space-y-4 shadow-2xl text-start">
+            <h3 className="text-md font-bold text-logo-primary border-b border-mid-gray/10 pb-2">
+              {editingKey === "default" ? "觀看核心提示詞" : (editingKey ? `編輯 ${editingType === "main" ? "主 Prompt" : (editingType === "mode" ? "修飾模式" : "專業詞庫")}` : (editingType === "main" ? "新增主 Prompt" : (editingType === "mode" ? "新增修飾模式" : "新增專業詞庫")))}
+            </h3>
+            
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-mid-gray">風格名稱</label>
+              <label className="text-xs font-semibold text-mid-gray">名稱</label>
               <Input
-                type="text"
+                value={editorName}
+                onChange={(e) => setEditorName(e.target.value)}
+                placeholder={editingType === "main" ? "例如：自訂核心規則" : (editingType === "mode" ? "例如：演講模式" : "例如：生化科技")}
                 className="w-full"
-                value={cardName}
-                onChange={(e) => setCardName(e.target.value)}
-                placeholder="例如：週報整理"
-                disabled={editingCardId !== null && allCards.find((c) => c.id === editingCardId)?.isPreset} // 預設風格名稱不開放修改
+                disabled={isDefaultItem(editingKey)} // 內建/預設項目名稱不可修改
               />
             </div>
 
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-mid-gray">AI 提示詞說明 (System Prompt)</label>
-              <Textarea
-                className="w-full h-44 text-sm"
-                value={cardPrompt}
-                onChange={(e) => setCardPrompt(e.target.value)}
-                placeholder={"撰寫轉錄後要執行的指令。範例：改善以下文字的語法 and 清晰度: ${output}"}
+              <label className="text-xs font-semibold text-mid-gray">卡片描述與功能說明 (顯示在 UI 卡片上)</label>
+              <Input
+                value={editorDescription}
+                onChange={(e) => setEditorDescription(e.target.value)}
+                placeholder="簡短描述此項目功能..."
+                className="w-full text-sm"
+                disabled={isDefaultItem(editingKey)} // 內建/預設項目描述不可修改
               />
-              <p className="text-[11px] text-mid-gray mt-1 leading-relaxed">
-                提示：您的風格中必須使用 <code>{"${output}"}</code> 作為轉錄語音的佔位符，若儲存時未填寫，系統將會自動在末端為您追加此變數。
-              </p>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-mid-gray">
+                {editingType === "main" ? "提示詞內容" : (editingType === "mode" ? "模式指令與語氣要求 (給 AI 的提示詞)" : "詞彙列表 (給 AI 的對照詞)")}
+              </label>
+              <Textarea
+                value={editorContent}
+                onChange={(e) => setEditorContent(e.target.value)}
+                className="w-full h-48 text-sm leading-relaxed"
+                placeholder={editingType === "main" ? "撰寫核心角色設定與基礎指令..." : (editingType === "mode" ? "請詳細描述 AI 應該使用的語氣..." : "例如：名詞A, 名詞B, 名詞C...")}
+                disabled={isDefaultItem(editingKey)} // 內建/預設項目內容不可修改
+              />
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button onClick={() => setEditorOpen(false)} variant="secondary" size="md">
-                取消
-              </Button>
-              <Button onClick={handleSaveCard} disabled={!cardName.trim() || !cardPrompt.trim()} variant="primary" size="md">
-                儲存
-              </Button>
+              {isDefaultItem(editingKey) ? (
+                <Button onClick={() => setEditorOpen(false)} variant="primary" size="md">關閉</Button>
+              ) : (
+                <>
+                  <Button onClick={() => setEditorOpen(false)} variant="secondary" size="md">取消</Button>
+                  <Button onClick={saveEditor} variant="primary" size="md" disabled={!editorName.trim() || !editorContent.trim()}>
+                    儲存
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
-
-      {/* 卡片網格列表 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {allCards.map((card) => {
-          const active = isCardActive(card);
-          return (
-            <div
-              key={card.id}
-              onClick={() => handleSelectCard(card)}
-              className={`p-5 rounded-2xl border cursor-pointer flex flex-col justify-between text-start relative group select-none min-h-48 glow-card-3d ${
-                active
-                  ? "border-logo-primary bg-logo-primary/5 active-glow-3d scale-[1.01]"
-                  : "border-mid-gray/20 bg-background-ui/5 hover:border-logo-primary/40"
-              }`}
-            >
-              {/* 卡片標題與啟用標籤 */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                    card.isPreset ? "bg-mid-gray/10 text-mid-gray" : "bg-logo-primary/20 text-logo-primary"
-                  }`}>
-                    {card.isPreset ? "預設" : "自訂"}
-                  </span>
-                  {active && (
-                    <span className="flex items-center gap-1 text-xs font-bold text-logo-primary">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      啟用中
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-md font-bold group-hover:text-logo-primary transition-colors">{card.name}</h3>
-                <p className="text-xs text-mid-gray leading-relaxed line-clamp-3">{card.description}</p>
-              </div>
-
-              {/* 操作按鈕 */}
-              <div
-                className="flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity mt-4"
-                onClick={(e) => e.stopPropagation()} // 阻止觸發 selectCard
-              >
-                <button
-                  onClick={() => handleOpenEditor(card)}
-                  className="p-1.5 rounded-md hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary transition-colors cursor-pointer"
-                  title="編輯風格"
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-                
-                {card.isPreset ? (
-                  card.isModified && (
-                    <button
-                      onClick={() => handleResetPreset(card.id)}
-                      className="px-2 py-1 text-xs font-bold rounded-md bg-logo-primary/10 text-logo-primary hover:bg-logo-primary/20 transition-colors cursor-pointer"
-                      title="恢復為預設提示詞"
-                    >
-                      一鍵復原
-                    </button>
-                  )
-                ) : (
-                  <button
-                    onClick={() => handleDeleteCard(card.id, card.name)}
-                    className="p-1.5 rounded-md hover:bg-logo-primary/10 text-mid-gray hover:text-red-500 transition-colors cursor-pointer"
-                    title="刪除風格"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 };

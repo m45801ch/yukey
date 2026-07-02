@@ -11,25 +11,57 @@ import {
 } from "./settings";
 import { useSettings } from "@/hooks/useSettings";
 
-type SettingsSection = "general" | "models" | "advanced" | "services" | "debug" | "about";
+type SettingsSection =
+  | "general"
+  | "models"
+  | "advanced"
+  | "services"
+  | "debug"
+  | "about";
 
 interface SettingsModalProps {
   onClose: () => void;
   defaultTab?: SettingsSection;
 }
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, defaultTab }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({
+  onClose,
+  defaultTab,
+}) => {
   const { t } = useTranslation();
   const { settings } = useSettings();
-  const [activeTab, setActiveTab] = useState<SettingsSection>(defaultTab || "general");
+  const [activeTab, setActiveTab] = useState<SettingsSection>(
+    defaultTab || "general",
+  );
 
   const SECTIONS = [
     { id: "general", label: "一般設定", icon: Cog, component: GeneralSettings },
     { id: "models", label: "ASR 模型", icon: Cpu, component: ModelsSettings },
-    { id: "advanced", label: "進階設定", icon: Sliders, component: AdvancedSettings },
-    { id: "services", label: "服務", icon: Sparkles, component: PostProcessingSettings },
-    { id: "debug", label: "偵錯資訊", icon: HelpCircle, component: DebugSettings, enabled: settings?.debug_mode ?? false },
-    { id: "about", label: "關於 yukey", icon: HelpCircle, component: AboutSettings },
+    {
+      id: "advanced",
+      label: "進階設定",
+      icon: Sliders,
+      component: AdvancedSettings,
+    },
+    {
+      id: "services",
+      label: "服務",
+      icon: Sparkles,
+      component: PostProcessingSettings,
+    },
+    {
+      id: "debug",
+      label: "偵錯資訊",
+      icon: HelpCircle,
+      component: DebugSettings,
+      enabled: settings?.debug_mode ?? false,
+    },
+    {
+      id: "about",
+      label: "關於 yukey",
+      icon: HelpCircle,
+      component: AboutSettings,
+    },
   ] as const;
 
   const activeSection = SECTIONS.find((s) => s.id === activeTab) || SECTIONS[0];
@@ -38,11 +70,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, defaultTa
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-fade-in select-none text-text">
       <div className="w-full max-w-6xl h-[92vh] bg-background border border-mid-gray/20 rounded-2xl flex overflow-hidden shadow-2xl relative">
-        
         {/* 左側：設定專屬的 Sidebar */}
         <div className="w-56 bg-mid-gray/5 border-r border-mid-gray/20 flex flex-col justify-between p-4">
           <div className="space-y-4">
-            <h3 className="text-xs font-semibold text-mid-gray px-2 uppercase tracking-wider">設定中心</h3>
+            <h3 className="text-xs font-semibold text-mid-gray px-2 uppercase tracking-wider">
+              設定中心
+            </h3>
             <div className="space-y-1">
               {SECTIONS.map((sec) => {
                 // 如果是偵錯分頁，檢查是否啟用
@@ -66,7 +99,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, defaultTa
               })}
             </div>
           </div>
-          
+
           <div className="text-[10px] text-mid-gray px-2">
             yukey settings &copy; 2026
           </div>
@@ -76,7 +109,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, defaultTa
         <div className="flex-1 flex flex-col overflow-hidden bg-background">
           {/* 頂部控制欄 */}
           <div className="flex justify-between items-center p-4 border-b border-mid-gray/20">
-            <h2 className="text-sm font-bold text-text">{activeSection.label}</h2>
+            <h2 className="text-sm font-bold text-text">
+              {activeSection.label}
+            </h2>
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl hover:bg-mid-gray/10 text-mid-gray hover:text-text transition-colors cursor-pointer"
@@ -86,7 +121,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ onClose, defaultTa
           </div>
 
           {/* 設定內容捲動區 */}
-          <div className="flex-1 overflow-y-auto p-6 pb-32 bg-background">
+          <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 pb-32 bg-background">
             <ActiveComponent />
           </div>
         </div>

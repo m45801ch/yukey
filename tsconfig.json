@@ -15,11 +15,15 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    "typeRoots": ["./node_modules/@types"],
+
     /* Path Aliases */
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@/bindings": ["./src/bindings.ts"]
+      "@/bindings": ["./src/bindings.ts"],
+      "react": ["./node_modules/@types/react"],
+      "react-dom": ["./node_modules/@types/react-dom"]
     },
 
     /* Linting */

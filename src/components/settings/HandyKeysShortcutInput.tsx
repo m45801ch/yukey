@@ -278,8 +278,7 @@ export const HandyKeysShortcutInput: React.FC<HandyKeysShortcutInputProps> = ({
           >
             {formatKeyCombination(binding.current_binding, osType)
               .replace(/Escape/gi, "ESC")
-              .replace(/Esc/gi, "ESC")
-            }
+              .replace(/Esc/gi, "ESC")}
           </div>
         )}
         <ResetButton

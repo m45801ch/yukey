@@ -9,16 +9,21 @@ interface ThemeSelectorProps {
   grouped?: boolean;
 }
 
-type ThemeType = "theme-premium-light" | "theme-dark-tech" | "theme-zen-natural";
+type ThemeType =
+  | "theme-premium-light"
+  | "theme-dark-tech"
+  | "theme-zen-natural";
 
 export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(
   ({ descriptionMode = "tooltip", grouped = false }) => {
     const { t } = useTranslation();
-    const [currentTheme, setCurrentTheme] = useState<ThemeType>("theme-zen-natural");
+    const [currentTheme, setCurrentTheme] =
+      useState<ThemeType>("theme-zen-natural");
 
     // On mount, read current theme from localStorage
     useEffect(() => {
-      const theme = (localStorage.getItem("yukey_app_theme") || "theme-zen-natural") as ThemeType;
+      const theme = (localStorage.getItem("yukey_app_theme") ||
+        "theme-zen-natural") as ThemeType;
       setCurrentTheme(theme);
       applyTheme(theme);
       emit("theme-changed", theme).catch((err) => {
@@ -28,13 +33,17 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(
 
     const applyTheme = (theme: ThemeType) => {
       const root = document.documentElement;
-      
+
       // 移除所有可能存在的自訂主題 class
-      root.classList.remove("theme-dark-tech", "theme-premium-light", "theme-zen-natural");
-      
+      root.classList.remove(
+        "theme-dark-tech",
+        "theme-premium-light",
+        "theme-zen-natural",
+      );
+
       // 套用選取的主題 class
       root.classList.add(theme);
-      
+
       // 設定瀏覽器原生色彩模式
       if (theme === "theme-dark-tech") {
         root.style.colorScheme = "dark";
@@ -76,7 +85,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(
         </div>
       </SettingContainer>
     );
-  }
+  },
 );
 
 ThemeSelector.displayName = "ThemeSelector";

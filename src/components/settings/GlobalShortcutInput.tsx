@@ -286,8 +286,7 @@ export const GlobalShortcutInput: React.FC<GlobalShortcutInputProps> = ({
           >
             {formatKeyCombination(binding.current_binding, osType)
               .replace(/Escape/gi, "ESC")
-              .replace(/Esc/gi, "ESC")
-            }
+              .replace(/Esc/gi, "ESC")}
           </div>
         )}
         <ResetButton

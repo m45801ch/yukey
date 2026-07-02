@@ -468,6 +468,23 @@ fn run_headless_transcription(app: &AppHandle, args: &CliArgs) -> i32 {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run(cli_args: CliArgs) {
+    // Set a global panic hook to release stuck modifier keys on Windows
+    let default_hook = std::panic::take_hook();
+    std::panic::set_hook(Box::new(move |info| {
+        log::error!("Application panicked: {:?}", info);
+        #[cfg(target_os = "windows")]
+        {
+            use enigo::{Enigo, Key, Keyboard, Settings};
+            if let Ok(mut enigo) = Enigo::new(&Settings::default()) {
+                let _ = enigo.key(Key::Control, enigo::Direction::Release);
+                let _ = enigo.key(Key::Alt, enigo::Direction::Release);
+                let _ = enigo.key(Key::Shift, enigo::Direction::Release);
+                let _ = enigo.key(Key::Meta, enigo::Direction::Release);
+            }
+        }
+        default_hook(info);
+    }));
+
     // Detect portable mode before anything else
     portable::init();
 
@@ -575,6 +592,9 @@ pub fn run(cli_args: CliArgs) {
             commands::history::toggle_history_entry_saved,
             commands::history::get_audio_file_path,
             commands::history::delete_history_entry,
+            commands::history::clear_all_history,
+            commands::history::clear_all_saved_history,
+            commands::history::get_history_stats,
             commands::history::retry_history_entry_transcription,
             commands::history::update_history_limit,
             commands::history::update_recording_retention_period,
@@ -736,8 +756,8 @@ pub fn run(cli_args: CliArgs) {
             let mut win_builder =
                 tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("/".into()))
                     .title("yukey")
-                    .inner_size(1226.0, 760.0)
-                    .min_inner_size(1226.0, 760.0)
+                    .inner_size(1226.0, 800.0)
+                    .min_inner_size(1226.0, 800.0)
                     .resizable(true)
                     .maximizable(false)
                     .visible(false);
@@ -849,4 +869,3 @@ pub fn run(cli_args: CliArgs) {
         });
 }
 // Force compile with new tray icons assets
-

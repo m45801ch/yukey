@@ -18,7 +18,7 @@ export const VocabPage: React.FC = () => {
   const { t } = useTranslation();
   const { getSetting, updateSetting, isUpdating } = useSettings();
   const [newWord, setNewWord] = useState("");
-  
+
   // 糾錯對照規則狀態
   const [rules, setRules] = useState<CorrectionRule[]>([]);
   const [rulePattern, setRulePattern] = useState("");
@@ -40,24 +40,31 @@ export const VocabPage: React.FC = () => {
 
   const saveRules = (updatedRules: CorrectionRule[]) => {
     setRules(updatedRules);
-    localStorage.setItem("yukey_correction_rules", JSON.stringify(updatedRules));
+    localStorage.setItem(
+      "yukey_correction_rules",
+      JSON.stringify(updatedRules),
+    );
   };
 
   // 添加熱詞
   const handleAddWord = () => {
     const trimmedWord = newWord.trim();
     const sanitizedWord = trimmedWord.replace(/[<>"'&]/g, "");
-    if (sanitizedWord && !sanitizedWord.includes(" ") && sanitizedWord.length <= 50) {
+    if (
+      sanitizedWord &&
+      !sanitizedWord.includes(" ") &&
+      sanitizedWord.length <= 50
+    ) {
       if (customWords.includes(sanitizedWord)) {
         toast.error(`熱詞 "${sanitizedWord}" 已存在於清單中`);
         return;
       }
       const updated = [...customWords, sanitizedWord];
       updateSetting("custom_words", updated);
-      
+
       // 更新對照 System Prompt 用的糾錯字/自訂詞彙
       syncSystemPromptWithCorrections(rules, updated);
-      
+
       setNewWord("");
       toast.success("熱詞添加成功");
     }
@@ -105,45 +112,73 @@ export const VocabPage: React.FC = () => {
   };
 
   // 同步糾錯規則至原 System Prompt（透過前端注入，當後處理執行時即可遵循）
-  const syncSystemPromptWithCorrections = (currentRules: CorrectionRule[], currentWords: string[]) => {
+  const syncSystemPromptWithCorrections = (
+    currentRules: CorrectionRule[],
+    currentWords: string[],
+  ) => {
     const activeRules = currentRules.filter((r) => r.enabled);
-    
+
     // 構造 Prompt 說明
     let correctionPrompt = "";
     if (activeRules.length > 0) {
-      correctionPrompt += "\n\n# 語音識別糾錯對照表 (請務必將左方的錯字或發音模糊字，更正為右方的正確字)：\n";
+      correctionPrompt +=
+        "\n\n# 語音識別糾錯對照表 (請務必將左方的錯字或發音模糊字，更正為右方的正確字)：\n";
       activeRules.forEach((r) => {
         correctionPrompt += `- "${r.pattern}" -> "${r.replacement}"\n`;
       });
     }
 
-    if (currentWords.length > 0) {
-      correctionPrompt += `\n# 本地熱詞/專有名詞列表 (請確保這些專有名詞拼寫正確)：\n- ${currentWords.join(", ")}\n`;
-    }
-
     // 保存到本地快取中，當 Style 卡片切換 System Prompt 時，會自動拼接此 correctionPrompt 在末尾
     localStorage.setItem("yukey_prompt_corrections_suffix", correctionPrompt);
-    
+
     // 同步更新當前啟用中的 System Prompt (讀取 settings 裡面已有的 prompt，先清掉舊對照，然後拼上新的)
     const selectedPromptId = getSetting("post_process_selected_prompt_id");
     const prompts = getSetting("post_process_prompts") || [];
     const selectedPrompt = prompts.find((p) => p.id === selectedPromptId);
-    
+
     if (selectedPrompt) {
-      // 清理原先可能殘留的糾錯與熱詞區塊
-      let cleanPrompt = selectedPrompt.prompt.split("\n\n# 語音識別糾錯對照表")[0];
+      // 清理原先可能殘留的糾錯與熱詞區塊，保留 ${output}
+      let cleanPrompt =
+        selectedPrompt.prompt.split("\n\n# 語音識別糾錯對照表")[0];
       cleanPrompt = cleanPrompt.split("\n# 本地熱詞")[0];
-      
-      const newPromptText = cleanPrompt + correctionPrompt;
-      
+      // 若切完後 ${output} 不見了，從原始字串找回並接回
+      if (
+        selectedPrompt.prompt.includes("${output}") &&
+        !cleanPrompt.includes("${output}")
+      ) {
+        const ti = selectedPrompt.prompt.lastIndexOf("Transcript:");
+        const oi = selectedPrompt.prompt.lastIndexOf("${output}");
+        if (ti !== -1 && oi !== -1) {
+          cleanPrompt =
+            cleanPrompt.trimEnd() +
+            "\n\n" +
+            selectedPrompt.prompt.slice(ti, oi + 9);
+        }
+      }
+
+      const newPromptText = correctionPrompt
+        ? (() => {
+            const clean = correctionPrompt.trimStart();
+            const idx = cleanPrompt.lastIndexOf("Transcript:");
+            return idx !== -1
+              ? cleanPrompt.slice(0, idx) +
+                  clean +
+                  "\n\n" +
+                  cleanPrompt.slice(idx)
+              : cleanPrompt.replace("${output}", clean + "\n\n${output}");
+          })()
+        : cleanPrompt;
+
       // 更新原後端所選提示詞內容
-      commands.updatePostProcessPrompt(
-        selectedPrompt.id,
-        selectedPrompt.name,
-        newPromptText
-      ).then(() => {
-        updateSetting("post_process_selected_prompt_id", selectedPrompt.id);
-      });
+      commands
+        .updatePostProcessPrompt(
+          selectedPrompt.id,
+          selectedPrompt.name,
+          newPromptText,
+        )
+        .then(() => {
+          updateSetting("post_process_selected_prompt_id", selectedPrompt.id);
+        });
     }
   };
 
@@ -158,7 +193,8 @@ export const VocabPage: React.FC = () => {
             - **自訂熱詞**：適合專有名詞、人名、產品名，能幫助 ASR 識別。
           </p>
           <p className="text-mid-gray">
-            - **糾錯規則**：在 AI 服務後處理時，將轉錄結果中的錯字或口誤自動替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。
+            - **糾錯規則**：在 AI
+            服務後處理時，將轉錄結果中的錯字或口誤自動替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。
           </p>
         </div>
       </div>
@@ -167,7 +203,9 @@ export const VocabPage: React.FC = () => {
         {/* 左側：自訂熱詞 */}
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
-            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">自訂熱詞</h3>
+            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
+              自訂熱詞
+            </h3>
             <p className="text-xs text-mid-gray/80">請輸入您常用的專業熱詞：</p>
             <div className="flex gap-2">
               <Input
@@ -182,7 +220,11 @@ export const VocabPage: React.FC = () => {
               />
               <Button
                 onClick={handleAddWord}
-                disabled={!newWord.trim() || newWord.includes(" ") || isUpdating("custom_words")}
+                disabled={
+                  !newWord.trim() ||
+                  newWord.includes(" ") ||
+                  isUpdating("custom_words")
+                }
                 variant="primary"
                 size="md"
               >
@@ -193,7 +235,9 @@ export const VocabPage: React.FC = () => {
 
           <div className="flex-1 min-h-36 max-h-60 overflow-y-auto p-3 rounded-lg border border-mid-gray/10 bg-mid-gray/5 flex flex-wrap gap-1.5 items-start content-start">
             {customWords.length === 0 ? (
-              <span className="text-xs text-mid-gray py-4 w-full text-center">尚無新增的自訂熱詞</span>
+              <span className="text-xs text-mid-gray py-4 w-full text-center">
+                尚無新增的自訂熱詞
+              </span>
             ) : (
               customWords.map((word) => (
                 <button
@@ -203,7 +247,9 @@ export const VocabPage: React.FC = () => {
                   className="px-2 py-1 rounded-md text-xs bg-mid-gray/10 hover:bg-logo-primary/20 border border-mid-gray/20 hover:border-logo-primary/40 flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <span>{word}</span>
-                  <span className="text-[10px] text-mid-gray hover:text-logo-primary">&times;</span>
+                  <span className="text-[10px] text-mid-gray hover:text-logo-primary">
+                    &times;
+                  </span>
                 </button>
               ))
             )}
@@ -213,8 +259,12 @@ export const VocabPage: React.FC = () => {
         {/* 右側：糾錯規則對照表 */}
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
-            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">糾錯對照規則</h3>
-            <p className="text-xs text-mid-gray/80">將轉錄錯字替換為正確拼寫：</p>
+            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
+              糾錯對照規則
+            </h3>
+            <p className="text-xs text-mid-gray/80">
+              將轉錄錯字替換為正確拼寫：
+            </p>
             <div className="flex gap-2 items-center">
               <Input
                 type="text"
@@ -246,14 +296,23 @@ export const VocabPage: React.FC = () => {
 
           <div className="flex-1 min-h-36 max-h-60 overflow-y-auto rounded-lg border border-mid-gray/10 bg-mid-gray/5 divide-y divide-mid-gray/10 text-start">
             {rules.length === 0 ? (
-              <div className="text-xs text-mid-gray py-4 text-center">尚無新增的糾錯規則</div>
+              <div className="text-xs text-mid-gray py-4 text-center">
+                尚無新增的糾錯規則
+              </div>
             ) : (
               rules.map((rule) => (
-                <div key={rule.id} className="flex justify-between items-center p-3 text-xs">
+                <div
+                  key={rule.id}
+                  className="flex justify-between items-center p-3 text-xs"
+                >
                   <div className="flex gap-2 items-center">
-                    <span className="font-semibold text-red-400 line-through">{rule.pattern}</span>
+                    <span className="font-semibold text-red-400 line-through">
+                      {rule.pattern}
+                    </span>
                     <span className="text-mid-gray">&rarr;</span>
-                    <span className="font-semibold text-logo-primary">{rule.replacement}</span>
+                    <span className="font-semibold text-logo-primary">
+                      {rule.replacement}
+                    </span>
                   </div>
                   <button
                     onClick={() => handleRemoveRule(rule.id)}

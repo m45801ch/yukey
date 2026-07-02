@@ -91,9 +91,12 @@ export const AccelerationSelector: FC<AccelerationSelectorProps> = ({
       setOrtOptions(
         ortVals.map((v) => ({
           value: v,
-          label: v === "auto"
-            ? (i18n.language.startsWith("zh") ? "自動" : "Auto")
-            : (ORT_LABELS[v as OrtAcceleratorSetting] ?? v),
+          label:
+            v === "auto"
+              ? i18n.language.startsWith("zh")
+                ? "自動"
+                : "Auto"
+              : (ORT_LABELS[v as OrtAcceleratorSetting] ?? v),
         })),
       );
     });

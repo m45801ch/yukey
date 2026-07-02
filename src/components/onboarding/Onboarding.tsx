@@ -15,6 +15,7 @@ const Onboarding: React.FC<OnboardingProps> = ({ onModelSelected }) => {
   const { t } = useTranslation();
   const {
     models,
+    loading,
     downloadModel,
     selectModel,
     downloadingModels,
@@ -88,10 +89,48 @@ const Onboarding: React.FC<OnboardingProps> = ({ onModelSelected }) => {
     return downloadStats[modelId]?.speed;
   };
 
+  if (loading && models.length === 0) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center gap-4 p-6">
+        <div className="flex flex-col items-center gap-2">
+          <img
+            src={yukeyStartImg}
+            alt="yukey start"
+            className="h-[60px] object-contain my-3"
+          />
+          <p className="text-text/70 max-w-md font-medium mx-auto">
+            {t("onboarding.loading")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!loading && models.length === 0) {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center gap-4 p-6">
+        <div className="flex flex-col items-center gap-2">
+          <img
+            src={yukeyStartImg}
+            alt="yukey start"
+            className="h-[60px] object-contain my-3"
+          />
+          <p className="text-text/70 max-w-md font-medium mx-auto">
+            {t("onboarding.noModels")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen w-screen flex flex-col p-6 gap-4 inset-0">
       <div className="flex flex-col items-center gap-2 shrink-0">
-        <img src={yukeyStartImg} alt="yukey start" className="h-[60px] object-contain my-3" />
+        <img
+          src={yukeyStartImg}
+          alt="yukey start"
+          className="h-[60px] object-contain my-3"
+        />
         <p className="text-text/70 max-w-md font-medium mx-auto">
           {t("onboarding.subtitle")}
         </p>

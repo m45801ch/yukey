@@ -92,6 +92,14 @@
       "cohere-int8": {
         "name": "Cohere",
         "description": "大型模型，速度较慢，但多语言识别非常准确。"
+      },
+      "paraformer-zh": {
+        "name": "Paraformer ZH",
+        "description": "標準中文語音辨識，高準確度。"
+      },
+      "paraformer-zh-small": {
+        "name": "Paraformer ZH Small",
+        "description": "輕量中文語音辨識，快速。"
       }
     },
     "errors": {
@@ -117,7 +125,9 @@
         "checkFailed": "检查权限失败。请重试。",
         "requestFailed": "请求权限失败。请重试。"
       }
-    }
+    },
+    "loading": "正在載入模型...",
+    "noModels": "沒有可用模型，請檢查網路連線後重試。"
   },
   "modelSelector": {
     "custom": "自定义",

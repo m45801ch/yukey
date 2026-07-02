@@ -159,7 +159,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         debug!("Using structured outputs for provider '{}'", provider.id);
 
         let system_prompt = build_system_prompt(&prompt);
-        let user_content = transcription.to_string();
+        let user_content = format!("Transcript to process:\n\"\"\"\n{}\n\"\"\"", transcription);
 
         // Handle Apple Intelligence separately since it uses native Swift APIs
         if provider.id == APPLE_INTELLIGENCE_PROVIDER_ID {
@@ -211,7 +211,7 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
             "properties": {
                 (TRANSCRIPTION_FIELD): {
                     "type": "string",
-                    "description": "The cleaned and processed transcription text"
+                    "description": "The processed text. You must strictly follow all system instructions, formatting rules, translation requirements, and constraints specified in the system prompt."
                 }
             },
             "required": [TRANSCRIPTION_FIELD],
@@ -404,6 +404,57 @@ impl ShortcutAction for TranscribeAction {
     fn start(&self, app: &AppHandle, binding_id: &str, _shortcut_str: &str) {
         let start_time = Instant::now();
         debug!("TranscribeAction::start called for binding: {}", binding_id);
+
+        let settings = get_settings(app);
+
+        if self.post_process {
+            let mut has_error = false;
+            let provider = settings.active_post_process_provider();
+            if provider.is_none() {
+                has_error = true;
+            } else {
+                let provider = provider.unwrap();
+                let is_apple = provider.id == crate::settings::APPLE_INTELLIGENCE_PROVIDER_ID;
+
+                let api_key = settings
+                    .post_process_api_keys
+                    .get(&provider.id)
+                    .cloned()
+                    .unwrap_or_default();
+
+                let model = settings
+                    .post_process_models
+                    .get(&provider.id)
+                    .cloned()
+                    .unwrap_or_default();
+
+                if (!is_apple && api_key.trim().is_empty()) || model.trim().is_empty() {
+                    has_error = true;
+                }
+            }
+
+            if has_error {
+                use tauri_plugin_dialog::DialogExt;
+                if let Some(main_win) = app.get_webview_window("main") {
+                    let _ = main_win.set_focus();
+                    main_win
+                        .dialog()
+                        .message(
+                            "請先設定 AI 服務商、輸入 API key 並選擇模型，再使用 AI 修飾功能。",
+                        )
+                        .title("提示")
+                        .show(|_| {});
+                } else {
+                    app.dialog()
+                        .message(
+                            "請先設定 AI 服務商、輸入 API key 並選擇模型，再使用 AI 修飾功能。",
+                        )
+                        .title("提示")
+                        .show(|_| {});
+                }
+                return;
+            }
+        }
 
         // Load model in the background
         let tm = app.state::<Arc<TranscriptionManager>>();

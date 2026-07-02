@@ -320,7 +320,7 @@ impl ModelManager {
                 accuracy_score: 0.80,
                 speed_score: 0.85,
                 supports_translation: false,
-                is_recommended: true,
+                is_recommended: false,
                 supported_languages: parakeet_v3_languages,
                 supports_language_selection: false,
                 is_custom: false,
@@ -613,11 +613,10 @@ impl ModelManager {
         );
 
         // Paraformer (Chinese ASR, from sherpa-onnx / FunASR)
-        let paraformer_languages: Vec<String> =
-            vec!["zh", "zh-Hans", "zh-Hant"]
-                .into_iter()
-                .map(String::from)
-                .collect();
+        let paraformer_languages: Vec<String> = vec!["zh", "zh-Hans", "zh-Hant"]
+            .into_iter()
+            .map(String::from)
+            .collect();
 
         available_models.insert(
             "paraformer-zh".to_string(),
@@ -637,7 +636,7 @@ impl ModelManager {
                 accuracy_score: 0.80,
                 speed_score: 0.80,
                 supports_translation: false,
-                is_recommended: false,
+                is_recommended: true,
                 supported_languages: paraformer_languages.clone(),
                 supports_language_selection: true,
                 is_custom: false,
@@ -1304,7 +1303,8 @@ impl ModelManager {
             } else {
                 return Err(anyhow::anyhow!(
                     "Unsupported archive format for model {} (magic: {:02x?})",
-                    model_id, magic
+                    model_id,
+                    magic
                 ));
             };
             let mut archive = Archive::new(tar);

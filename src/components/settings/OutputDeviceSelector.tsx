@@ -28,9 +28,7 @@ export const OutputDeviceSelector: React.FC<OutputDeviceSelectorProps> =
 
       const rawOutput = getSetting("selected_output_device") || "default";
       const selectedOutputDevice =
-        rawOutput.toLowerCase() === "default"
-          ? "系統預設"
-          : rawOutput;
+        rawOutput.toLowerCase() === "default" ? "系統預設" : rawOutput;
 
       const handleOutputDeviceSelect = async (deviceName: string) => {
         const value = deviceName === "系統預設" ? "default" : deviceName;
@@ -48,7 +46,7 @@ export const OutputDeviceSelector: React.FC<OutputDeviceSelectorProps> =
           .map((device: AudioDevice) => ({
             value: device.name,
             label: device.name,
-          }))
+          })),
       ];
 
       return (

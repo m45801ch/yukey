@@ -147,16 +147,27 @@
 
 /* 1. 全域背景與文字轉場 (滑順切換主題) */
 :root {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
 }
-:root *, :root *::before, :root *::after {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+:root *,
+:root *::before,
+:root *::after {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* 2. 科技極簡 (theme-dark-tech) 專屬光暈陰影 */
 .theme-dark-tech .shadow-sm,
 .theme-dark-tech .rounded-lg {
-  box-shadow: 0 4px 20px -2px rgba(56, 189, 248, 0.05), 0 2px 8px -1px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    0 4px 20px -2px rgba(56, 189, 248, 0.05),
+    0 2px 8px -1px rgba(0, 0, 0, 0.3);
 }
 .theme-dark-tech .bg-background-ui:hover {
   box-shadow: 0 0 15px 1px rgba(56, 189, 248, 0.15);
@@ -167,7 +178,9 @@
 /* 3. 現代優雅 (theme-premium-light) 專屬柔粉光暈與羽化陰影 */
 .theme-premium-light .shadow-sm,
 .theme-premium-light .rounded-lg {
-  box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 10px 25px -5px rgba(244, 114, 182, 0.08),
+    0 8px 16px -6px rgba(0, 0, 0, 0.02);
 }
 .theme-premium-light .bg-background-ui:hover {
   box-shadow: 0 12px 20px -2px rgba(244, 114, 182, 0.14);
@@ -187,16 +200,20 @@
 }
 
 /* 5. 點擊回彈微動畫 (All Buttons & Interactive Items) */
-button, 
-.cursor-pointer, 
+button,
+.cursor-pointer,
 .interactive-item {
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease !important;
+  transition:
+    transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
 }
-button:hover, 
+button:hover,
 .cursor-pointer:hover {
   transform: scale(1.02);
 }
-button:active, 
+button:active,
 .cursor-pointer:active {
   transform: scale(0.96) !important;
 }
@@ -219,38 +236,77 @@ button:active,
 
 /* ==================== 3D立體感立體陰影與光暈效果卡片 ==================== */
 .glow-card-3d {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+  margin: 4px 2px; /* 增加邊距以避免縮放和陰影被父容器截斷 */
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.08),
+    0 8px 16px -6px rgba(0, 0, 0, 0.04);
   transform: translateY(0);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.3s ease,
+    border-color 0.3s ease,
+    background-color 0.3s ease;
 }
 .glow-card-3d:hover {
   transform: translateY(-4px) scale(1.01);
 }
 .theme-dark-tech .glow-card-3d:hover {
-  box-shadow: 0 20px 30px -10px rgba(56, 189, 248, 0.25), 0 0 18px 2px rgba(56, 189, 248, 0.15);
+  box-shadow:
+    0 20px 30px -10px rgba(56, 189, 248, 0.25),
+    0 0 18px 2px rgba(56, 189, 248, 0.15);
   border-color: rgba(56, 189, 248, 0.4);
   background-color: rgba(30, 41, 59, 0.4);
 }
 .theme-premium-light .glow-card-3d:hover {
-  box-shadow: 0 20px 30px -10px rgba(244, 114, 182, 0.25), 0 0 18px 2px rgba(244, 114, 182, 0.15);
+  box-shadow:
+    0 20px 30px -10px rgba(244, 114, 182, 0.25),
+    0 0 18px 2px rgba(244, 114, 182, 0.15);
   border-color: rgba(244, 114, 182, 0.4);
   background-color: rgba(255, 255, 255, 0.8);
 }
 .theme-zen-natural .glow-card-3d:hover {
-  box-shadow: 0 20px 30px -10px rgba(62, 107, 92, 0.2), 0 0 18px 2px rgba(62, 107, 92, 0.15);
+  box-shadow:
+    0 20px 30px -10px rgba(62, 107, 92, 0.2),
+    0 0 18px 2px rgba(62, 107, 92, 0.15);
   border-color: rgba(62, 107, 92, 0.4);
   background-color: rgba(252, 252, 249, 0.8);
 }
 
 /* Active 3D card glows */
+.active-glow-3d {
+  border: 2px solid var(--color-logo-primary) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--color-logo-primary) 8%,
+    transparent
+  ) !important;
+  box-shadow:
+    0 15px 30px -5px
+      color-mix(in srgb, var(--color-logo-primary) 30%, transparent),
+    0 0 16px 2px color-mix(in srgb, var(--color-logo-primary) 15%, transparent) !important;
+  transform: translateY(-4px) scale(1.01) !important;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
 .theme-dark-tech .active-glow-3d {
-  box-shadow: 0 15px 25px -8px rgba(56, 189, 248, 0.3), 0 0 16px 2px rgba(56, 189, 248, 0.2) !important;
+  border: 2px solid var(--color-logo-primary) !important;
+  background-color: rgba(56, 189, 248, 0.12) !important;
+  box-shadow:
+    0 15px 25px -8px rgba(56, 189, 248, 0.4),
+    0 0 16px 2px rgba(56, 189, 248, 0.25) !important;
 }
 .theme-premium-light .active-glow-3d {
-  box-shadow: 0 15px 25px -8px rgba(244, 114, 182, 0.3), 0 0 16px 2px rgba(244, 114, 182, 0.2) !important;
+  border: 2px solid var(--color-logo-primary) !important;
+  background-color: rgba(244, 114, 182, 0.12) !important;
+  box-shadow:
+    0 15px 25px -8px rgba(244, 114, 182, 0.4),
+    0 0 16px 2px rgba(244, 114, 182, 0.25) !important;
 }
 .theme-zen-natural .active-glow-3d {
-  box-shadow: 0 15px 25px -8px rgba(62, 107, 92, 0.25), 0 0 16px 2px rgba(62, 107, 92, 0.2) !important;
+  border: 2px solid var(--color-logo-primary) !important;
+  background-color: rgba(62, 107, 92, 0.12) !important;
+  box-shadow:
+    0 15px 25px -8px rgba(62, 107, 92, 0.35),
+    0 0 16px 2px rgba(62, 107, 92, 0.25) !important;
 }
 
 /* Active 3D Sidebar item styling */
@@ -263,16 +319,34 @@ button:active,
 }
 
 .theme-dark-tech .active-sidebar-item-3d {
-  background: linear-gradient(135deg, var(--color-logo-primary), #0284c7) !important;
-  box-shadow: 0 4px 15px -2px rgba(56, 189, 248, 0.5), 0 2px 6px rgba(56, 189, 248, 0.3);
+  background: linear-gradient(
+    135deg,
+    var(--color-logo-primary),
+    #0284c7
+  ) !important;
+  box-shadow:
+    0 4px 15px -2px rgba(56, 189, 248, 0.5),
+    0 2px 6px rgba(56, 189, 248, 0.3);
 }
 .theme-premium-light .active-sidebar-item-3d {
-  background: linear-gradient(135deg, var(--color-logo-primary), #db2777) !important;
-  box-shadow: 0 4px 15px -2px rgba(244, 114, 182, 0.5), 0 2px 6px rgba(244, 114, 182, 0.3);
+  background: linear-gradient(
+    135deg,
+    var(--color-logo-primary),
+    #db2777
+  ) !important;
+  box-shadow:
+    0 4px 15px -2px rgba(244, 114, 182, 0.5),
+    0 2px 6px rgba(244, 114, 182, 0.3);
 }
 .theme-zen-natural .active-sidebar-item-3d {
-  background: linear-gradient(135deg, var(--color-logo-primary), #2d4f44) !important;
-  box-shadow: 0 4px 15px -2px rgba(62, 107, 92, 0.4), 0 2px 6px rgba(62, 107, 92, 0.3);
+  background: linear-gradient(
+    135deg,
+    var(--color-logo-primary),
+    #2d4f44
+  ) !important;
+  box-shadow:
+    0 4px 15px -2px rgba(62, 107, 92, 0.4),
+    0 2px 6px rgba(62, 107, 92, 0.3);
 }
 
 /* Settings Modal left sidebar items */
@@ -312,7 +386,7 @@ button:active,
 }
 
 .capsule-toggle-3d::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 1px;
   left: 2px;
@@ -331,7 +405,7 @@ input:checked + .capsule-toggle-3d::after {
 
 input:checked + .capsule-toggle-3d {
   background: var(--color-logo-primary) !important;
-  box-shadow: 0 0 10px color-mix(in srgb, var(--color-logo-primary), transparent 40%), inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--color-logo-primary), transparent 40%),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2) !important;
 }
-
-

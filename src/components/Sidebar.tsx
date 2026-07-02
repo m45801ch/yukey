@@ -1,5 +1,11 @@
 import React from "react";
-import { LayoutDashboard, History, BookOpen, Sparkles, Cog } from "lucide-react";
+import {
+  LayoutDashboard,
+  History,
+  BookOpen,
+  Sparkles,
+  Cog,
+} from "lucide-react";
 import { Overview } from "./pages/Overview";
 import { HistoryPage } from "./pages/HistoryPage";
 import { VocabPage } from "./pages/VocabPage";
@@ -31,7 +37,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <div className="flex flex-col w-44 h-full border-e border-mid-gray/20 bg-background-ui/5 items-center justify-between px-2 py-4 select-none">
       {/* 頂部 Logo 替換為 yukey-start 圖片 */}
       <div className="w-full text-center py-2 flex flex-col items-center justify-center">
-        <img src={yukeyStartImg} alt="yukey" className="h-[40px] object-contain my-1" />
+        <img
+          src={yukeyStartImg}
+          alt="yukey"
+          className="h-[40px] object-contain my-1"
+        />
       </div>
 
       {/* 中間分頁導覽清單 */}

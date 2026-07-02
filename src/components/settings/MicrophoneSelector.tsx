@@ -45,7 +45,7 @@ export const MicrophoneSelector: React.FC<MicrophoneSelectorProps> = React.memo(
         .map((device) => ({
           value: device.name,
           label: device.name,
-        }))
+        })),
     ];
 
     return (

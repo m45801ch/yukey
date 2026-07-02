@@ -39,6 +39,12 @@ pub struct PaginatedHistory {
     pub has_more: bool,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+pub struct HistoryStats {
+    pub limit: usize,
+    pub count: usize,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Type, tauri_specta::Event)]
 #[serde(tag = "action")]
 pub enum HistoryUpdatePayload {
@@ -50,6 +56,8 @@ pub enum HistoryUpdatePayload {
     Deleted { id: i64 },
     #[serde(rename = "toggled")]
     Toggled { id: i64 },
+    #[serde(rename = "cleared")]
+    Cleared,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
@@ -636,6 +644,86 @@ impl HistoryManager {
         }
 
         Ok(())
+    }
+
+    pub async fn clear_all_history(&self) -> Result<()> {
+        let conn = self.get_connection()?;
+
+        // Get all non-saved entries to delete their audio files
+        let mut stmt = conn.prepare(
+            "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
+             FROM transcription_history
+             WHERE saved = 0"
+        )?;
+        let entries = stmt
+            .query_map([], Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        for entry in entries {
+            let file_path = self.get_audio_file_path(&entry.file_name);
+            if file_path.exists() {
+                if let Err(e) = fs::remove_file(&file_path) {
+                    error!("Failed to delete audio file {}: {}", entry.file_name, e);
+                }
+            }
+        }
+
+        // Delete all non-saved from database
+        conn.execute("DELETE FROM transcription_history WHERE saved = 0", [])?;
+
+        debug!("Cleared all non-saved history entries");
+
+        // Emit history cleared event
+        if let Err(e) = (HistoryUpdatePayload::Cleared).emit(&self.app_handle) {
+            error!("Failed to emit history-updated cleared event: {}", e);
+        }
+
+        Ok(())
+    }
+
+    pub async fn clear_all_saved_history(&self) -> Result<()> {
+        let conn = self.get_connection()?;
+
+        // Get all saved entries to delete their audio files
+        let mut stmt = conn.prepare(
+            "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
+             FROM transcription_history
+             WHERE saved = 1"
+        )?;
+        let entries = stmt
+            .query_map([], Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        for entry in entries {
+            let file_path = self.get_audio_file_path(&entry.file_name);
+            if file_path.exists() {
+                if let Err(e) = fs::remove_file(&file_path) {
+                    error!("Failed to delete audio file {}: {}", entry.file_name, e);
+                }
+            }
+        }
+
+        // Delete all saved from database
+        conn.execute("DELETE FROM transcription_history WHERE saved = 1", [])?;
+
+        debug!("Cleared all saved history entries");
+
+        // Emit history cleared event
+        if let Err(e) = (HistoryUpdatePayload::Cleared).emit(&self.app_handle) {
+            error!("Failed to emit history-updated cleared event: {}", e);
+        }
+
+        Ok(())
+    }
+
+    pub fn get_history_stats(&self) -> Result<HistoryStats> {
+        let conn = self.get_connection()?;
+        let limit = crate::settings::get_history_limit(&self.app_handle);
+        let count: usize =
+            conn.query_row("SELECT COUNT(*) FROM transcription_history", [], |row| {
+                row.get(0)
+            })?;
+        Ok(HistoryStats { limit, count })
     }
 
     fn format_timestamp_title(&self, timestamp: i64) -> String {

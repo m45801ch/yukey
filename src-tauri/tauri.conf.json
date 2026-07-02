@@ -5,8 +5,8 @@
   "identifier": "com.yukey.app",
   "build": {
     "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "cd .",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "fnm exec --using=22 -- node.exe node_modules\\typescript\\lib\\tsc.js && fnm exec --using=22 -- node.exe node_modules\\vite\\bin\\vite.js build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -28,7 +28,12 @@
     "createUpdaterArtifacts": false,
     "targets": "all",
     "resources": [
-      "resources/**/*"
+      "resources/default_settings.json",
+      "resources/handy.png",
+      "resources/*.wav",
+      "resources/*.png",
+      "resources/models/silero_vad_v4.onnx",
+      "resources/models/gigaam_vocab.txt"
     ],
     "license": "MIT",
     "icon": [

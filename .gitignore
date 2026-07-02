@@ -54,3 +54,22 @@ target/
 .env
 .env.*
 .env.local
+
+# Sensitive files (Private Keys, Certificates)
+*.key
+*.pem
+*.pfx
+*.cer
+*.crt
+src-tauri/tauri.key
+
+# Databases and user history
+*.db
+*.sqlite
+*.sqlite3
+history.json
+settings.json
+
+# System files
+Thumbs.db
+
