@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "需要權限",
-      "description": "Handy 需要一些權限才能正常運作",
+      "description": "yukey 需要一些權限才能正常運作",
       "microphone": {
         "title": "麥克風存取",
         "description": "需要聽取您的語音進行轉錄"
@@ -456,7 +456,7 @@
       },
       "updateChecks": {
         "label": "檢查更新",
-        "description": "自動檢查 Handy 的新版本"
+        "description": "自動檢查 yukey 的新版本"
       },
       "soundTheme": {
         "label": "聲音主題",
@@ -593,7 +593,7 @@
   },
   "accessibility": {
     "permissionsRequired": "需要輔助使用權限",
-    "permissionsDescription": "Handy 需要輔助使用權限才能輸入轉錄的文字",
+    "permissionsDescription": "yukey 需要輔助使用權限才能輸入轉錄的文字",
     "openSettings": "開啟系統設定",
     "dismiss": "關閉"
   },
@@ -616,7 +616,7 @@
   },
   "appLanguage": {
     "title": "應用程式語言",
-    "description": "變更 Handy 介面的語言"
+    "description": "變更 yukey 介面的語言"
   },
   "overlay": {
     "transcribing": "正在轉錄...",

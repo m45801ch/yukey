@@ -108,7 +108,7 @@
     },
     "permissions": {
       "title": "需要权限",
-      "description": "Handy 需要一些权限才能正常工作。",
+      "description": "yukey 需要一些权限才能正常工作。",
       "microphone": {
         "title": "麦克风访问",
         "description": "需要听取您的语音进行转录。"
@@ -186,7 +186,7 @@
     "general": {
       "title": "通用",
       "shortcut": {
-        "title": "Handy 快捷键",
+        "title": "yukey 快捷键",
         "description": "配置启动语音转文字录制的键盘快捷键",
         "loading": "加载快捷键中...",
         "none": "未配置快捷键",
@@ -286,11 +286,11 @@
       },
       "autostart": {
         "label": "开机启动",
-        "description": "登录计算机时自动启动 Handy。"
+        "description": "登录计算机时自动启动 yukey。"
       },
       "showTrayIcon": {
         "label": "显示托盘图标",
-        "description": "在系统托盘中显示 Handy 图标。"
+        "description": "在系统托盘中显示 yukey 图标。"
       },
       "overlay": {
         "title": "悬浮窗位置",
@@ -466,7 +466,7 @@
       },
       "updateChecks": {
         "label": "检查更新",
-        "description": "自动检查 Handy 的新版本"
+        "description": "自动检查 yukey 的新版本"
       },
       "soundTheme": {
         "label": "声音主题",
@@ -603,7 +603,7 @@
   },
   "accessibility": {
     "permissionsRequired": "需要辅助功能权限",
-    "permissionsDescription": "Handy 需要辅助功能权限才能输入转录的文字。",
+    "permissionsDescription": "yukey 需要辅助功能权限才能输入转录的文字。",
     "openSettings": "打开系统设置",
     "dismiss": "关闭"
   },
@@ -626,7 +626,7 @@
   },
   "appLanguage": {
     "title": "应用语言",
-    "description": "更改 Handy 界面的语言"
+    "description": "更改 yukey 界面的语言"
   },
   "overlay": {
     "transcribing": "正在转录...",
