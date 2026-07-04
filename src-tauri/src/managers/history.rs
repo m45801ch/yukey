@@ -31,12 +31,44 @@ static MIGRATIONS: &[M] = &[
     M::up("ALTER TABLE transcription_history ADD COLUMN post_processed_text TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_prompt TEXT;"),
     M::up("ALTER TABLE transcription_history ADD COLUMN post_process_requested BOOLEAN NOT NULL DEFAULT 0;"),
+    M::up(
+        "CREATE TABLE IF NOT EXISTS usage_stats (
+            date TEXT PRIMARY KEY,
+            count INTEGER NOT NULL DEFAULT 0,
+            char_count INTEGER NOT NULL DEFAULT 0,
+            estimated_duration_sec REAL NOT NULL DEFAULT 0.0
+        );",
+    ),
 ];
+
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+pub struct HistoryStats {
+    pub limit: usize,
+    pub count: usize,
+    pub text_limit: usize,
+    pub text_count: usize,
+    pub audio_limit: usize,
+    pub audio_count: usize,
+}
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
 pub struct PaginatedHistory {
     pub entries: Vec<HistoryEntry>,
     pub has_more: bool,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+pub struct UsageStat {
+    pub date: String,
+    pub count: i64,
+    pub char_count: i64,
+    pub estimated_duration_sec: f64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Type)]
+pub struct UsageSummary {
+    pub daily_stats: Vec<UsageStat>,
+    pub all_time_count: i64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type, tauri_specta::Event)]
@@ -50,6 +82,8 @@ pub enum HistoryUpdatePayload {
     Deleted { id: i64 },
     #[serde(rename = "toggled")]
     Toggled { id: i64 },
+    #[serde(rename = "cleared")]
+    Cleared,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Type)]
@@ -228,6 +262,25 @@ impl HistoryManager {
         let title = self.format_timestamp_title(timestamp);
 
         let conn = self.get_connection()?;
+
+        // Update independent usage stats table
+        let local_time = Local::now();
+        let date_str = local_time.format("%Y-%m-%d").to_string();
+        let char_count = transcription_text.chars().count() as i64;
+        let estimated_duration = (char_count as f64) * 0.3;
+
+        if let Err(e) = conn.execute(
+            "INSERT INTO usage_stats (date, count, char_count, estimated_duration_sec)
+             VALUES (?1, 1, ?2, ?3)
+             ON CONFLICT(date) DO UPDATE SET
+                count = count + 1,
+                char_count = char_count + ?2,
+                estimated_duration_sec = estimated_duration_sec + ?3",
+            params![&date_str, char_count, estimated_duration],
+        ) {
+            error!("Failed to update usage stats in database: {}", e);
+        }
+
         conn.execute(
             "INSERT INTO transcription_history (
                 file_name,
@@ -328,23 +381,27 @@ impl HistoryManager {
     }
 
     pub fn cleanup_old_entries(&self) -> Result<()> {
-        let retention_period = crate::settings::get_recording_retention_period(&self.app_handle);
+        // 1. Always enforce text history limit
+        let text_limit = crate::settings::get_history_limit(&self.app_handle);
+        self.cleanup_by_count(text_limit)?;
 
+        // 2. Process time-based recording retention period
+        let retention_period = crate::settings::get_recording_retention_period(&self.app_handle);
         match retention_period {
-            crate::settings::RecordingRetentionPeriod::Never => {
-                // Don't delete anything
-                Ok(())
-            }
-            crate::settings::RecordingRetentionPeriod::PreserveLimit => {
-                // Use the old count-based logic with history_limit
-                let limit = crate::settings::get_history_limit(&self.app_handle);
-                self.cleanup_by_count(limit)
+            crate::settings::RecordingRetentionPeriod::Never
+            | crate::settings::RecordingRetentionPeriod::PreserveLimit => {
+                // Quantity limits are processed by cleanup_old_audio_files
             }
             _ => {
-                // Use time-based logic
-                self.cleanup_by_time(retention_period)
+                // Time-based deletion of WAV files
+                self.cleanup_by_time(retention_period)?;
             }
         }
+
+        // 3. Always enforce audio file history limit
+        self.cleanup_old_audio_files()?;
+
+        Ok(())
     }
 
     fn delete_entries_and_files(&self, entries: &[(i64, String)]) -> Result<usize> {
@@ -406,6 +463,54 @@ impl HistoryManager {
         Ok(())
     }
 
+    pub fn cleanup_old_audio_files(&self) -> Result<()> {
+        let limit = crate::settings::get_audio_history_limit(&self.app_handle);
+        let conn = self.get_connection()?;
+
+        // Get all entries that are not saved and have an audio file, ordered by timestamp desc
+        let mut stmt = conn.prepare(
+            "SELECT id, file_name FROM transcription_history 
+             WHERE saved = 0 AND file_name IS NOT NULL AND file_name != '' 
+             ORDER BY timestamp DESC"
+        )?;
+
+        let rows = stmt.query_map([], |row| {
+            Ok((row.get::<_, i64>("id")?, row.get::<_, String>("file_name")?))
+        })?;
+
+        let mut entries: Vec<(i64, String)> = Vec::new();
+        for row in rows {
+            entries.push(row?);
+        }
+
+        if entries.len() > limit {
+            let to_clean = &entries[limit..];
+            let mut cleaned_count = 0;
+            for (id, file_name) in to_clean {
+                let file_path = self.recordings_dir.join(file_name);
+                if file_path.exists() {
+                    if let Err(e) = fs::remove_file(&file_path) {
+                        error!("Failed to delete WAV file {}: {}", file_name, e);
+                    } else {
+                        debug!("Deleted old WAV file to respect limit: {}", file_name);
+                        cleaned_count += 1;
+                    }
+                }
+                
+                // Clear the file_name field in the database
+                conn.execute(
+                    "UPDATE transcription_history SET file_name = '' WHERE id = ?1",
+                    params![id],
+                )?;
+            }
+            if cleaned_count > 0 {
+                debug!("Cleaned up {} old audio files by limit", cleaned_count);
+            }
+        }
+
+        Ok(())
+    }
+
     fn cleanup_by_time(
         &self,
         retention_period: crate::settings::RecordingRetentionPeriod,
@@ -421,9 +526,9 @@ impl HistoryManager {
             _ => unreachable!("Should not reach here"),
         };
 
-        // Get all unsaved entries older than the cutoff timestamp
+        // Get all unsaved entries older than the cutoff timestamp that have an audio file
         let mut stmt = conn.prepare(
-            "SELECT id, file_name FROM transcription_history WHERE saved = 0 AND timestamp < ?1",
+            "SELECT id, file_name FROM transcription_history WHERE saved = 0 AND timestamp < ?1 AND file_name IS NOT NULL AND file_name != ''",
         )?;
 
         let rows = stmt.query_map(params![cutoff_timestamp], |row| {
@@ -435,11 +540,28 @@ impl HistoryManager {
             entries_to_delete.push(row?);
         }
 
-        let deleted_count = self.delete_entries_and_files(&entries_to_delete)?;
+        let mut deleted_count = 0;
+        for (id, file_name) in &entries_to_delete {
+            let file_path = self.recordings_dir.join(file_name);
+            if file_path.exists() {
+                if let Err(e) = fs::remove_file(&file_path) {
+                    error!("Failed to delete WAV file {}: {}", file_name, e);
+                } else {
+                    debug!("Deleted old WAV file based on retention period: {}", file_name);
+                    deleted_count += 1;
+                }
+            }
+
+            // Clear the file_name field in the database, keep the text
+            conn.execute(
+                "UPDATE transcription_history SET file_name = '' WHERE id = ?1",
+                params![id],
+            )?;
+        }
 
         if deleted_count > 0 {
             debug!(
-                "Cleaned up {} old history entries based on retention period",
+                "Cleaned up {} old audio files based on retention period",
                 deleted_count
             );
         }
@@ -636,6 +758,157 @@ impl HistoryManager {
         }
 
         Ok(())
+    }
+
+    pub async fn clear_all_history(&self) -> Result<()> {
+        let conn = self.get_connection()?;
+
+        // Get all non-saved entries to delete their audio files
+        let mut stmt = conn.prepare(
+            "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
+             FROM transcription_history
+             WHERE saved = 0"
+        )?;
+        let entries = stmt
+            .query_map([], Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        for entry in entries {
+            let file_path = self.get_audio_file_path(&entry.file_name);
+            if file_path.exists() {
+                if let Err(e) = fs::remove_file(&file_path) {
+                    error!("Failed to delete audio file {}: {}", entry.file_name, e);
+                }
+            }
+        }
+
+        // Delete all non-saved from database
+        conn.execute("DELETE FROM transcription_history WHERE saved = 0", [])?;
+
+        debug!("Cleared all non-saved history entries");
+
+        // Emit history cleared event
+        if let Err(e) = (HistoryUpdatePayload::Cleared).emit(&self.app_handle) {
+            error!("Failed to emit history-updated cleared event: {}", e);
+        }
+
+        Ok(())
+    }
+
+    pub async fn clear_all_saved_history(&self) -> Result<()> {
+        let conn = self.get_connection()?;
+
+        // Get all saved entries to delete their audio files
+        let mut stmt = conn.prepare(
+            "SELECT id, file_name, timestamp, saved, title, transcription_text, post_processed_text, post_process_prompt, post_process_requested
+             FROM transcription_history
+             WHERE saved = 1"
+        )?;
+        let entries = stmt
+            .query_map([], Self::map_history_entry)?
+            .collect::<std::result::Result<Vec<_>, _>>()?;
+
+        for entry in entries {
+            let file_path = self.get_audio_file_path(&entry.file_name);
+            if file_path.exists() {
+                if let Err(e) = fs::remove_file(&file_path) {
+                    error!("Failed to delete audio file {}: {}", entry.file_name, e);
+                }
+            }
+        }
+
+        // Delete all saved from database
+        conn.execute("DELETE FROM transcription_history WHERE saved = 1", [])?;
+
+        debug!("Cleared all saved history entries");
+
+        // Emit history cleared event
+        if let Err(e) = (HistoryUpdatePayload::Cleared).emit(&self.app_handle) {
+            error!("Failed to emit history-updated cleared event: {}", e);
+        }
+
+        Ok(())
+    }
+
+    pub fn export_audio_file(&self, src_filename: &str, dest_path: &str) -> Result<()> {
+        let src_path = self.recordings_dir.join(src_filename);
+        if !src_path.exists() {
+            return Err(anyhow::anyhow!("Source audio file does not exist"));
+        }
+        let dest = std::path::Path::new(dest_path);
+        std::fs::copy(&src_path, dest)?;
+        Ok(())
+    }
+
+    pub fn get_history_stats(&self) -> Result<HistoryStats> {
+        let conn = self.get_connection()?;
+        let text_limit = crate::settings::get_history_limit(&self.app_handle);
+        let audio_limit = crate::settings::get_audio_history_limit(&self.app_handle);
+
+        let text_count: usize =
+            conn.query_row("SELECT COUNT(*) FROM transcription_history", [], |row| {
+                row.get(0)
+            })?;
+
+        let audio_count: usize =
+            conn.query_row(
+                "SELECT COUNT(*) FROM transcription_history WHERE file_name IS NOT NULL AND file_name != ''",
+                [],
+                |row| row.get(0),
+            )?;
+
+        Ok(HistoryStats {
+            limit: text_limit,
+            count: text_count,
+            text_limit,
+            text_count,
+            audio_limit,
+            audio_count,
+        })
+    }
+
+    pub async fn get_usage_stats(&self, days: i64) -> Result<UsageSummary> {
+        let conn = self.get_connection()?;
+        let mut stats = Vec::new();
+        let today = Local::now();
+
+        for i in (0..days).rev() {
+            let target_date = today - chrono::Duration::days(i);
+            let date_str = target_date.format("%Y-%m-%d").to_string();
+
+            let mut stmt = conn.prepare(
+                "SELECT count, char_count, estimated_duration_sec
+                 FROM usage_stats
+                 WHERE date = ?1",
+            )?;
+
+            let stat = stmt
+                .query_row(params![&date_str], |row| {
+                    Ok(UsageStat {
+                        date: date_str.clone(),
+                        count: row.get(0)?,
+                        char_count: row.get(1)?,
+                        estimated_duration_sec: row.get(2)?,
+                    })
+                })
+                .unwrap_or_else(|_| UsageStat {
+                    date: date_str.clone(),
+                    count: 0,
+                    char_count: 0,
+                    estimated_duration_sec: 0.0,
+                });
+
+            stats.push(stat);
+        }
+
+        let all_time_count: i64 = conn
+            .query_row("SELECT SUM(count) FROM usage_stats", [], |row| row.get(0))
+            .unwrap_or(0);
+
+        Ok(UsageSummary {
+            daily_stats: stats,
+            all_time_count,
+        })
     }
 
     fn format_timestamp_title(&self, timestamp: i64) -> String {

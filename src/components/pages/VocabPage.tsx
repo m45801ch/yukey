@@ -193,8 +193,8 @@ export const VocabPage: React.FC = () => {
             - **自訂熱詞**：適合專有名詞、人名、產品名，能幫助 ASR 識別。
           </p>
           <p className="text-mid-gray">
-            - **糾錯規則**：在 AI
-            服務後處理時，將轉錄結果中的錯字或口誤自動替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。
+            - **糾錯規則**：在進行 AI
+            潤色修飾時，將轉錄結果中的錯字或口誤自動替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。
           </p>
         </div>
       </div>
@@ -288,6 +288,7 @@ export const VocabPage: React.FC = () => {
                 disabled={!rulePattern.trim() || !ruleReplacement.trim()}
                 variant="primary"
                 size="md"
+                className="whitespace-nowrap shrink-0"
               >
                 新增
               </Button>

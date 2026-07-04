@@ -32,6 +32,27 @@ export const ModelsSettings: React.FC = () => {
   const [languageSearch, setLanguageSearch] = useState("");
   const languageDropdownRef = useRef<HTMLDivElement>(null);
   const languageSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Sorting state and dropdown state
+  const [sortBy, setSortBy] = useState<"name" | "accuracy" | "speed" | "size">("name");
+  const [sortDropdownOpen, setSortDropdownOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const getSortLabel = (type: string) => {
+    switch (type) {
+      case "name":
+        return "模型名稱";
+      case "accuracy":
+        return "模型精準度";
+      case "speed":
+        return "辨識速度";
+      case "size":
+        return "檔案大小";
+      default:
+        return "";
+    }
+  };
+
   const {
     models,
     currentModel,
@@ -49,7 +70,7 @@ export const ModelsSettings: React.FC = () => {
     rescanLocalModels,
   } = useModelStore();
 
-  // click outside handler for language dropdown
+  // click outside handler for dropdowns
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -58,6 +79,12 @@ export const ModelsSettings: React.FC = () => {
       ) {
         setLanguageDropdownOpen(false);
         setLanguageSearch("");
+      }
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node)
+      ) {
+        setSortDropdownOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -164,10 +191,10 @@ export const ModelsSettings: React.FC = () => {
     }
   };
 
-  // Filter models by search query (name + description) and language filter
+  // Filter models by search query (name + description) and language filter, then sort them
   const filteredModels = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    return models.filter((model: ModelInfo) => {
+    const filtered = models.filter((model: ModelInfo) => {
       // Hide deprecated legacy (.bin/ONNX) downloads unless already on disk.
       if (isLegacyModel(model) && !model.is_downloaded) return false;
       if (languageFilter !== "all") {
@@ -179,7 +206,26 @@ export const ModelsSettings: React.FC = () => {
       }
       return true;
     });
-  }, [models, languageFilter, searchQuery]);
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      if (sortBy === "name") {
+        return a.name.localeCompare(b.name);
+      }
+      if (sortBy === "accuracy") {
+        return b.accuracy_score - a.accuracy_score;
+      }
+      if (sortBy === "speed") {
+        return b.speed_score - a.speed_score;
+      }
+      if (sortBy === "size") {
+        return b.size_mb - a.size_mb;
+      }
+      return 0;
+    });
+
+    return filtered;
+  }, [models, languageFilter, searchQuery, sortBy]);
 
   // Split filtered models into downloaded (including custom) and available sections
   const { downloadedModels, availableModels } = useMemo(() => {
@@ -268,6 +314,50 @@ export const ModelsSettings: React.FC = () => {
                   />
                   <span>{t("settings.models.rescan.label")}</span>
                 </button>
+                {/* Sorting dropdown */}
+                <div className="relative font-normal" ref={sortDropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors cursor-pointer"
+                  >
+                    <span className="truncate">排序：{getSortLabel(sortBy)}</span>
+                    <ChevronDown
+                      className={`w-3.5 h-3.5 transition-transform ${
+                        sortDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+
+                  {sortDropdownOpen && (
+                    <div className="absolute top-full right-0 mt-1 w-44 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
+                      <div className="py-1 flex flex-col">
+                        {[
+                          { value: "name", label: "模型名稱" },
+                          { value: "accuracy", label: "模型精準度" },
+                          { value: "speed", label: "辨識速度" },
+                          { value: "size", label: "檔案大小" },
+                        ].map((opt) => (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => {
+                              setSortBy(opt.value as any);
+                              setSortDropdownOpen(false);
+                            }}
+                            className={`w-full px-3 py-2 text-start text-xs transition-colors hover:bg-mid-gray/10 cursor-pointer ${
+                              sortBy === opt.value
+                                ? "text-logo-primary font-semibold bg-logo-primary/5"
+                                : "text-text/80"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
                 {/* Language filter dropdown */}
                 <div className="relative" ref={languageDropdownRef}>
                   <button

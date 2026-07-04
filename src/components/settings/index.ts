@@ -9,6 +9,7 @@ export { ModelsSettings } from "./models/ModelsSettings";
 
 // Individual setting components
 export { MicrophoneSelector } from "./MicrophoneSelector";
+export { MicrophoneGain } from "./MicrophoneGain";
 export { ClamshellMicrophoneSelector } from "./ClamshellMicrophoneSelector";
 export { OutputDeviceSelector } from "./OutputDeviceSelector";
 export { AlwaysOnMicrophone } from "./AlwaysOnMicrophone";
@@ -27,6 +28,7 @@ export { AppDataDirectory } from "./AppDataDirectory";
 export { ModelUnloadTimeoutSetting } from "./ModelUnloadTimeout";
 export { StartHidden } from "./StartHidden";
 export { HistoryLimit } from "./HistoryLimit";
+export { AudioHistoryLimit } from "./AudioHistoryLimit";
 export { RecordingRetentionPeriodSelector } from "./RecordingRetentionPeriod";
 export { AutostartToggle } from "./AutostartToggle";
 export { UpdateChecksToggle } from "./UpdateChecksToggle";

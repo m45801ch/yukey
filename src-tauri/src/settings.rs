@@ -362,6 +362,10 @@ pub struct AppSettings {
     pub selected_output_device: Option<String>,
     #[serde(default = "default_translate_to_english")]
     pub translate_to_english: bool,
+    #[serde(default = "default_translate_target_language")]
+    pub translate_target_language: String,
+    #[serde(default = "default_translate_using_llm")]
+    pub translate_using_llm: bool,
     #[serde(default = "default_selected_language")]
     pub selected_language: String,
     #[serde(default = "default_overlay_position")]
@@ -378,6 +382,8 @@ pub struct AppSettings {
     pub word_correction_threshold: f64,
     #[serde(default = "default_history_limit")]
     pub history_limit: usize,
+    #[serde(default = "default_audio_history_limit")]
+    pub audio_history_limit: usize,
     #[serde(default = "default_recording_retention_period")]
     pub recording_retention_period: RecordingRetentionPeriod,
     #[serde(default)]
@@ -438,13 +444,25 @@ pub struct AppSettings {
     /// `overlay_position` (position `none` → style `None`).
     #[serde(default = "default_overlay_style")]
     pub overlay_style: OverlayStyle,
+    #[serde(default = "default_microphone_gain_enabled")]
+    pub microphone_gain_enabled: bool,
+    #[serde(default = "default_microphone_gain_value")]
+    pub microphone_gain_value: f32,
+}
+
+fn default_microphone_gain_enabled() -> bool {
+    false
+}
+
+fn default_microphone_gain_value() -> f32 {
+    2.5
 }
 
 fn default_model() -> String {
     "".to_string()
 }
 
-const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 1;
+const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 5;
 
 fn default_settings_schema_version() -> u32 {
     CURRENT_SETTINGS_SCHEMA_VERSION
@@ -455,6 +473,14 @@ fn default_always_on_microphone() -> bool {
 }
 
 fn default_translate_to_english() -> bool {
+    false
+}
+
+fn default_translate_target_language() -> String {
+    "en".to_string()
+}
+
+fn default_translate_using_llm() -> bool {
     false
 }
 
@@ -522,6 +548,10 @@ fn default_auto_submit() -> bool {
 }
 
 fn default_history_limit() -> usize {
+    5
+}
+
+fn default_audio_history_limit() -> usize {
     5
 }
 
@@ -748,7 +778,7 @@ pub const SETTINGS_STORE_PATH: &str = "settings_store.json";
 
 pub fn get_default_settings() -> AppSettings {
     #[cfg(target_os = "windows")]
-    let default_shortcut = "ctrl+space";
+    let default_shortcut = "control_right";
     #[cfg(target_os = "macos")]
     let default_shortcut = "option+space";
     #[cfg(target_os = "linux")]
@@ -768,7 +798,7 @@ pub fn get_default_settings() -> AppSettings {
         },
     );
     #[cfg(target_os = "windows")]
-    let default_post_process_shortcut = "ctrl+shift+space";
+    let default_post_process_shortcut = "control_right+'";
     #[cfg(target_os = "macos")]
     let default_post_process_shortcut = "option+shift+space";
     #[cfg(target_os = "linux")]
@@ -797,6 +827,36 @@ pub fn get_default_settings() -> AppSettings {
             current_binding: "escape".to_string(),
         },
     );
+    #[cfg(target_os = "windows")]
+    let default_translate = "control_right+shift_right";
+    #[cfg(not(target_os = "windows"))]
+    let default_translate = "";
+
+    #[cfg(target_os = "windows")]
+    let default_ask_ai = "control_right+space";
+    #[cfg(not(target_os = "windows"))]
+    let default_ask_ai = "";
+
+    bindings.insert(
+        "translate".to_string(),
+        ShortcutBinding {
+            id: "translate".to_string(),
+            name: "Translate".to_string(),
+            description: "Translates your speech into the target language.".to_string(),
+            default_binding: default_translate.to_string(),
+            current_binding: default_translate.to_string(),
+        },
+    );
+    bindings.insert(
+        "ask_ai".to_string(),
+        ShortcutBinding {
+            id: "ask_ai".to_string(),
+            name: "Ask AI".to_string(),
+            description: "Sends your speech to AI and types the answer.".to_string(),
+            default_binding: default_ask_ai.to_string(),
+            current_binding: default_ask_ai.to_string(),
+        },
+    );
 
     AppSettings {
         settings_schema_version: default_settings_schema_version(),
@@ -817,6 +877,8 @@ pub fn get_default_settings() -> AppSettings {
         clamshell_microphone: None,
         selected_output_device: None,
         translate_to_english: false,
+        translate_target_language: default_translate_target_language(),
+        translate_using_llm: default_translate_using_llm(),
         selected_language: "auto".to_string(),
         overlay_position: default_overlay_position(),
         debug_mode: false,
@@ -825,6 +887,7 @@ pub fn get_default_settings() -> AppSettings {
         model_unload_timeout: ModelUnloadTimeout::default(),
         word_correction_threshold: default_word_correction_threshold(),
         history_limit: default_history_limit(),
+        audio_history_limit: default_audio_history_limit(),
         recording_retention_period: default_recording_retention_period(),
         paste_method: PasteMethod::default(),
         clipboard_handling: ClipboardHandling::default(),
@@ -854,6 +917,8 @@ pub fn get_default_settings() -> AppSettings {
         extra_recording_buffer_ms: 0,
         vad_enabled: default_vad_enabled(),
         overlay_style: default_overlay_style(),
+        microphone_gain_enabled: default_microphone_gain_enabled(),
+        microphone_gain_value: default_microphone_gain_value(),
     }
 }
 
@@ -1004,6 +1069,144 @@ fn apply_settings_migrations(
             settings.transcribe_accelerator = TranscribeAcceleratorSetting::Auto;
             settings.transcribe_gpu_device = default_transcribe_gpu_device();
         }
+        settings.settings_schema_version = 1;
+        updated = true;
+    }
+
+    if stored_schema_version < 2 {
+        #[cfg(target_os = "windows")]
+        {
+            if let Some(transcribe) = settings.bindings.get_mut("transcribe") {
+                if transcribe.current_binding == "ctrl+space" {
+                    transcribe.current_binding = "alt".to_string();
+                }
+                if transcribe.default_binding == "ctrl+space" {
+                    transcribe.default_binding = "alt".to_string();
+                }
+            }
+            if let Some(translate) = settings.bindings.get_mut("translate") {
+                if translate.current_binding.is_empty() {
+                    translate.current_binding = "alt+shift".to_string();
+                }
+                if translate.default_binding.is_empty() {
+                    translate.default_binding = "alt+shift".to_string();
+                }
+            }
+            if let Some(ask_ai) = settings.bindings.get_mut("ask_ai") {
+                if ask_ai.current_binding.is_empty() || ask_ai.current_binding == "ctrl+space" {
+                    ask_ai.current_binding = "alt+space".to_string();
+                }
+                if ask_ai.default_binding.is_empty() || ask_ai.default_binding == "ctrl+space" {
+                    ask_ai.default_binding = "alt+space".to_string();
+                }
+            }
+        }
+        settings.settings_schema_version = 2;
+        updated = true;
+    }
+
+    if stored_schema_version < 3 {
+        #[cfg(target_os = "windows")]
+        {
+            if let Some(transcribe) = settings.bindings.get_mut("transcribe") {
+                if transcribe.current_binding == "ctrl+space" || transcribe.current_binding == "alt"
+                {
+                    transcribe.current_binding = "ctrl".to_string();
+                }
+                if transcribe.default_binding == "ctrl+space" || transcribe.default_binding == "alt"
+                {
+                    transcribe.default_binding = "ctrl".to_string();
+                }
+            }
+            if let Some(translate) = settings.bindings.get_mut("translate") {
+                if translate.current_binding.is_empty() || translate.current_binding == "alt+shift"
+                {
+                    translate.current_binding = "ctrl+shift".to_string();
+                }
+                if translate.default_binding.is_empty() || translate.default_binding == "alt+shift"
+                {
+                    translate.default_binding = "ctrl+shift".to_string();
+                }
+            }
+            if let Some(ask_ai) = settings.bindings.get_mut("ask_ai") {
+                if ask_ai.current_binding.is_empty()
+                    || ask_ai.current_binding == "ctrl+space"
+                    || ask_ai.current_binding == "alt+space"
+                {
+                    ask_ai.current_binding = "ctrl+space".to_string();
+                }
+                if ask_ai.default_binding.is_empty()
+                    || ask_ai.default_binding == "ctrl+space"
+                    || ask_ai.default_binding == "alt+space"
+                {
+                    ask_ai.default_binding = "ctrl+space".to_string();
+                }
+            }
+        }
+        settings.settings_schema_version = 3;
+        updated = true;
+    }
+
+    if stored_schema_version < 4 {
+        #[cfg(target_os = "windows")]
+        {
+            if let Some(transcribe) = settings.bindings.get_mut("transcribe") {
+                if transcribe.current_binding == "ctrl+space"
+                    || transcribe.current_binding == "alt"
+                    || transcribe.current_binding == "ctrl"
+                {
+                    transcribe.current_binding = "control_right".to_string();
+                }
+                if transcribe.default_binding == "ctrl+space"
+                    || transcribe.default_binding == "alt"
+                    || transcribe.default_binding == "ctrl"
+                {
+                    transcribe.default_binding = "control_right".to_string();
+                }
+            }
+            if let Some(translate) = settings.bindings.get_mut("translate") {
+                if translate.current_binding.is_empty()
+                    || translate.current_binding == "alt+shift"
+                    || translate.current_binding == "ctrl+shift"
+                {
+                    translate.current_binding = "control_right+shift_right".to_string();
+                }
+                if translate.default_binding.is_empty()
+                    || translate.default_binding == "alt+shift"
+                    || translate.default_binding == "ctrl+shift"
+                {
+                    translate.default_binding = "control_right+shift_right".to_string();
+                }
+            }
+            if let Some(ask_ai) = settings.bindings.get_mut("ask_ai") {
+                if ask_ai.current_binding.is_empty()
+                    || ask_ai.current_binding == "ctrl+space"
+                    || ask_ai.current_binding == "alt+space"
+                {
+                    ask_ai.current_binding = "control_right+space".to_string();
+                }
+                if ask_ai.default_binding.is_empty()
+                    || ask_ai.default_binding == "ctrl+space"
+                    || ask_ai.default_binding == "alt+space"
+                {
+                    ask_ai.default_binding = "control_right+space".to_string();
+                }
+            }
+        }
+        settings.settings_schema_version = 4;
+        updated = true;
+    }
+
+    if stored_schema_version < 5 {
+        #[cfg(target_os = "windows")]
+        {
+            if let Some(post_process) = settings.bindings.get_mut("transcribe_with_post_process") {
+                if post_process.current_binding == "ctrl+shift+space" {
+                    post_process.current_binding = "control_right+'".to_string();
+                }
+                post_process.default_binding = "control_right+'".to_string();
+            }
+        }
         settings.settings_schema_version = CURRENT_SETTINGS_SCHEMA_VERSION;
         updated = true;
     }
@@ -1054,6 +1257,11 @@ pub fn get_stored_binding(app: &AppHandle, id: &str) -> ShortcutBinding {
 pub fn get_history_limit(app: &AppHandle) -> usize {
     let settings = get_settings(app);
     settings.history_limit
+}
+
+pub fn get_audio_history_limit(app: &AppHandle) -> usize {
+    let settings = get_settings(app);
+    settings.audio_history_limit
 }
 
 pub fn get_recording_retention_period(app: &AppHandle) -> RecordingRetentionPeriod {

@@ -1,13 +1,26 @@
-import { DEFAULT_MAIN_PROMPT, DEFAULT_MODES, DEFAULT_DICTIONARIES } from "./defaults";
+import {
+  DEFAULT_MAIN_PROMPT,
+  DEFAULT_MODES,
+  DEFAULT_DICTIONARIES,
+} from "./defaults";
 
 export interface PromptPluginSettings {
   activeMainPrompt: string;
-  customMainPrompts: Record<string, { name: string; description: string; content: string }>;
+  customMainPrompts: Record<
+    string,
+    { name: string; description: string; content: string }
+  >;
   activeMode: string;
   activeDictionaries: string[];
   customRules: string;
-  customModes: Record<string, { name: string; description: string; content: string }>;
-  customDictionaries: Record<string, { name: string; description: string; content: string }>;
+  customModes: Record<
+    string,
+    { name: string; description: string; content: string }
+  >;
+  customDictionaries: Record<
+    string,
+    { name: string; description: string; content: string }
+  >;
 }
 
 const STORAGE_KEY = "openless_prompt_plugin_settings";
@@ -39,12 +52,13 @@ export const savePromptSettings = (settings: PromptPluginSettings) => {
 };
 
 export const getAvailableMainPrompts = (
-  settings: PromptPluginSettings
+  settings: PromptPluginSettings,
 ): Record<string, { name: string; description: string; content: string }> => {
   return {
     default: {
       name: "OpenLess 核心提示詞",
-      description: "系統預設的核心身份定義與規則，確保語音修飾的極致準確性與原意保留。",
+      description:
+        "系統預設的核心身份定義與規則，確保語音修飾的極致準確性與原意保留。",
       content: DEFAULT_MAIN_PROMPT,
     },
     ...settings.customMainPrompts,
@@ -62,12 +76,16 @@ export const getAvailableDictionaries = (settings: PromptPluginSettings) => {
 /**
  * 根據設定動態組裝最終的 Prompt
  */
-export const buildPrompt = (settings: PromptPluginSettings, customWords: string[] = []): string => {
+export const buildPrompt = (
+  settings: PromptPluginSettings,
+  customWords: string[] = [],
+): string => {
   const parts: string[] = [];
 
   // 1. 主 Prompt
   const mainPrompts = getAvailableMainPrompts(settings);
-  const activeMain = mainPrompts[settings.activeMainPrompt] || mainPrompts["default"];
+  const activeMain =
+    mainPrompts[settings.activeMainPrompt] || mainPrompts["default"];
   parts.push(activeMain.content);
 
   // 2. 修飾模式
@@ -116,7 +134,8 @@ ${settings.customRules.trim()}`);
   }
 
   // 6. 語音辨識糾錯對照表 (VocabPage 建立的後綴)
-  const correctionsSuffix = localStorage.getItem("yukey_prompt_corrections_suffix") || "";
+  const correctionsSuffix =
+    localStorage.getItem("yukey_prompt_corrections_suffix") || "";
   if (correctionsSuffix) {
     parts.push(correctionsSuffix.trim());
   }

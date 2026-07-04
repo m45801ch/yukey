@@ -27,7 +27,10 @@ import dictEducation from "./dictionary/education.md?raw";
 
 export const DEFAULT_MAIN_PROMPT = mainPrompt;
 
-export const DEFAULT_MODES: Record<string, { name: string; description: string; content: string }> = {
+export const DEFAULT_MODES: Record<
+  string,
+  { name: string; description: string; content: string }
+> = {
   general: {
     name: "一般",
     description: "適用於日常對話與記錄，修正明顯口誤並保持口語自然。",
@@ -55,15 +58,20 @@ export const DEFAULT_MODES: Record<string, { name: string; description: string; 
   },
 };
 
-export const DEFAULT_DICTIONARIES: Record<string, { name: string; description: string; content: string }> = {
+export const DEFAULT_DICTIONARIES: Record<
+  string,
+  { name: string; description: string; content: string }
+> = {
   ai: {
     name: "AI 人工智慧",
-    description: "導入人工智慧、深度學習、大語言模型 (LLM) 等相關專業領域術語與英文縮寫。",
+    description:
+      "導入人工智慧、深度學習、大語言模型 (LLM) 等相關專業領域術語與英文縮寫。",
     content: dictAi,
   },
   coding: {
     name: "程式開發",
-    description: "導入前端、後端、API、Git 版本控制、軟體部署與測試等資工專業詞彙。",
+    description:
+      "導入前端、後端、API、Git 版本控制、軟體部署與測試等資工專業詞彙。",
     content: dictCoding,
   },
   medical: {
@@ -78,7 +86,8 @@ export const DEFAULT_DICTIONARIES: Record<string, { name: string; description: s
   },
   engineering: {
     name: "工程專案",
-    description: "導入產品研發、結構設計、工程藍圖、物料製造與專案管理專業術語。",
+    description:
+      "導入產品研發、結構設計、工程藍圖、物料製造與專案管理專業術語。",
     content: dictEngineering,
   },
   education: {

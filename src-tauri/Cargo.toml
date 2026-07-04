@@ -1,11 +1,11 @@
 [package]
-name = "handy"
-version = "0.9.0"
-description = "Handy"
+name = "yukey"
+version = "0.2.0"
+description = "yukey"
 authors = ["cjpais"]
 edition = "2021"
 license = "MIT"
-default-run = "handy"
+default-run = "yukey"
 
 [profile.dev]
 incremental = true # Compile your binary in smaller steps.
@@ -126,10 +126,7 @@ winreg = "0.55"
 # signtool verify entirely. CI pins -DGGML_NATIVE=OFF (see build.yml) so the
 # static build targets a portable ARM baseline, not the build runner's CPU.
 [target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
-transcribe-cpp = { version = "0.1.0", default-features = false, features = [
-  "dynamic-backends",
-  "vulkan",
-] }
+transcribe-cpp = { version = "0.1.0", default-features = false }
 
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies]
 transcribe-cpp = { version = "0.1.0", default-features = false }

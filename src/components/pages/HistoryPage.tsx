@@ -15,15 +15,17 @@ import {
   Search,
   Star,
   Trash2,
+  Download,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { ask } from "@tauri-apps/plugin-dialog";
+import { ask, save } from "@tauri-apps/plugin-dialog";
 import {
   commands,
   events,
   type HistoryEntry,
   type HistoryUpdatePayload,
+  type HistoryStats,
 } from "@/bindings";
 import { useOsType } from "@/hooks/useOsType";
 import { formatDateTime } from "@/utils/dateFormat";
@@ -40,17 +42,25 @@ export const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [stats, setStats] = useState<{ limit: number; count: number } | null>(
-    null,
-  );
-  const [filter, setFilter] = useState<"all" | "saved">("all");
+  const [historyCopyTargets, setHistoryCopyTargets] = useState<Record<number, "raw" | "polished">>({});
+  const [stats, setStats] = useState<HistoryStats | null>(null);
+  const [filter, setFilter] = useState<"all" | "saved" | "audio">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const selectedEntry = useMemo(() => {
+    return entries.find((e) => e.id === selectedId) || null;
+  }, [entries, selectedId]);
+
+  const currentCopyTarget = selectedId !== null ? historyCopyTargets[selectedId] : undefined;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const filteredEntries = useMemo(() => {
     return entries.filter((e) => {
-      const matchesFilter = filter === "all" || e.saved;
+      const matchesFilter =
+        filter === "all" ||
+        (filter === "saved" && e.saved) ||
+        (filter === "audio" && e.file_name && e.file_name.trim().length > 0);
       const matchesSearch =
         !searchQuery.trim() ||
         e.transcription_text
@@ -177,9 +187,7 @@ export const HistoryPage: React.FC = () => {
     };
   }, []);
 
-  const selectedEntry = useMemo(() => {
-    return entries.find((e) => e.id === selectedId) || null;
-  }, [entries, selectedId]);
+
 
   const toggleSaved = async (id: number) => {
     setEntries((prev) =>
@@ -327,6 +335,33 @@ export const HistoryPage: React.FC = () => {
     }
   };
 
+  const handleDownloadAudio = async (fileName: string) => {
+    if (!fileName) return;
+    try {
+      const savePath = await save({
+        filters: [
+          {
+            name: "Audio Files",
+            extensions: ["wav"],
+          },
+        ],
+        defaultPath: fileName,
+      });
+
+      if (savePath) {
+        const result = await commands.exportAudioFile(fileName, savePath);
+        if (result.status === "ok") {
+          toast.success("錄音檔下載成功！");
+        } else {
+          toast.error("下載錄音檔失敗：" + String(result.error));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to download audio:", error);
+      toast.error("下載錄音檔發生錯誤");
+    }
+  };
+
   return (
     <div className="w-full h-[calc(100vh-140px)] flex flex-col md:flex-row gap-4 select-none text-text">
       {/* 左欄：列表 */}
@@ -351,7 +386,7 @@ export const HistoryPage: React.FC = () => {
           <div className="flex gap-1.5 p-0.5 bg-mid-gray/10 rounded-lg text-[11px] font-medium shrink-0">
             <button
               onClick={() => setFilter("all")}
-              className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center ${
+              className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer text-center ${
                 filter === "all"
                   ? "bg-logo-primary text-white font-semibold shadow-sm"
                   : "text-mid-gray hover:text-text"
@@ -360,8 +395,18 @@ export const HistoryPage: React.FC = () => {
               全部紀錄
             </button>
             <button
+              onClick={() => setFilter("audio")}
+              className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer text-center ${
+                filter === "audio"
+                  ? "bg-logo-primary text-white font-semibold shadow-sm"
+                  : "text-mid-gray hover:text-text"
+              }`}
+            >
+              有語音檔
+            </button>
+            <button
               onClick={() => setFilter("saved")}
-              className={`flex-1 py-1 rounded-md transition-all cursor-pointer text-center ${
+              className={`flex-1 py-1.5 rounded-md transition-all cursor-pointer text-center ${
                 filter === "saved"
                   ? "bg-logo-primary text-white font-semibold shadow-sm"
                   : "text-mid-gray hover:text-text"
@@ -424,9 +469,30 @@ export const HistoryPage: React.FC = () => {
               紀錄詳情
             </h3>
             {stats && (
-              <span className="text-[10px] text-mid-gray bg-mid-gray/10 px-2 py-0.5 rounded-full select-none">
-                儲存筆數：{stats.count} / {stats.limit} 筆
-              </span>
+              <div className="flex gap-2 select-none">
+                <span
+                  onClick={() => setFilter("all")}
+                  className={`text-[10px] px-2 py-0.5 rounded-full cursor-pointer transition-all ${
+                    filter === "all"
+                      ? "bg-logo-primary text-white font-semibold shadow-sm"
+                      : "bg-mid-gray/10 text-mid-gray hover:bg-logo-primary/10 hover:text-logo-primary"
+                  }`}
+                  title="文字歷史紀錄筆數與上限（點擊篩選全部文字紀錄）"
+                >
+                  文字：{stats.text_count} / {stats.text_limit} 筆
+                </span>
+                <span
+                  onClick={() => setFilter("audio")}
+                  className={`text-[10px] px-2 py-0.5 rounded-full cursor-pointer transition-all ${
+                    filter === "audio"
+                      ? "bg-logo-primary text-white font-semibold shadow-sm"
+                      : "bg-mid-gray/10 text-mid-gray hover:bg-logo-primary/10 hover:text-logo-primary"
+                  }`}
+                  title="已保留錄音檔筆數與上限（點擊篩選含有錄音檔的紀錄）"
+                >
+                  語音：{stats.audio_count} / {stats.audio_limit} 檔
+                </span>
+              </div>
             )}
           </div>
           {filteredEntries.length > 0 && (
@@ -461,7 +527,7 @@ export const HistoryPage: React.FC = () => {
           <Search className="absolute left-3 top-2.5 w-4 h-4 text-mid-gray/60" />
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 px-2 py-1">
           {selectedEntry ? (
             <div className="space-y-6 flex flex-col h-full justify-between">
               <div className="space-y-4">
@@ -480,10 +546,22 @@ export const HistoryPage: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() =>
-                        copyToClipboard(selectedEntry.transcription_text)
+                        copyToClipboard(
+                          currentCopyTarget === "polished" && selectedEntry.post_processed_text
+                            ? selectedEntry.post_processed_text
+                            : selectedEntry.transcription_text
+                        )
                       }
                       className="p-2 rounded-lg hover:bg-mid-gray/10 text-mid-gray hover:text-logo-primary transition-colors cursor-pointer"
-                      title="複製文字"
+                      title={
+                        selectedEntry.post_processed_text
+                          ? currentCopyTarget === "polished"
+                            ? "複製選取的 AI 潤色文字"
+                            : currentCopyTarget === "raw"
+                              ? "複製選取的原始轉錄文字"
+                              : "複製文字 (預設為原始轉錄)"
+                          : "複製文字"
+                      }
                     >
                       <Copy className="w-4.5 h-4.5" />
                     </button>
@@ -511,28 +589,92 @@ export const HistoryPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2 text-start">
-                  <h4 className="text-xs font-semibold text-mid-gray uppercase tracking-wider">
-                    原始轉錄文字 (Raw ASR)
-                  </h4>
-                  <div className="p-4 rounded-xl bg-mid-gray/5 border border-mid-gray/10 text-sm leading-relaxed select-text cursor-text whitespace-pre-wrap break-words">
+                <div
+                  className={`space-y-2 text-start ${selectedEntry.post_processed_text ? "cursor-pointer group" : ""}`}
+                  onClick={() => {
+                    if (selectedEntry.post_processed_text) {
+                      setHistoryCopyTargets((prev) => ({
+                        ...prev,
+                        [selectedEntry.id]: "raw",
+                      }));
+                      copyToClipboard(selectedEntry.transcription_text);
+                    }
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-semibold text-mid-gray uppercase tracking-wider">
+                      原始轉錄文字 (Raw ASR)
+                    </h4>
+                    {selectedEntry.post_processed_text && (
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${
+                        currentCopyTarget === "raw"
+                          ? "bg-logo-primary text-white font-medium"
+                          : "bg-mid-gray/10 text-mid-gray group-hover:bg-logo-primary/10 group-hover:text-logo-primary"
+                      }`}>
+                        {currentCopyTarget === "raw" ? "已選取並複製" : "點擊選取並複製"}
+                      </span>
+                    )}
+                  </div>
+                  <div className={`p-4 mx-1 rounded-xl border transition-all text-sm leading-relaxed select-text cursor-text whitespace-pre-wrap break-words min-w-0 glow-card-3d ${
+                    selectedEntry.post_processed_text
+                      ? currentCopyTarget === "raw"
+                        ? "bg-logo-primary/5 border-logo-primary ring-1 ring-logo-primary/30"
+                        : "bg-mid-gray/5 border-mid-gray/10 hover:border-logo-primary/30"
+                      : "bg-mid-gray/5 border-mid-gray/10"
+                  }`}>
                     {selectedEntry.transcription_text}
                   </div>
                 </div>
 
                 {selectedEntry.post_processed_text && (
-                  <div className="space-y-2 text-start">
-                    <h4 className="text-xs font-semibold text-logo-primary uppercase tracking-wider">
-                      AI 潤色修飾文字 (Polished Text)
-                    </h4>
-                    <div className="p-4 rounded-xl bg-logo-primary/5 border border-logo-primary/10 text-sm leading-relaxed select-text cursor-text whitespace-pre-wrap break-words font-medium">
+                  <div
+                    className="space-y-2 text-start cursor-pointer group"
+                    onClick={() => {
+                      setHistoryCopyTargets((prev) => ({
+                        ...prev,
+                        [selectedEntry.id]: "polished",
+                      }));
+                      copyToClipboard(selectedEntry.post_processed_text!);
+                    }}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-semibold text-logo-primary uppercase tracking-wider">
+                        AI 潤色修飾文字 (Polished Text)
+                      </h4>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${
+                        currentCopyTarget === "polished"
+                          ? "bg-logo-primary text-white font-medium"
+                          : "bg-mid-gray/10 text-mid-gray group-hover:bg-logo-primary/10 group-hover:text-logo-primary"
+                      }`}>
+                        {currentCopyTarget === "polished" ? "已選取並複製" : "點擊選取並複製"}
+                      </span>
+                    </div>
+                    <div className={`p-4 mx-1 rounded-xl border transition-all text-sm leading-relaxed select-text cursor-text whitespace-pre-wrap break-words font-medium min-w-0 glow-card-3d ${
+                      currentCopyTarget === "polished"
+                        ? "bg-logo-primary/10 border-logo-primary ring-1 ring-logo-primary/30"
+                        : "bg-logo-primary/5 border-logo-primary/10 hover:border-logo-primary/30"
+                    }`}>
                       {selectedEntry.post_processed_text}
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="pt-4 border-t border-mid-gray/20">
+              <div className="pt-4 border-t border-mid-gray/20 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-mid-gray">語音播放</span>
+                  {selectedEntry.file_name && (
+                    <Button
+                      onClick={() => handleDownloadAudio(selectedEntry.file_name)}
+                      variant="secondary"
+                      size="sm"
+                      className="flex items-center gap-1 text-[11px]"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>下載錄音檔</span>
+                    </Button>
+                  )}
+                </div>
                 <AudioPlayer
                   onLoadRequest={() => getAudioUrl(selectedEntry.file_name)}
                   className="w-full"

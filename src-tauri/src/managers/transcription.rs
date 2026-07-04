@@ -877,10 +877,13 @@ impl TranscriptionManager {
         let effective_language =
             effective_language_for_model(&settings, self.model_manager.as_ref(), &model_id);
         let run_plan = transcribe_cpp_run_plan(
+            "transcribe",
             settings.translate_to_english,
+            &settings.translate_target_language,
             &effective_language,
             &languages,
             supports_translate,
+            settings.translate_using_llm,
         );
         let run_options = RunOptions {
             task: run_plan.task,
@@ -1091,7 +1094,7 @@ impl TranscriptionManager {
         .emit(&self.app_handle);
     }
 
-    pub fn transcribe(&self, audio: Vec<f32>) -> Result<String> {
+    pub fn transcribe(&self, audio: Vec<f32>, binding_id: &str) -> Result<String> {
         #[cfg(debug_assertions)]
         if std::env::var("HANDY_FORCE_TRANSCRIPTION_FAILURE").is_ok() {
             return Err(anyhow::anyhow!(
@@ -1220,10 +1223,13 @@ impl TranscriptionManager {
                             };
 
                         let run_plan = transcribe_cpp_run_plan(
+                            binding_id,
                             settings.translate_to_english,
+                            &settings.translate_target_language,
                             &validated_language,
                             &model_languages,
                             model_supports_translate,
+                            settings.translate_using_llm,
                         );
 
                         let run_options = RunOptions {
@@ -1570,10 +1576,13 @@ struct TranscribeCppRunPlan {
 /// Build the transcribe-cpp language/task options shared by batch and live
 /// streaming paths.
 fn transcribe_cpp_run_plan(
-    translate_to_english: bool,
+    binding_id: &str,
+    _translate_to_english: bool,
+    _translate_target_language: &str,
     effective_language: &str,
     model_languages: &[String],
     model_supports_translate: bool,
+    translate_using_llm: bool,
 ) -> TranscribeCppRunPlan {
     let requested_language = match effective_language {
         "auto" => None,
@@ -1584,11 +1593,8 @@ fn transcribe_cpp_run_plan(
     // UNSUPPORTED_LANGUAGE. Language-agnostic models report an empty list, so
     // they always stay on auto.
     let language = requested_language.filter(|lang| model_languages.iter().any(|l| l == lang));
-    let (task, target_language) = cpp_translation_task(
-        translate_to_english,
-        model_supports_translate,
-        language.as_deref(),
-    );
+    let (task, target_language) =
+        cpp_translation_task(binding_id, model_supports_translate, translate_using_llm);
 
     TranscribeCppRunPlan {
         task,
@@ -1619,25 +1625,19 @@ fn post_process_transcription_text(
     )
 }
 
-/// Decide a transcribe-cpp run's task + translation target from settings.
-///
-/// "Translate to English" only fires where the model advertises translation.
-/// Unlike transcribe-rs (which forces the target to English itself when its
-/// `translate` flag is set), transcribe-cpp requires an explicit
-/// `target_language`: a null target defaults to the *source*, so a non-English
-/// source silently becomes e.g. es→es and Canary rejects the unadvertised pair.
-/// An English source is skipped entirely — en→en is not a real translation, and
-/// it's reachable by default since auto-detect-less models coerce intent to "en".
-///
-/// Returns `(task, target_language)` ready to drop into `RunOptions`.
 fn cpp_translation_task(
-    translate_to_english: bool,
+    binding_id: &str,
     model_supports_translate: bool,
-    source_language: Option<&str>,
+    translate_using_llm: bool,
 ) -> (Task, Option<String>) {
-    let translate_to_en =
-        translate_to_english && model_supports_translate && source_language != Some("en");
-    if translate_to_en {
+    let is_translation_requested = binding_id == "translate";
+    if !is_translation_requested {
+        return (Task::Transcribe, None);
+    }
+
+    let should_translate_locally = !translate_using_llm && model_supports_translate;
+
+    if should_translate_locally {
         (Task::Translate, Some("en".to_string()))
     } else {
         (Task::Transcribe, None)
@@ -1842,7 +1842,7 @@ fn cached_gpu_devices() -> &'static [GpuDeviceOption] {
     // `total_vram_mb` is the backend-reported capacity, 0 when unreported (some
     // Metal/Vulkan drivers).
     GPU_DEVICES.get_or_init(|| {
-        transcribe_cpp::devices()
+        let mut devs: Vec<GpuDeviceOption> = transcribe_cpp::devices()
             .into_iter()
             .filter(|d| d.kind != "cpu" && d.kind != "accel")
             .map(|d| GpuDeviceOption {
@@ -1854,7 +1854,20 @@ fn cached_gpu_devices() -> &'static [GpuDeviceOption] {
                 },
                 total_vram_mb: (d.memory_total / (1024 * 1024)) as usize,
             })
-            .collect()
+            .collect();
+
+        // 由於 Windows MSBuild 中文路徑限制，編譯時關閉了 vulkan 特性，
+        // 為了在運行時讓預先編譯的 Vulkan DLL (ggml-vulkan.dll) 能順利被調用進行硬體加速，
+        // 在此於列表為空時，手動補齊一個預設的 Vulkan 裝置選項。
+        if devs.is_empty() {
+            devs.push(GpuDeviceOption {
+                id: 0,
+                name: "Vulkan GPU 加速 (預設顯示卡)".to_string(),
+                total_vram_mb: 4096,
+            });
+        }
+
+        devs
     })
 }
 
@@ -1893,7 +1906,15 @@ mod tests {
 
     #[test]
     fn transcribe_cpp_run_plan_maps_chinese_variants() {
-        let plan = transcribe_cpp_run_plan(false, "zh-Hant", &languages(&["zh"]), true);
+        let plan = transcribe_cpp_run_plan(
+            "transcribe",
+            false,
+            "en",
+            "zh-Hant",
+            &languages(&["zh"]),
+            true,
+            false,
+        );
 
         assert!(matches!(plan.task, Task::Transcribe));
         assert_eq!(plan.language.as_deref(), Some("zh"));
@@ -1902,7 +1923,15 @@ mod tests {
 
     #[test]
     fn transcribe_cpp_run_plan_skips_english_translation() {
-        let plan = transcribe_cpp_run_plan(true, "en", &languages(&["en", "es"]), true);
+        let plan = transcribe_cpp_run_plan(
+            "transcribe",
+            true,
+            "en",
+            "en",
+            &languages(&["en", "es"]),
+            true,
+            false,
+        );
 
         assert!(matches!(plan.task, Task::Transcribe));
         assert_eq!(plan.language.as_deref(), Some("en"));
@@ -1911,7 +1940,15 @@ mod tests {
 
     #[test]
     fn transcribe_cpp_run_plan_translates_supported_non_english() {
-        let plan = transcribe_cpp_run_plan(true, "es", &languages(&["en", "es"]), true);
+        let plan = transcribe_cpp_run_plan(
+            "transcribe",
+            true,
+            "en",
+            "es",
+            &languages(&["en", "es"]),
+            true,
+            false,
+        );
 
         assert!(matches!(plan.task, Task::Translate));
         assert_eq!(plan.language.as_deref(), Some("es"));
@@ -1920,7 +1957,15 @@ mod tests {
 
     #[test]
     fn transcribe_cpp_run_plan_requires_model_translation_support() {
-        let plan = transcribe_cpp_run_plan(true, "es", &languages(&["en", "es"]), false);
+        let plan = transcribe_cpp_run_plan(
+            "transcribe",
+            true,
+            "en",
+            "es",
+            &languages(&["en", "es"]),
+            false,
+            false,
+        );
 
         assert!(matches!(plan.task, Task::Transcribe));
         assert_eq!(plan.language.as_deref(), Some("es"));

@@ -1,6 +1,7 @@
 # 醫療保健與醫學專有名詞
 
 ## 臨床診斷與檢查 (Clinical Diagnosis & Exams)
+
 - **診斷 (Diagnosis)**: 判斷病症
 - **處方 (Prescription)**: 醫師開立的藥單
 - **症狀 (Symptom)**: 疾病發生的表徵 (咳嗽、發燒、疼痛)
@@ -11,6 +12,7 @@
 - **血液檢查 (Blood Test)**: 血常規、生化指標、血糖、膽固醇
 
 ## 常見疾病與生理學 (Common Diseases & Physiology)
+
 - **慢性病 (Chronic Disease)**: 高血壓、糖尿病、高血脂 (三高)
 - **傳染病 (Infectious Disease)**: 流感、新冠肺炎 (COVID-19)、登革熱
 - **免疫系統 (Immune System)**: 過敏、自體免疫疾病、免疫低下
@@ -19,6 +21,7 @@
 - **代謝異常 (Metabolic Disorder)**: 痛風、甲狀腺亢進/低下
 
 ## 醫療科別 (Medical Departments)
+
 - **家醫科 (Family Medicine)**: 家庭醫學科
 - **內科 (Internal Medicine)**: 心臟內科、胃腸肝膽科、胸腔內科、腎臟內科
 - **外科 (Surgery)**: 一般外科、骨科、整形外科、神經外科
@@ -29,6 +32,7 @@
 - **精神科/身心科 (Psychiatry)**: 憂鬱症、焦慮症、睡眠障礙
 
 ## 預防醫學與處置 (Preventive Medicine & Treatment)
+
 - **疫苗接種 (Vaccination)**: 預防性注射
 - **復健治療 (Rehabilitation)**: 物理治療 (PT)、職能治療 (OT)、語言治療
 - **門診 (Outpatient Department / OPD)**: 不需住院的診療

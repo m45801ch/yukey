@@ -354,7 +354,12 @@ impl AudioRecordingManager {
 
         let mut recorder_opt = self.recorder.lock().unwrap();
         if let Some(rec) = recorder_opt.as_mut() {
-            rec.open(selected_device)
+            let gain = if settings.microphone_gain_enabled {
+                settings.microphone_gain_value
+            } else {
+                1.0
+            };
+            rec.open(selected_device, gain)
                 .map_err(|e| anyhow::anyhow!("Failed to open recorder: {}", e))?;
         }
 
@@ -453,6 +458,17 @@ impl AudioRecordingManager {
             Err("Recorder not available".to_string())
         } else {
             Err("Already recording".to_string())
+        }
+    }
+
+    pub fn switch_binding_id(&self, new_binding_id: &str) {
+        let mut state = self.state.lock().unwrap();
+        if let RecordingState::Recording { ref mut binding_id } = *state {
+            debug!(
+                "AudioRecordingManager: switching binding ID from {} to {}",
+                binding_id, new_binding_id
+            );
+            *binding_id = new_binding_id.to_string();
         }
     }
 

@@ -101,6 +101,8 @@ pub struct BindingResponse {
     success: bool,
     binding: Option<ShortcutBinding>,
     error: Option<String>,
+    conflict_id: Option<String>,
+    conflict_name: Option<String>,
 }
 
 #[tauri::command]
@@ -109,6 +111,7 @@ pub fn change_binding(
     app: AppHandle,
     id: String,
     binding: String,
+    force: Option<bool>,
 ) -> Result<BindingResponse, String> {
     // Reject empty bindings — every shortcut should have a value
     if binding.trim().is_empty() {
@@ -116,6 +119,45 @@ pub fn change_binding(
     }
 
     let mut settings = settings::get_settings(&app);
+
+    // Normalize the new binding to detect conflicts
+    let normalized_new = binding.trim().to_lowercase();
+
+    // Check for conflicts with other shortcuts
+    let mut conflict_info = None;
+    for (other_id, other_binding) in &settings.bindings {
+        if other_id != &id && other_binding.current_binding.trim().to_lowercase() == normalized_new
+        {
+            conflict_info = Some((other_id.clone(), other_binding.name.clone()));
+            break;
+        }
+    }
+
+    if let Some((conf_id, conf_name)) = conflict_info {
+        if force != Some(true) {
+            return Ok(BindingResponse {
+                success: false,
+                binding: None,
+                error: Some("conflict".to_string()),
+                conflict_id: Some(conf_id),
+                conflict_name: Some(conf_name),
+            });
+        } else {
+            // Force overwrite: clear the conflicting shortcut
+            if let Some(mut conf_binding) = settings.bindings.get(&conf_id).cloned() {
+                if conf_id != "cancel" {
+                    if let Err(e) = unregister_shortcut(&app, conf_binding.clone()) {
+                        warn!(
+                            "Failed to unregister conflicting shortcut {}: {}",
+                            conf_id, e
+                        );
+                    }
+                }
+                conf_binding.current_binding = "".to_string();
+                settings.bindings.insert(conf_id.clone(), conf_binding);
+            }
+        }
+    }
 
     // Get the binding to modify, or create it from defaults if it doesn't exist
     let binding_to_modify = match settings.bindings.get(&id) {
@@ -138,6 +180,8 @@ pub fn change_binding(
                         success: false,
                         binding: None,
                         error: Some(error_msg),
+                        conflict_id: None,
+                        conflict_name: None,
                     });
                 }
             }
@@ -155,6 +199,8 @@ pub fn change_binding(
                 success: true,
                 binding: Some(b.clone()),
                 error: None,
+                conflict_id: None,
+                conflict_name: None,
             });
         }
     }
@@ -184,6 +230,8 @@ pub fn change_binding(
             success: false,
             binding: None,
             error: Some(error_msg),
+            conflict_id: None,
+            conflict_name: None,
         });
     }
 
@@ -198,6 +246,8 @@ pub fn change_binding(
         success: true,
         binding: Some(updated_binding),
         error: None,
+        conflict_id: None,
+        conflict_name: None,
     })
 }
 
@@ -205,7 +255,7 @@ pub fn change_binding(
 #[specta::specta]
 pub fn reset_binding(app: AppHandle, id: String) -> Result<BindingResponse, String> {
     let binding = settings::get_stored_binding(&app, &id);
-    change_binding(app, id, binding.default_binding)
+    change_binding(app, id, binding.default_binding, Some(true))
 }
 
 /// Temporarily unregister a binding while the user is editing it in the UI.
@@ -519,6 +569,27 @@ pub fn change_sound_theme_setting(app: AppHandle, theme: String) -> Result<(), S
 pub fn change_translate_to_english_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     settings.translate_to_english = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_translate_using_llm_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.translate_using_llm = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_translate_target_language_setting(
+    app: AppHandle,
+    target: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.translate_target_language = target;
     settings::write_settings(&app, settings);
     Ok(())
 }

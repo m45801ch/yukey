@@ -1,8 +1,9 @@
+/* eslint-disable i18next/no-literal-string */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useModelStore } from "@/stores/modelStore";
 import { useSettings } from "@/hooks/useSettings";
-import { commands, type HistoryEntry } from "@/bindings";
+import { commands, type HistoryEntry, type UsageSummary } from "@/bindings";
 import {
   Cpu,
   Sparkles,
@@ -26,6 +27,7 @@ export const Overview: React.FC<OverviewProps> = ({
   const { currentModel, models } = useModelStore();
   const { settings } = useSettings();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [usageSummary, setUsageSummary] = useState<UsageSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 獲取目前 model 名稱
@@ -48,13 +50,19 @@ export const Overview: React.FC<OverviewProps> = ({
     };
   }, [settings]);
 
-  // 獲取所有歷史紀錄
-  const loadHistory = useCallback(async () => {
+  // 獲取歷史紀錄與統計資料
+  const loadData = useCallback(async () => {
     try {
-      // 讀取前 200 條以進行統計
-      const result = await commands.getHistoryEntries(null, 200);
-      if (result.status === "ok") {
-        setHistory(result.data.entries);
+      // 讀取前 5 條以進行最近紀錄顯示
+      const historyResult = await commands.getHistoryEntries(null, 5);
+      if (historyResult.status === "ok") {
+        setHistory(historyResult.data.entries);
+      }
+
+      // 讀取過去 7 天的獨立使用量統計
+      const usageResult = await commands.getUsageStats(7);
+      if (usageResult.status === "ok") {
+        setUsageSummary(usageResult.data);
       }
     } catch (e) {
       console.error("Failed to load history for overview statistics", e);
@@ -64,31 +72,18 @@ export const Overview: React.FC<OverviewProps> = ({
   }, []);
 
   useEffect(() => {
-    loadHistory();
-  }, [loadHistory]);
+    loadData();
+  }, [loadData]);
 
-  // 計算今日數據
+  // 計算今日與累計數據
   const metrics = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayStat = usageSummary?.daily_stats && usageSummary.daily_stats.length > 0
+      ? usageSummary.daily_stats[usageSummary.daily_stats.length - 1]
+      : null;
 
-    const todays = history.filter((entry) => {
-      const entryDate = new Date(entry.timestamp);
-      return entryDate >= today;
-    });
-
-    const segmentsToday = todays.length;
-    const charsToday = todays.reduce(
-      (acc, entry) => acc + (entry.transcription_text?.length || 0),
-      0,
-    );
-
-    // 原專案無時長紀錄，以每 100 字 20 秒 (20000 ms) 進行模擬，或者 WAV 檔案大小來算。
-    // 這邊以文字長度估計：一個中文字/英文單字約 0.3 秒
-    const estimatedDurationSec = todays.reduce((acc, entry) => {
-      const textLen = entry.transcription_text?.length || 0;
-      return acc + textLen * 0.3;
-    }, 0);
+    const segmentsToday = todayStat?.count || 0;
+    const charsToday = todayStat?.char_count || 0;
+    const estimatedDurationSec = todayStat?.estimated_duration_sec || 0;
 
     const formatDuration = (sec: number) => {
       if (sec === 0) return "0 秒";
@@ -105,44 +100,35 @@ export const Overview: React.FC<OverviewProps> = ({
       charsToday,
       durationTodayStr: formatDuration(estimatedDurationSec),
       avgChars,
-      totalCount: history.length,
+      totalCount: usageSummary?.all_time_count || 0,
     };
-  }, [history]);
+  }, [usageSummary]);
 
   // 計算過去 7 天的每日聽寫段落數
   const weeklyChartData = useMemo(() => {
-    const data = Array(7)
-      .fill(0)
-      .map((_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (6 - i));
-        date.setHours(0, 0, 0, 0);
-        return {
-          date,
-          label: date.toLocaleDateString(i18n.language, { weekday: "short" }),
-          count: 0,
-        };
-      });
+    if (!usageSummary || !usageSummary.daily_stats) return [];
 
-    history.forEach((entry) => {
-      const entryDate = new Date(entry.timestamp);
-      entryDate.setHours(0, 0, 0, 0);
-      const diffTime = Date.now() - entryDate.getTime();
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      if (diffDays >= 0 && diffDays < 7) {
-        data[6 - diffDays].count += 1;
-      }
+    const maxCount = Math.max(...usageSummary.daily_stats.map((d) => d.count), 1);
+    
+    return usageSummary.daily_stats.map((stat) => {
+      const dateParts = stat.date.split("-");
+      const date = new Date(
+        parseInt(dateParts[0], 10),
+        parseInt(dateParts[1], 10) - 1,
+        parseInt(dateParts[2], 10)
+      );
+
+      return {
+        date,
+        label: date.toLocaleDateString(i18n.language, { weekday: "short" }),
+        count: stat.count,
+        percentage: (stat.count / maxCount) * 100,
+      };
     });
-
-    const maxCount = Math.max(...data.map((d) => d.count), 1);
-    return data.map((d) => ({
-      ...d,
-      percentage: (d.count / maxCount) * 100,
-    }));
-  }, [history, i18n.language]);
+  }, [usageSummary, i18n.language]);
 
   const recentEntries = useMemo(() => {
-    return history.slice(0, 5);
+    return history;
   }, [history]);
 
   return (

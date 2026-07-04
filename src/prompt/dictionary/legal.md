@@ -1,6 +1,7 @@
 # 法律合規與合約專有名詞
 
 ## 合約與商務條款 (Contracts & Commercial Terms)
+
 - **合約 (Contract) / 協議 (Agreement)**: 雙方合意之法律文件
 - **條款與條件 (Terms & Conditions / T&C)**: 約定之具體內容
 - **NDA (Non-Disclosure Agreement)**: 保密協定
@@ -11,6 +12,7 @@
 - **管轄法院 (Jurisdiction)**: 約定解決爭議的法院
 
 ## 智慧財產權 (Intellectual Property / IP)
+
 - **智慧財產權 (IPR)**: 智慧財產保護範疇
 - **專利 (Patent)**: 技術發明之獨佔排他權
 - **商標 (Trademark)**: 品牌標誌、名稱之權益保護
@@ -19,6 +21,7 @@
 - **授權合約 (Licensing Agreement)**: 權利人許可他人使用之約定
 
 ## 诉讼、爭議與裁決 (Litigation, Disputes & Ruling)
+
 - **訴訟 (Litigation)**: 透過法院解決爭議的過程
 - **仲裁 (Arbitration)**: 雙方同意由第三方仲裁人裁決的爭議解決機制
 - **調解 (Mediation)**: 在第三方協助下進行和解協商
@@ -28,6 +31,7 @@
 - **強制執行 (Enforcement)**: 聲請法院強制履行債務或判決
 
 ## 法律基本實體 (Legal Entities & Compliance)
+
 - **法人 (Legal Entity / Corporation)**: 法律上具有權利義務主體資格的組織
 - **自然人 (Natural Person)**: 法律上的個人
 - **合規/合規性 (Compliance)**: 企業營運符合法規、法條要求

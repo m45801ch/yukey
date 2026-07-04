@@ -42,3 +42,8 @@ blob-report/
 
 # Nix build output
 result
+
+# Local Editor History
+.history/
+dist_new/
+temp_history.txt

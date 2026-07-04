@@ -1,6 +1,6 @@
 use crate::actions::process_transcription_output;
 use crate::managers::{
-    history::{HistoryManager, PaginatedHistory},
+    history::{HistoryManager, PaginatedHistory, UsageSummary},
     transcription::TranscriptionManager,
 };
 use std::sync::Arc;
@@ -16,6 +16,19 @@ pub async fn get_history_entries(
 ) -> Result<PaginatedHistory, String> {
     history_manager
         .get_history_entries(cursor, limit)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_usage_stats(
+    _app: AppHandle,
+    history_manager: State<'_, Arc<HistoryManager>>,
+    days: i64,
+) -> Result<UsageSummary, String> {
+    history_manager
+        .get_usage_stats(days)
         .await
         .map_err(|e| e.to_string())
 }
@@ -84,17 +97,23 @@ pub async fn retry_history_entry_transcription(
     transcription_manager.initiate_model_load();
 
     let tm = Arc::clone(&transcription_manager);
-    let transcription = tauri::async_runtime::spawn_blocking(move || tm.transcribe(samples))
-        .await
-        .map_err(|e| format!("Transcription task panicked: {}", e))?
-        .map_err(|e| e.to_string())?;
+    let transcription =
+        tauri::async_runtime::spawn_blocking(move || tm.transcribe(samples, "transcribe"))
+            .await
+            .map_err(|e| format!("Transcription task panicked: {}", e))?
+            .map_err(|e| e.to_string())?;
 
     if transcription.is_empty() {
         return Err("Recording contains no speech".to_string());
     }
 
-    let processed =
-        process_transcription_output(&app, &transcription, entry.post_process_requested).await;
+    let processed = process_transcription_output(
+        &app,
+        &transcription,
+        entry.post_process_requested,
+        "transcribe",
+    )
+    .await;
     history_manager
         .update_transcription(
             id,
@@ -119,6 +138,24 @@ pub async fn update_history_limit(
 
     history_manager
         .cleanup_old_entries()
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn update_audio_history_limit(
+    app: AppHandle,
+    history_manager: State<'_, Arc<HistoryManager>>,
+    limit: usize,
+) -> Result<(), String> {
+    let mut settings = crate::settings::get_settings(&app);
+    settings.audio_history_limit = limit;
+    crate::settings::write_settings(&app, settings);
+
+    history_manager
+        .cleanup_old_audio_files()
         .map_err(|e| e.to_string())?;
 
     Ok(())
@@ -151,4 +188,50 @@ pub async fn update_recording_retention_period(
         .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn clear_all_history(
+    _app: AppHandle,
+    history_manager: State<'_, Arc<HistoryManager>>,
+) -> Result<(), String> {
+    history_manager
+        .clear_all_history()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn clear_all_saved_history(
+    _app: AppHandle,
+    history_manager: State<'_, Arc<HistoryManager>>,
+) -> Result<(), String> {
+    history_manager
+        .clear_all_saved_history()
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn get_history_stats(
+    history_manager: State<'_, Arc<HistoryManager>>,
+) -> Result<crate::managers::history::HistoryStats, String> {
+    history_manager
+        .get_history_stats()
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn export_audio_file(
+    history_manager: State<'_, Arc<HistoryManager>>,
+    src_filename: String,
+    dest_path: String,
+) -> Result<(), String> {
+    history_manager
+        .export_audio_file(&src_filename, &dest_path)
+        .map_err(|e| e.to_string())
 }

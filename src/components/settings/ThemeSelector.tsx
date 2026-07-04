@@ -81,7 +81,6 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = React.memo(
             selectedValue={currentTheme}
             onSelect={handleThemeChange}
           />
-          <div className="w-[32px] flex-shrink-0" />
         </div>
       </SettingContainer>
     );

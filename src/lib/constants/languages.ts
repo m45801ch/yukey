@@ -168,5 +168,127 @@ export const getUniqueCapabilityLanguages = (
   });
 };
 
-export const getLanguageLabel = (languageCode: string): string | undefined =>
-  LANGUAGE_LABELS.get(languageCode);
+const CHINESE_TRANSLATIONS: Record<string, string> = {
+  en: "英文",
+  zh: "中文",
+  "zh-Hans": "簡體中文",
+  "zh-Hant": "繁體中文",
+  yue: "粵語",
+  de: "德文",
+  es: "西班牙文",
+  ru: "俄文",
+  ko: "韓文",
+  fr: "法文",
+  ja: "日文",
+  pt: "葡萄牙文",
+  tr: "土耳其文",
+  pl: "波蘭文",
+  ca: "加泰隆尼亞文",
+  nl: "荷蘭文",
+  ar: "阿拉伯文",
+  sv: "瑞典文",
+  it: "義大利文",
+  id: "印尼文",
+  hi: "印地文",
+  fi: "芬蘭文",
+  vi: "越南文",
+  he: "希伯來文",
+  uk: "烏克蘭文",
+  el: "希臘文",
+  ms: "馬來文",
+  cs: "捷克文",
+  ro: "羅馬尼亞文",
+  da: "丹麥文",
+  hu: "匈牙利文",
+  ta: "泰米爾文",
+  no: "挪威文",
+  th: "泰文",
+  ur: "烏爾都文",
+  hr: "克羅埃西亞文",
+  bg: "保加利亞文",
+  lt: "立陶宛文",
+  la: "拉丁文",
+  mi: "毛利文",
+  ml: "馬拉雅拉姆文",
+  cy: "威爾斯文",
+  sk: "斯洛伐克文",
+  te: "泰盧固文",
+  fa: "波斯文",
+  lv: "拉脫維亞文",
+  bn: "孟加拉文",
+  sr: "塞爾維亞文",
+  az: "亞塞拜然文",
+  sl: "斯洛維尼亞文",
+  kn: "卡納達文",
+  et: "愛沙尼亞文",
+  mk: "馬其頓文",
+  br: "布列塔尼文",
+  eu: "巴斯克文",
+  is: "冰島文",
+  hy: "亞美尼亞文",
+  ne: "尼泊爾文",
+  mn: "蒙古文",
+  bs: "波士尼亞文",
+  kk: "哈薩克文",
+  sq: "阿爾巴尼亞文",
+  sw: "斯瓦希里文",
+  gl: "加利西亞文",
+  mr: "馬拉地文",
+  pa: "旁遮普文",
+  si: "僧伽羅文",
+  km: "高棉文",
+  sn: "修納文",
+  yo: "約魯巴文",
+  so: "索馬利文",
+  af: "南非荷蘭文",
+  oc: "奧克文",
+  ka: "喬治亞文",
+  be: "白俄羅斯文",
+  tg: "塔吉克文",
+  sd: "信德文",
+  gu: "古吉拉特文",
+  am: "阿姆哈拉文",
+  yi: "意第緒文",
+  lo: "寮國文",
+  uz: "烏茲別克文",
+  fo: "法羅文",
+  ht: "海地克里奧爾文",
+  ps: "普什圖文",
+  tk: "土庫曼文",
+  nn: "新挪威文",
+  mt: "馬爾他文",
+  sa: "梵文",
+  lb: "盧森堡文",
+  my: "緬甸文",
+  bo: "藏文",
+  tl: "他加祿文",
+  mg: "馬達加斯加文",
+  as: "阿薩姆文",
+  tt: "韃靼文",
+  haw: "夏威夷文",
+  ln: "林加拉文",
+  ha: "豪薩文",
+  ba: "巴什基爾文",
+  jw: "爪哇文",
+  su: "巽他文",
+};
+
+export const getLanguageLabel = (
+  languageCode: string,
+  currentLang?: string,
+): string | undefined => {
+  const baseLabel = LANGUAGE_LABELS.get(languageCode);
+  if (!baseLabel) return undefined;
+
+  if (currentLang && currentLang.startsWith("zh")) {
+    if (languageCode === "auto") {
+      return "自動檢測";
+    }
+    const chineseName = CHINESE_TRANSLATIONS[languageCode];
+    if (chineseName) {
+      return `${baseLabel} (${chineseName})`;
+    }
+  }
+
+  return baseLabel;
+};

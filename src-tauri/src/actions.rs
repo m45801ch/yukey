@@ -74,15 +74,38 @@ fn is_blank_transcription(transcription: &str) -> bool {
     transcription.trim().is_empty()
 }
 
-async fn post_process_transcription(settings: &AppSettings, transcription: &str) -> Option<String> {
+async fn post_process_transcription(
+    app: &AppHandle,
+    settings: &AppSettings,
+    transcription: &str,
+    binding_id: &str,
+) -> Option<String> {
+    use tauri::Emitter;
+
     if is_blank_transcription(transcription) {
         debug!("Post-processing skipped because the transcription is empty");
         return None;
     }
 
+    let model_supports_translate = app
+        .state::<Arc<ModelManager>>()
+        .get_model_info(&settings.selected_model)
+        .as_ref()
+        .map(|m| m.supports_translation)
+        .unwrap_or(false);
+    let is_translation_requested = binding_id == "translate";
+    let translate_using_llm_effective =
+        is_translation_requested && (!model_supports_translate || settings.translate_using_llm);
+    let is_ai_action = binding_id == "ask_ai"
+        || binding_id == "transcribe_with_post_process"
+        || translate_using_llm_effective;
+
     let provider = match settings.active_post_process_provider().cloned() {
         Some(provider) => provider,
         None => {
+            if is_ai_action {
+                let _ = app.emit("post-process-config-error", "no_provider".to_string());
+            }
             debug!("Post-processing enabled but no provider is selected");
             return None;
         }
@@ -95,6 +118,9 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         .unwrap_or_default();
 
     if model.trim().is_empty() {
+        if is_ai_action {
+            let _ = app.emit("post-process-config-error", "no_model".to_string());
+        }
         debug!(
             "Post-processing skipped because provider '{}' has no model configured",
             provider.id
@@ -102,33 +128,69 @@ async fn post_process_transcription(settings: &AppSettings, transcription: &str)
         return None;
     }
 
-    let selected_prompt_id = match &settings.post_process_selected_prompt_id {
-        Some(id) => id.clone(),
-        None => {
-            debug!("Post-processing skipped because no prompt is selected");
-            return None;
-        }
-    };
+    let api_key = settings
+        .post_process_api_keys
+        .get(&provider.id)
+        .cloned()
+        .unwrap_or_default();
 
-    let prompt = match settings
-        .post_process_prompts
-        .iter()
-        .find(|prompt| prompt.id == selected_prompt_id)
-    {
-        Some(prompt) => prompt.prompt.clone(),
-        None => {
-            debug!(
-                "Post-processing skipped because prompt '{}' was not found",
-                selected_prompt_id
-            );
-            return None;
+    if api_key.trim().is_empty() && provider.id != "custom" && provider.id != "apple_intelligence" {
+        if is_ai_action {
+            let _ = app.emit("post-process-config-error", "no_api_key".to_string());
         }
-    };
-
-    if prompt.trim().is_empty() {
-        debug!("Post-processing skipped because the selected prompt is empty");
+        debug!("Post-processing skipped because API key is empty");
         return None;
     }
+
+    let prompt = if binding_id == "ask_ai" {
+        "你是一個智能助手，請直接、簡明扼要地回答使用者的問題。\n\n問題：${output}".to_string()
+    } else if is_translation_requested && translate_using_llm_effective {
+        let target_lang_code = &settings.translate_target_language;
+        let target_lang = match target_lang_code.as_str() {
+            "en" => "English",
+            "zh-TW" | "zh-hant" | "zh-Hant" => "Traditional Chinese (繁體中文)",
+            "zh-CN" | "zh-hans" | "zh-Hans" => "Simplified Chinese",
+            "ja" => "Japanese",
+            "ko" => "Korean",
+            "es" => "Spanish",
+            "fr" => "French",
+            "de" => "German",
+            other => other,
+        };
+        format!(
+            "You are a professional translator. Translate the user's text into {}. Output ONLY the translation. Do not include any explanations, introduction, markdown blocks, or extra text. Text to translate:\n\n${{output}}",
+            target_lang
+        )
+    } else {
+        let selected_prompt_id = match &settings.post_process_selected_prompt_id {
+            Some(id) => id.clone(),
+            None => {
+                debug!("Post-processing skipped because no prompt is selected");
+                return None;
+            }
+        };
+
+        let p = match settings
+            .post_process_prompts
+            .iter()
+            .find(|prompt| prompt.id == selected_prompt_id)
+        {
+            Some(prompt) => prompt.prompt.clone(),
+            None => {
+                debug!(
+                    "Post-processing skipped because prompt '{}' was not found",
+                    selected_prompt_id
+                );
+                return None;
+            }
+        };
+
+        if p.trim().is_empty() {
+            debug!("Post-processing skipped because the selected prompt is empty");
+            return None;
+        }
+        p
+    };
 
     debug!(
         "Starting LLM post-processing with provider '{}' (model: {})",
@@ -391,6 +453,7 @@ pub(crate) async fn process_transcription_output(
     app: &AppHandle,
     transcription: &str,
     post_process: bool,
+    binding_id: &str,
 ) -> ProcessedTranscription {
     let settings = get_settings(app);
     let mut final_text = transcription.to_string();
@@ -407,12 +470,48 @@ pub(crate) async fn process_transcription_output(
         final_text = converted_text;
     }
 
-    if post_process {
-        if let Some(processed_text) = post_process_transcription(&settings, &final_text).await {
+    let model_supports_translate = app
+        .state::<Arc<ModelManager>>()
+        .get_model_info(&settings.selected_model)
+        .as_ref()
+        .map(|m| m.supports_translation)
+        .unwrap_or(false);
+    let is_translation_requested = binding_id == "translate";
+    let translate_using_llm_effective =
+        is_translation_requested && (!model_supports_translate || settings.translate_using_llm);
+
+    let should_post_process = post_process || translate_using_llm_effective;
+
+    if should_post_process {
+        if let Some(processed_text) =
+            post_process_transcription(app, &settings, &final_text, binding_id).await
+        {
             post_processed_text = Some(processed_text.clone());
             final_text = processed_text;
 
-            if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
+            if binding_id == "ask_ai" {
+                post_process_prompt = Some(
+                    "你是一個智能助手，請直接、簡明扼要地回答使用者的問題。\n\n問題：${output}"
+                        .to_string(),
+                );
+            } else if is_translation_requested {
+                let target_lang_code = &settings.translate_target_language;
+                let target_lang = match target_lang_code.as_str() {
+                    "en" => "English",
+                    "zh-TW" | "zh-hant" | "zh-Hant" => "Traditional Chinese (繁體中文)",
+                    "zh-CN" | "zh-hans" | "zh-Hans" => "Simplified Chinese",
+                    "ja" => "Japanese",
+                    "ko" => "Korean",
+                    "es" => "Spanish",
+                    "fr" => "French",
+                    "de" => "German",
+                    other => other,
+                };
+                post_process_prompt = Some(format!(
+                    "You are a professional translator. Translate the user's text into {}. Output ONLY the translation. Do not include any explanations, introduction, markdown blocks, or extra text. Text to translate:\n\n${{output}}",
+                    target_lang
+                ));
+            } else if let Some(prompt_id) = &settings.post_process_selected_prompt_id {
                 if let Some(prompt) = settings
                     .post_process_prompts
                     .iter()
@@ -488,18 +587,27 @@ impl ShortcutAction for TranscribeAction {
             OverlayStyle::Live | OverlayStyle::Minimal => show_recording_overlay(app),
             OverlayStyle::None => {} // show_overlay_state no-ops on None anyway
         }
+
+        let _ = app.emit("active-binding-changed", binding_id.clone());
         debug!("Microphone mode - always_on: {}", is_always_on);
 
         let mut recording_error: Option<String> = None;
         if is_always_on {
             // Always-on mode: Play audio feedback immediately, then apply mute after sound finishes
             debug!("Always-on mode: Playing audio feedback immediately");
-            let rm_clone = Arc::clone(&rm);
+            let binding_id_clone = binding_id.clone();
             let app_clone = app.clone();
+            let rm_clone = Arc::clone(&rm);
             // The blocking helper exits immediately if audio feedback is disabled,
             // so we can always reuse this thread to ensure mute happens right after playback.
             std::thread::spawn(move || {
-                play_feedback_sound_blocking(&app_clone, SoundType::Start);
+                let sound = match binding_id_clone.as_str() {
+                    "ask_ai" => SoundType::AiStart,
+                    "translate" => SoundType::TranslateStart,
+                    "transcribe_with_post_process" => SoundType::PostProcessStart,
+                    _ => SoundType::Start,
+                };
+                play_feedback_sound_blocking(&app_clone, sound);
                 rm_clone.apply_mute();
             });
 
@@ -516,6 +624,7 @@ impl ShortcutAction for TranscribeAction {
                 Ok(()) => {
                     debug!("Recording started in {:?}", recording_start_time.elapsed());
                     // Small delay to ensure microphone stream is active
+                    let binding_id_clone = binding_id.clone();
                     let app_clone = app.clone();
                     let rm_clone = Arc::clone(&rm);
                     std::thread::spawn(move || {
@@ -523,7 +632,13 @@ impl ShortcutAction for TranscribeAction {
                         debug!("Handling delayed audio feedback/mute sequence");
                         // Helper handles disabled audio feedback by returning early, so we reuse it
                         // to keep mute sequencing consistent in every mode.
-                        play_feedback_sound_blocking(&app_clone, SoundType::Start);
+                        let sound = match binding_id_clone.as_str() {
+                            "ask_ai" => SoundType::AiStart,
+                            "translate" => SoundType::TranslateStart,
+                            "transcribe_with_post_process" => SoundType::PostProcessStart,
+                            _ => SoundType::Start,
+                        };
+                        play_feedback_sound_blocking(&app_clone, sound);
                         rm_clone.apply_mute();
                     });
                 }
@@ -596,7 +711,13 @@ impl ShortcutAction for TranscribeAction {
         rm.remove_mute();
 
         // Play audio feedback for recording stop
-        play_feedback_sound(app, SoundType::Stop);
+        let stop_sound = match binding_id {
+            "ask_ai" => SoundType::AiStop,
+            "translate" => SoundType::TranslateStop,
+            "transcribe_with_post_process" => SoundType::PostProcessStop,
+            _ => SoundType::Stop,
+        };
+        play_feedback_sound(app, stop_sound);
 
         let binding_id = binding_id.to_string(); // Clone binding_id for the async task
         let post_process = self.post_process;
@@ -655,7 +776,7 @@ impl ShortcutAction for TranscribeAction {
                         // surfaced instead — the worker may still hold the engine,
                         // so a batch fallback would contend with it.
                         Ok(Some(text)) if !text.trim().is_empty() => Ok(text),
-                        Ok(_) => tm.transcribe(samples),
+                        Ok(_) => tm.transcribe(samples, &binding_id),
                         Err(err) => Err(err),
                     };
 
@@ -698,16 +819,32 @@ impl ShortcutAction for TranscribeAction {
                                 transcription
                             );
 
-                            if post_process {
+                            let settings = get_settings(&ah);
+                            let model_supports_translate = ah
+                                .state::<Arc<ModelManager>>()
+                                .get_model_info(&settings.selected_model)
+                                .as_ref()
+                                .map(|m| m.supports_translation)
+                                .unwrap_or(false);
+                            let is_translation_requested = binding_id == "translate";
+                            let translate_using_llm_effective = is_translation_requested
+                                && (!model_supports_translate || settings.translate_using_llm);
+                            let should_show_processing =
+                                post_process || translate_using_llm_effective;
+                            if should_show_processing {
                                 if style == OverlayStyle::Live {
                                     tm.emit_stream_working(StreamWorkKind::Polishing);
                                 } else {
                                     show_processing_overlay(&ah);
                                 }
                             }
-                            let processed =
-                                process_transcription_output(&ah, &transcription, post_process)
-                                    .await;
+                            let processed = process_transcription_output(
+                                &ah,
+                                &transcription,
+                                post_process,
+                                &binding_id,
+                            )
+                            .await;
 
                             if rm.was_cancelled_since(cancel_generation) {
                                 debug!("Transcription operation cancelled before paste");
@@ -859,6 +996,16 @@ pub static ACTION_MAP: Lazy<HashMap<String, Arc<dyn ShortcutAction>>> = Lazy::ne
     );
     map.insert(
         "transcribe_with_post_process".to_string(),
+        Arc::new(TranscribeAction { post_process: true }) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "translate".to_string(),
+        Arc::new(TranscribeAction {
+            post_process: false,
+        }) as Arc<dyn ShortcutAction>,
+    );
+    map.insert(
+        "ask_ai".to_string(),
         Arc::new(TranscribeAction { post_process: true }) as Arc<dyn ShortcutAction>,
     );
     map.insert(

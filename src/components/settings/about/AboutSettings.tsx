@@ -1,3 +1,4 @@
+/* eslint-disable i18next/no-literal-string */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getVersion } from "@tauri-apps/api/app";
@@ -28,14 +29,6 @@ export const AboutSettings: React.FC = () => {
     fetchVersion();
   }, []);
 
-  const handleDonateClick = async () => {
-    try {
-      await openUrl("https://handy.computer/donate");
-    } catch (error) {
-      console.error("Failed to open donate link:", error);
-    }
-  };
-
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
       <SettingsGroup title={t("settings.about.title")}>
@@ -45,33 +38,20 @@ export const AboutSettings: React.FC = () => {
           description={t("settings.about.version.description")}
           grouped={true}
         >
-          {/* eslint-disable-next-line i18next/no-literal-string */}
           <span className="text-sm font-mono">v{version}</span>
-        </SettingContainer>
-
-        <ShowWhatsNewOnUpdate descriptionMode="tooltip" grouped={true} />
-
-        <SettingContainer
-          title={t("settings.about.supportDevelopment.title")}
-          description={t("settings.about.supportDevelopment.description")}
-          grouped={true}
-        >
-          <Button variant="primary" size="md" onClick={handleDonateClick}>
-            {t("settings.about.supportDevelopment.button")}
-          </Button>
         </SettingContainer>
 
         <SettingContainer
           title={t("settings.about.sourceCode.title")}
-          description={t("settings.about.sourceCode.description")}
+          description="檢視 yukey 專案的開源原始碼與開發進度。"
           grouped={true}
         >
           <Button
             variant="secondary"
             size="md"
-            onClick={() => openUrl("https://github.com/cjpais/Handy")}
+            onClick={() => openUrl("https://github.com/m45801ch/yukey")}
           >
-            {t("settings.about.sourceCode.button")}
+            GitHub 原始碼
           </Button>
         </SettingContainer>
 
@@ -80,6 +60,20 @@ export const AboutSettings: React.FC = () => {
       </SettingsGroup>
 
       <SettingsGroup title={t("settings.about.acknowledgments.title")}>
+        <SettingContainer
+          title="致謝原創專案 (Handy)"
+          description="本專案 yukey 係基於原作者 CJ Pais 的優秀開源專案 Handy 進行衍生與深度客製修改。我們由衷感謝原作者的開源精神與對本機語音轉文字應用的卓越技術架構貢獻。"
+          grouped={true}
+          layout="stacked"
+        >
+          <div className="text-sm text-mid-gray flex flex-col gap-1 mt-1">
+            <span>• 原始專案作者：CJ Pais</span>
+            <span>• 授權條款：MIT License</span>
+            <span className="text-xs text-mid-gray/80 mt-1 font-mono">
+              Copyright (c) 2025 CJ Pais
+            </span>
+          </div>
+        </SettingContainer>
         <SettingContainer
           title={t("settings.about.acknowledgments.ggml.title")}
           description={t("settings.about.acknowledgments.ggml.description")}

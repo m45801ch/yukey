@@ -310,3 +310,33 @@ pub fn is_recording(app: AppHandle) -> bool {
     let audio_manager = app.state::<Arc<AudioRecordingManager>>();
     audio_manager.is_recording()
 }
+
+#[tauri::command]
+#[specta::specta]
+pub fn set_microphone_gain_enabled(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = get_settings(&app);
+    settings.microphone_gain_enabled = enabled;
+    write_settings(&app, settings);
+
+    // Update the audio manager to apply the gain setting immediately if the stream is active
+    let rm = app.state::<Arc<AudioRecordingManager>>();
+    rm.update_selected_device()
+        .map_err(|e| format!("Failed to restart stream: {}", e))?;
+
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn set_microphone_gain_value(app: AppHandle, value: f32) -> Result<(), String> {
+    let mut settings = get_settings(&app);
+    settings.microphone_gain_value = value;
+    write_settings(&app, settings);
+
+    // Update the audio manager to apply the gain setting immediately if the stream is active
+    let rm = app.state::<Arc<AudioRecordingManager>>();
+    rm.update_selected_device()
+        .map_err(|e| format!("Failed to restart stream: {}", e))?;
+
+    Ok(())
+}

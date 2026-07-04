@@ -222,7 +222,10 @@
         "title": "Microphone",
         "description": "Select your preferred microphone device",
         "placeholder": "Select microphone...",
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "gainLabel": "Microphone Gain",
+        "gainTooltip": "If you are using a high-quality or high-sensitivity microphone, it is recommended to disable gain to avoid amplifying background noise or causing audio clipping.",
+        "gainValueLabel": "Gain Value"
       },
       "audioFeedback": {
         "label": "Audio Feedback",
@@ -340,7 +343,24 @@
       },
       "translateToEnglish": {
         "label": "Translate to English",
-        "description": "Automatically translate speech from other languages to English during transcription."
+        "description": "Use the local model to translate transcribed language into English."
+      },
+      "translateLanguage": {
+        "label": "Translate Language",
+        "description": "Use cloud service to perform translation."
+      },
+      "translateUsingLlm": {
+        "label": "Use cloud service to translate",
+        "description": "Enable custom target language translation using configured AI service providers.",
+        "localSupportedDesc": "Defaults to using the local model to translate speech into English. Enable to switch to the cloud service LLM for multi-language translation."
+      },
+      "cloudTranslation": {
+        "label": "Cloud Service Translation",
+        "description": "Use cloud service to perform translation."
+      },
+      "translateTargetLanguage": {
+        "label": "Translation Target Language",
+        "description": "Select the target language for LLM translation."
       },
       "modelUnload": {
         "title": "Unload Model",
@@ -479,8 +499,13 @@
         "description": "Sensitivity for custom word corrections"
       },
       "historyLimit": {
-        "title": "History Limit",
+        "title": "Text History Limit",
         "description": "Maximum number of history entries to keep",
+        "entries": "entries"
+      },
+      "audioHistoryLimit": {
+        "title": "Audio Recording Limit",
+        "description": "Maximum number of audio files to retain (oldest audio files beyond this limit will be deleted, but text history remains)",
         "entries": "entries"
       },
       "recordingRetention": {
@@ -611,7 +636,10 @@
     "modelLoadFailedUnknown": "unknown model",
     "pasteFailedTitle": "Failed to Paste Text",
     "pasteFailed": "Text could not be pasted into the active application.",
-    "transcriptionFailedTitle": "Transcription Failed"
+    "transcriptionFailedTitle": "Transcription Failed",
+    "noProvider": "Please configure an AI post-processing provider in settings.",
+    "noModel": "Please select a post-processing AI model in settings.",
+    "noApiKey": "Please enter your API key in settings to use the Ask AI feature."
   },
   "appLanguage": {
     "title": "Application Language",
@@ -619,6 +647,11 @@
   },
   "overlay": {
     "transcribing": "Transcribing...",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "ai_listening": "Asking AI...",
+    "ai_processing": "AI Thinking...",
+    "translate_listening": "Translating speech...",
+    "translate_processing": "Translating...",
+    "post_process_processing": "Post-processing..."
   }
 }

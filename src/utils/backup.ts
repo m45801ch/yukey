@@ -20,7 +20,9 @@ const generateReadableMarkdown = (data: BackupData): string => {
   const lines: string[] = [];
 
   lines.push(`# OpenLess 自訂備份與規則文件`);
-  lines.push(`此文件由 OpenLess 系統自動匯出於：${new Date(data.timestamp).toLocaleString()}\n`);
+  lines.push(
+    `此文件由 OpenLess 系統自動匯出於：${new Date(data.timestamp).toLocaleString()}\n`,
+  );
 
   // 1. 自訂模式
   lines.push(`## 1. 自訂修飾模式`);
@@ -68,7 +70,9 @@ const generateReadableMarkdown = (data: BackupData): string => {
     lines.push(`| 原始錯字/音 | 修正後正確字 | 是否啟用 |`);
     lines.push(`| :--- | :--- | :--- |`);
     correctionRules.forEach((rule) => {
-      lines.push(`| ${rule.pattern} | ${rule.replacement} | ${rule.enabled ? "是" : "否"} |`);
+      lines.push(
+        `| ${rule.pattern} | ${rule.replacement} | ${rule.enabled ? "是" : "否"} |`,
+      );
     });
   }
 
@@ -81,7 +85,10 @@ const generateReadableMarkdown = (data: BackupData): string => {
 const generateCorrectionsCSV = (rules: any[]): string => {
   const header = "Pattern,Replacement,Enabled\n";
   const rows = rules
-    .map((r) => `"${r.pattern.replace(/"/g, '""')}","${r.replacement.replace(/"/g, '""')}",${r.enabled}`)
+    .map(
+      (r) =>
+        `"${r.pattern.replace(/"/g, '""')}","${r.replacement.replace(/"/g, '""')}",${r.enabled}`,
+    )
     .join("\n");
   return header + rows;
 };
@@ -91,7 +98,7 @@ const generateCorrectionsCSV = (rules: any[]): string => {
  */
 export const exportBackupZip = async (
   promptSettings: PromptPluginSettings,
-  customWords: string[]
+  customWords: string[],
 ) => {
   try {
     // 讀取糾錯規則
@@ -187,21 +194,32 @@ export const importBackupZip = async (): Promise<BackupData | null> => {
     }
 
     // 寫入 LocalStorage
-    localStorage.setItem("openless_prompt_plugin_settings", JSON.stringify(backupData.promptSettings));
-    localStorage.setItem("yukey_correction_rules", JSON.stringify(backupData.correctionRules));
+    localStorage.setItem(
+      "openless_prompt_plugin_settings",
+      JSON.stringify(backupData.promptSettings),
+    );
+    localStorage.setItem(
+      "yukey_correction_rules",
+      JSON.stringify(backupData.correctionRules),
+    );
 
     // 重新構造 VocabPage 使用的後綴快取
-    const activeRules = backupData.correctionRules.filter((r: any) => r.enabled);
+    const activeRules = backupData.correctionRules.filter(
+      (r: any) => r.enabled,
+    );
     let correctionPrompt = "";
     if (activeRules.length > 0) {
-      correctionPrompt += "\n\n# 語音識別糾錯對照表 (請務必將左方的錯字或發音模糊字，更正為右方的正確字)：\n";
+      correctionPrompt +=
+        "\n\n# 語音識別糾錯對照表 (請務必將左方的錯字或發音模糊字，更正為右方的正確字)：\n";
       activeRules.forEach((r: any) => {
         correctionPrompt += `- "${r.pattern}" -> "${r.replacement}"\n`;
       });
     }
     localStorage.setItem("yukey_prompt_corrections_suffix", correctionPrompt);
 
-    toast.success("系統設定與詞庫已成功還原！請點擊上方「儲存並套用」使變更生效。");
+    toast.success(
+      "系統設定與詞庫已成功還原！請點擊上方「儲存並套用」使變更生效。",
+    );
     return backupData;
   } catch (e) {
     console.error("Import backup failed", e);

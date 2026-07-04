@@ -14,6 +14,7 @@ import { AutoSubmit } from "../AutoSubmit";
 import { PostProcessingToggle } from "../PostProcessingToggle";
 import { AppendTrailingSpace } from "../AppendTrailingSpace";
 import { HistoryLimit } from "../HistoryLimit";
+import { AudioHistoryLimit } from "../AudioHistoryLimit";
 import { RecordingRetentionPeriodSelector } from "../RecordingRetentionPeriod";
 import { ExperimentalToggle } from "../ExperimentalToggle";
 import { useSettings } from "../../../hooks/useSettings";
@@ -33,7 +34,6 @@ export const AdvancedSettings: React.FC = () => {
         <StartHidden descriptionMode="tooltip" grouped={true} />
         <AutostartToggle descriptionMode="tooltip" grouped={true} />
         <ShowTrayIcon descriptionMode="tooltip" grouped={true} />
-        <ShowOverlay descriptionMode="tooltip" grouped={true} />
         <ModelUnloadTimeoutSetting descriptionMode="tooltip" grouped={true} />
         <ExperimentalToggle descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
@@ -53,6 +53,7 @@ export const AdvancedSettings: React.FC = () => {
 
       <SettingsGroup title={t("settings.advanced.groups.history")}>
         <HistoryLimit descriptionMode="tooltip" grouped={true} />
+        <AudioHistoryLimit descriptionMode="tooltip" grouped={true} />
         <RecordingRetentionPeriodSelector
           descriptionMode="tooltip"
           grouped={true}

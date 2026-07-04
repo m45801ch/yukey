@@ -14,6 +14,7 @@ import Footer from "./components/footer";
 import Onboarding, { AccessibilityOnboarding } from "./components/onboarding";
 import { Sidebar, SidebarSection } from "./components/Sidebar";
 import { SettingsModal } from "./components/SettingsModal";
+import { WhatsNewGate } from "./components/whats-new";
 import { Overview } from "./components/pages/Overview";
 import { HistoryPage } from "./components/pages/HistoryPage";
 import { VocabPage } from "./components/pages/VocabPage";
@@ -166,6 +167,23 @@ function App() {
     };
   }, [t]);
 
+  // Listen for AI post-processing configuration errors and show a warning toast
+  useEffect(() => {
+    const unlisten = listen<string>("post-process-config-error", (event) => {
+      const reason = event.payload;
+      if (reason === "no_provider") {
+        toast.error(t("errors.noProvider"));
+      } else if (reason === "no_model") {
+        toast.error(t("errors.noModel"));
+      } else if (reason === "no_api_key") {
+        toast.error(t("errors.noApiKey"));
+      }
+    });
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, [t]);
+
   // Listen for model loading failures and show a toast
   useEffect(() => {
     const unlisten = listen<ModelStateEvent>("model-state-changed", (event) => {
@@ -197,8 +215,9 @@ function App() {
   const checkOnboardingStatus = async () => {
     try {
       // Check if they have any models available
-      const result = await commands.hasAnyModelsAvailable();
-      const hasModels = result.status === "ok" && result.data;
+      const result = await commands.getAvailableModels();
+      const hasModels =
+        result.status === "ok" && result.data.some((m: any) => m.is_downloaded);
       const currentPlatform = platform();
 
       if (hasModels) {
@@ -300,6 +319,7 @@ function App() {
           },
         }}
       />
+      <WhatsNewGate />
 
       {/* 全螢幕設定 Modal 覆蓋層 */}
       {isSettingsOpen && (

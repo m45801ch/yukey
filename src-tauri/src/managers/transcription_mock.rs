@@ -65,7 +65,7 @@ impl TranscriptionManager {
         None
     }
 
-    pub fn transcribe(&self, _audio: Vec<f32>) -> Result<String> {
+    pub fn transcribe(&self, _audio: Vec<f32>, _binding_id: &str) -> Result<String> {
         Ok(String::new())
     }
 }

@@ -44,7 +44,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   supportedLanguages,
   supportsLanguageDetection = true,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { getSetting, updateSetting, resetSetting, isUpdating } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -95,14 +95,25 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const filteredLanguages = useMemo(
     () =>
-      availableLanguages.filter((language) =>
-        language.label.toLowerCase().includes(searchQuery.toLowerCase()),
-      ),
-    [searchQuery, availableLanguages],
+      availableLanguages.filter((language) => {
+        const label = language.label.toLowerCase();
+        const query = searchQuery.toLowerCase();
+        if (label.includes(query)) return true;
+
+        if (i18n.language.startsWith("zh")) {
+          const translated = getLanguageLabel(language.value, i18n.language);
+          if (translated && translated.toLowerCase().includes(query)) {
+            return true;
+          }
+        }
+        return false;
+      }),
+    [searchQuery, availableLanguages, i18n.language],
   );
 
   const selectedLanguageName =
-    getLanguageLabel(selectedLanguage) || t("settings.general.language.auto");
+    getLanguageLabel(selectedLanguage, i18n.language) ||
+    t("settings.general.language.auto");
 
   const handleLanguageSelect = async (languageCode: string) => {
     await updateSetting("selected_language", languageCode);
@@ -185,7 +196,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 />
               </div>
 
-              <div className="max-h-48 overflow-y-auto">
+              <div className="max-h-48 overflow-y-auto overflow-x-hidden">
                 {filteredLanguages.length === 0 ? (
                   <div className="px-2 py-2 text-sm text-mid-gray text-center">
                     {t("settings.general.language.noResults")}
@@ -203,7 +214,10 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                       onClick={() => handleLanguageSelect(language.value)}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="truncate">{language.label}</span>
+                        <span className="truncate">
+                          {getLanguageLabel(language.value, i18n.language) ||
+                            language.label}
+                        </span>
                       </div>
                     </button>
                   ))

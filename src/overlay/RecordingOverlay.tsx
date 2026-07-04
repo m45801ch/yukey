@@ -18,10 +18,25 @@ type OverlayState = "recording" | "streaming" | "transcribing" | "processing";
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
 const WAVE_BARS = 9;
 
+// Apply theme on file load
+const initialTheme = localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
+document.documentElement.classList.remove(
+  "theme-dark-tech",
+  "theme-premium-light",
+  "theme-zen-natural"
+);
+document.documentElement.classList.add(initialTheme);
+if (initialTheme === "theme-dark-tech") {
+  document.documentElement.style.colorScheme = "dark";
+} else {
+  document.documentElement.style.colorScheme = "light";
+}
+
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [state, setState] = useState<OverlayState>("recording");
+  const [activeBinding, setActiveBinding] = useState<string>("transcribe");
   const [levels, setLevels] = useState<number[]>(Array(WAVE_BARS).fill(0));
   const [streamText, setStreamText] = useState<StreamTextEvent>({
     committed: "",
@@ -50,6 +65,22 @@ const RecordingOverlay: React.FC = () => {
 
   useEffect(() => {
     const setupEventListeners = async () => {
+      const unlistenTheme = await listen<string>("theme-changed", (event) => {
+        const theme = event.payload;
+        const root = document.documentElement;
+        root.classList.remove(
+          "theme-dark-tech",
+          "theme-premium-light",
+          "theme-zen-natural"
+        );
+        root.classList.add(theme);
+        if (theme === "theme-dark-tech") {
+          root.style.colorScheme = "dark";
+        } else {
+          root.style.colorScheme = "light";
+        }
+      });
+
       const unlistenShow = await listen("show-overlay", async (event) => {
         await syncLanguageFromSettings();
         // The Live panel flows downward from a top overlay and upward from a
@@ -78,6 +109,13 @@ const RecordingOverlay: React.FC = () => {
         setIsVisible(true);
       });
 
+      const unlistenActiveBinding = await listen<string>(
+        "active-binding-changed",
+        (event) => {
+          setActiveBinding(event.payload);
+        },
+      );
+
       const unlistenHide = await listen("hide-overlay", () => {
         setIsVisible(false);
       });
@@ -105,11 +143,13 @@ const RecordingOverlay: React.FC = () => {
       });
 
       return () => {
+        unlistenTheme();
         unlistenShow();
         unlistenHide();
         unlistenLevel();
         unlistenStream();
         unlistenPhase();
+        unlistenActiveBinding();
       };
     };
 
@@ -185,7 +225,9 @@ const RecordingOverlay: React.FC = () => {
   const listeningRow = (showTimer: boolean, showCancel: boolean) => (
     <div className="sbase">
       <div className="sbase-l">
-        <span className="sdot" />
+        <span
+          className={`sdot ${activeBinding === "ask_ai" ? "ask-ai" : ""} ${activeBinding === "translate" ? "translate" : ""} ${activeBinding === "transcribe_with_post_process" ? "post-process" : ""}`}
+        />
       </div>
       {waveform}
       <div className="sbase-r">
@@ -225,7 +267,9 @@ const RecordingOverlay: React.FC = () => {
           key={session}
           className={`scard ${open ? "open" : ""} ${collapsed ? "working" : ""} ${
             isVisible ? "" : "leaving"
-          }`}
+          } ${activeBinding === "ask_ai" ? "ask-ai-card" : ""} ${
+            activeBinding === "translate" ? "translate-card" : ""
+          } ${activeBinding === "transcribe_with_post_process" ? "post-process-card" : ""}`}
         >
           <div className="stext">
             <div className="stext-clip">
@@ -249,8 +293,18 @@ const RecordingOverlay: React.FC = () => {
           {working
             ? workingRow(
                 workKind === "polishing"
-                  ? t("overlay.processing")
-                  : t("overlay.transcribing"),
+                  ? activeBinding === "ask_ai"
+                    ? t("overlay.ai_processing")
+                    : activeBinding === "translate"
+                      ? t("overlay.translate_processing")
+                      : activeBinding === "transcribe_with_post_process"
+                        ? t("overlay.post_process_processing")
+                        : t("overlay.processing")
+                  : activeBinding === "ask_ai"
+                    ? t("overlay.ai_listening")
+                    : activeBinding === "translate"
+                      ? t("overlay.translate_listening")
+                      : t("overlay.transcribing"),
                 true,
               )
             : listeningRow(open, true)}
@@ -263,10 +317,27 @@ const RecordingOverlay: React.FC = () => {
   // spinner + label (transcribing / processing). Never both. The pill animates its
   // width between them; the cancel button is in both rows so it stays put.
   const working = state === "transcribing" || state === "processing";
-  const workLabel =
+  let workLabel =
     state === "processing"
       ? t("overlay.processing")
       : t("overlay.transcribing");
+
+  if (activeBinding === "ask_ai") {
+    workLabel =
+      state === "processing"
+        ? t("overlay.ai_processing")
+        : t("overlay.ai_listening");
+  } else if (activeBinding === "translate") {
+    workLabel =
+      state === "processing"
+        ? t("overlay.translate_processing")
+        : t("overlay.translate_listening");
+  } else if (activeBinding === "transcribe_with_post_process") {
+    workLabel =
+      state === "processing"
+        ? t("overlay.post_process_processing")
+        : t("overlay.transcribing");
+  }
 
   return (
     <div
@@ -274,7 +345,11 @@ const RecordingOverlay: React.FC = () => {
       className={`ov-stage ${position} ov-fade ${isVisible ? "show" : ""}`}
     >
       <div
-        className={`scard compact ${working && isVisible ? "cworking" : ""}`}
+        className={`scard compact ${working && isVisible ? "cworking" : ""} ${
+          activeBinding === "ask_ai" ? "ask-ai-card" : ""
+        } ${activeBinding === "translate" ? "translate-card" : ""} ${
+          activeBinding === "transcribe_with_post_process" ? "post-process-card" : ""
+        }`}
       >
         {working ? workingRow(workLabel, true) : listeningRow(false, true)}
       </div>

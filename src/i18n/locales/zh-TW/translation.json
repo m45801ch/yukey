@@ -3,7 +3,7 @@
     "settings": "設定...",
     "checkUpdates": "檢查更新...",
     "copyLastTranscript": "複製最新轉錄",
-    "unloadModel": "卸載模型",
+    "unloadModel": "釋放記憶體",
     "model": "模型",
     "quit": "結束",
     "cancel": "取消"
@@ -12,7 +12,7 @@
     "general": "一般",
     "models": "模型",
     "advanced": "進階",
-    "postProcessing": "後處理",
+    "postProcessing": "AI 潤色修飾",
     "history": "歷史紀錄",
     "debug": "偵錯",
     "about": "關於"
@@ -100,7 +100,7 @@
     },
     "permissions": {
       "title": "需要權限",
-      "description": "Handy 需要一些權限才能正常運作",
+      "description": "yukey 需要一些權限才能正常運作",
       "microphone": {
         "title": "麥克風存取",
         "description": "需要聽取您的語音進行轉錄"
@@ -136,7 +136,7 @@
     "loading": "正在載入 {{modelName}}...",
     "loadingGeneric": "載入中...",
     "modelError": "模型錯誤",
-    "modelUnloaded": "模型已卸載",
+    "modelUnloaded": "記憶體已釋放",
     "noModelDownloadRequired": "無模型 - 需要下載",
     "deleteModel": "刪除 {{modelName}}",
     "downloadSpeed": "{{speed}} MB/s",
@@ -160,7 +160,7 @@
     "general": {
       "title": "一般",
       "shortcut": {
-        "title": "Handy 快捷鍵",
+        "title": "yukey 快捷鍵",
         "description": "設定啟動語音轉文字錄製的鍵盤快捷鍵",
         "loading": "載入快捷鍵中...",
         "none": "未設定快捷鍵",
@@ -176,8 +176,16 @@
             "description": "用於取消目前錄製的鍵盤快捷鍵"
           },
           "transcribe_with_post_process": {
-            "name": "後處理快捷鍵",
-            "description": "可選：專用快捷鍵，使用時一律對轉錄結果套用 AI 後處理"
+            "name": "AI 潤色快捷鍵",
+            "description": "可選：專用快捷鍵，使用時一律對轉錄結果套用 AI 潤色修飾"
+          },
+          "translate": {
+            "name": "翻譯快捷鍵",
+            "description": "按下開始和停止翻譯成指定的目標語言 (此功能需要所選模型支援多語言資源，如 Whisper 系列)"
+          },
+          "ask_ai": {
+            "name": "提問AI快捷鍵",
+            "description": "按下開始和停止錄音，叫 AI 直接回答你的問題"
           }
         },
         "errors": {
@@ -196,7 +204,9 @@
       "pushToTalk": {
         "label": "按住說話",
         "description": "按住錄製，放開停止"
-      }
+      },
+      "translate_target_title": "翻譯目標",
+      "translate_target_description": "選擇翻譯模式下的口述目標語言 (此功能需要所選模型支援多語言資源，如 Whisper 系列)"
     },
     "models": {
       "title": "轉錄模型",
@@ -213,7 +223,7 @@
       "searchPlaceholder": "依名稱搜尋模型…",
       "rescan": {
         "label": "重新掃描",
-        "tooltip": "重新掃描在 Handy 之外新增到模型資料夾或 Hugging Face 快取中的模型"
+        "tooltip": "重新掃描在 yukey 之外新增到模型資料夾或 Hugging Face 快取中的模型"
       }
     },
     "sound": {
@@ -222,7 +232,10 @@
         "title": "麥克風",
         "description": "選擇您偏好的麥克風裝置",
         "placeholder": "選擇麥克風...",
-        "loading": "載入中..."
+        "loading": "載入中...",
+        "gainLabel": "麥克風增益",
+        "gainTooltip": "若您使用的是高品質或高靈敏度的麥克風，建議關閉增益效果以避免背景雜音被放大或音訊飽和（爆音）。",
+        "gainValueLabel": "增益數值"
       },
       "audioFeedback": {
         "label": "聲音回饋",
@@ -274,20 +287,20 @@
       },
       "autostart": {
         "label": "開機啟動",
-        "description": "登入電腦時自動啟動 Handy"
+        "description": "登入電腦時自動啟動 yukey"
       },
       "showTrayIcon": {
         "label": "顯示系統匣圖示",
-        "description": "在系統匣中顯示 Handy 圖示"
+        "description": "在系統匣中顯示 yukey 圖示"
       },
       "overlay": {
         "style": {
-          "title": "Overlay",
-          "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
+          "title": "懸浮窗風格",
+          "description": "選擇錄音懸浮窗顯示樣式：『無』隱藏懸浮窗，『極簡』顯示緊湊的小藥丸，『即時』在您說話時即時顯示轉錄文字（僅支援串流的模型 — 請在模型選取器中尋找有『Streaming』標籤的模型）。在 Linux 上建議選擇『無』。",
           "options": {
             "none": "無",
-            "minimal": "Minimal",
-            "live": "Live"
+            "minimal": "極簡",
+            "live": "即時"
           }
         },
         "position": {
@@ -340,10 +353,27 @@
       },
       "translateToEnglish": {
         "label": "翻譯為英語",
-        "description": "在轉錄過程中自動將其他語言的語音翻譯為英語"
+        "description": "使用本地的模型，將轉錄的語言翻譯成英文"
+      },
+      "translateLanguage": {
+        "label": "翻譯語言",
+        "description": "使用雲端服務大模型進行翻譯"
+      },
+      "translateUsingLlm": {
+        "label": "使用雲端服務翻譯",
+        "description": "開啟後可自訂翻譯目標語言，並透過 AI 服務商大模型進行高品質翻譯",
+        "localSupportedDesc": "預設使用本地模型將語音翻譯為英文，開啟以切換為雲端服務大模型進行多國語言翻譯。"
+      },
+      "cloudTranslation": {
+        "label": "雲端服務翻譯",
+        "description": "使用雲端服務進行翻譯"
+      },
+      "translateTargetLanguage": {
+        "label": "翻譯目標語言",
+        "description": "選擇大模型翻譯的目標語言。"
       },
       "modelUnload": {
-        "title": "卸載模型",
+        "title": "自動釋放記憶體",
         "description": "當模型在指定時間內未使用時自動釋放 GPU/CPU 記憶體",
         "options": {
           "never": "從不",
@@ -365,8 +395,8 @@
         "duplicate": "「{{word}}」已存在"
       },
       "voiceActivityDetection": {
-        "title": "Voice Activity Detection",
-        "description": "Filter silence from recordings. Streaming-capable models use a longer VAD tail; disabling VAD records raw audio."
+        "title": "語音活動偵測 (VAD)",
+        "description": "過濾錄音中的靜音片段。支援串流的模型會使用較長的 VAD 尾音；停用 VAD 將錄製原始音訊。"
       }
     },
     "postProcessing": {
@@ -420,7 +450,7 @@
         "createPrompt": "建立提示詞",
         "cancel": "取消",
         "selectToEdit": "選擇上方的提示詞以檢視和編輯其詳細資訊",
-        "createFirst": "點選上方的「建立新提示詞」來建立您的第一個後處理提示詞"
+        "createFirst": "點選上方的「建立新提示詞」來建立您的第一個 AI 潤色提示詞"
       }
     },
     "history": {
@@ -461,7 +491,7 @@
       },
       "updateChecks": {
         "label": "檢查更新",
-        "description": "自動檢查 Handy 的新版本"
+        "description": "自動檢查 yukey 的新版本"
       },
       "soundTheme": {
         "label": "聲音主題",
@@ -472,8 +502,13 @@
         "description": "自訂詞彙修正的靈敏度"
       },
       "historyLimit": {
-        "title": "歷史紀錄上限",
+        "title": "歷史文字記錄上限",
         "description": "歷史紀錄的最大保留筆數",
+        "entries": "筆"
+      },
+      "audioHistoryLimit": {
+        "title": "歷史錄音記錄上限",
+        "description": "歷史錄音檔案的最大保留筆數（超出此限制的最舊錄音檔會被刪除，但其文字紀錄仍會保留）",
         "entries": "筆"
       },
       "recordingRetention": {
@@ -495,8 +530,8 @@
         "description": "筆記型電腦闔蓋時使用的麥克風"
       },
       "postProcessingToggle": {
-        "label": "後處理",
-        "description": "啟用轉錄後的 AI 文字最佳化"
+        "label": "AI 潤色修飾",
+        "description": "啟用轉錄後的 AI 潤色與文字最佳化"
       },
       "muteWhileRecording": {
         "label": "錄製時靜音",
@@ -536,11 +571,11 @@
       "title": "關於",
       "version": {
         "title": "版本",
-        "description": "Handy 的目前版本"
+        "description": "yukey 的目前版本"
       },
       "appDataDirectory": {
         "title": "應用程式資料目錄",
-        "description": "Handy 儲存資料的位置"
+        "description": "yukey 儲存資料的位置"
       },
       "sourceCode": {
         "title": "原始碼",
@@ -549,7 +584,7 @@
       },
       "supportDevelopment": {
         "title": "支持開發",
-        "description": "幫助我們繼續開發 Handy",
+        "description": "幫助我們繼續開發 yukey",
         "button": "捐贈"
       },
       "acknowledgments": {
@@ -557,12 +592,12 @@
         "ggml": {
           "title": "ggml",
           "description": "針對 OpenAI Whisper 自動語音識別模型的高效能推理引擎",
-          "details": "Handy 使用 ggml 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
+          "details": "yukey 使用 ggml 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
         }
       },
       "whatsNewUpdates": {
         "label": "顯示新功能",
-        "description": "Handy 更新後顯示版本資訊"
+        "description": "yukey 更新後顯示版本資訊"
       }
     }
   },
@@ -589,7 +624,7 @@
     "noOptionsFound": "未找到選項"
   },
   "accessibility": {
-    "permissionsDescription": "Handy 需要輔助使用權限才能輸入轉錄的文字",
+    "permissionsDescription": "yukey 需要輔助使用權限才能輸入轉錄的文字",
     "openSettings": "開啟系統設定"
   },
   "errors": {
@@ -608,17 +643,25 @@
     "modelLoadFailedUnknown": "未知模型",
     "pasteFailedTitle": "貼上文字失敗",
     "pasteFailed": "無法將文字貼上至目前作用中的應用程式。",
-    "transcriptionFailedTitle": "轉錄失敗"
+    "transcriptionFailedTitle": "轉錄失敗",
+    "noProvider": "請先至設定中配置 AI 潤色修飾服務商。",
+    "noModel": "請先至設定中配置 AI 潤色模型。",
+    "noApiKey": "請先在設定中填寫 API 金鑰才能使用提問 AI 功能。"
   },
   "appLanguage": {
     "title": "應用程式語言",
-    "description": "變更 Handy 介面的語言"
+    "description": "變更 yukey 介面的語言"
   },
   "overlay": {
     "transcribing": "正在轉錄...",
-    "processing": "處理中..."
+    "processing": "處理中...",
+    "ai_listening": "提問 AI 中...",
+    "ai_processing": "AI 思考中...",
+    "translate_listening": "翻譯語音中...",
+    "translate_processing": "翻譯中...",
+    "post_process_processing": "AI 潤色中..."
   },
   "whatsNew": {
-    "title": "Handy v{{version}} 新功能"
+    "title": "yukey v{{version}} 新功能"
   }
 }

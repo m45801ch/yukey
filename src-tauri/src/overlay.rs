@@ -42,8 +42,8 @@ tauri_panel! {
 // Compact overlay (Minimal / transcribing / processing): the 40h pill animates
 // width from 172 (--ov-rest-w) to 216 (--ov-work-w) and expands from center, so
 // the window must fit the widest state plus a little slack.
-const OVERLAY_WIDTH: f64 = 256.0;
-const OVERLAY_HEIGHT: f64 = 46.0;
+const OVERLAY_WIDTH: f64 = 320.0;
+const OVERLAY_HEIGHT: f64 = 56.0;
 
 // Actual is 394x118, just a little extra
 const OVERLAY_STREAM_WIDTH: f64 = 400.0;

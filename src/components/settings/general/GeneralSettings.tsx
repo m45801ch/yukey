@@ -2,6 +2,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { type } from "@tauri-apps/plugin-os";
 import { MicrophoneSelector } from "../MicrophoneSelector";
+import { MicrophoneGain } from "../MicrophoneGain";
 import { ShortcutInput } from "../ShortcutInput";
 import { SettingsGroup } from "../../ui/SettingsGroup";
 import { OutputDeviceSelector } from "../OutputDeviceSelector";
@@ -11,10 +12,12 @@ import { useSettings } from "../../../hooks/useSettings";
 import { VolumeSlider } from "../VolumeSlider";
 import { MuteWhileRecording } from "../MuteWhileRecording";
 import { ModelSettingsCard } from "./ModelSettingsCard";
+import { ShowOverlay } from "../ShowOverlay";
+import { ThemeSelector } from "../ThemeSelector";
 
 export const GeneralSettings: React.FC = () => {
   const { t } = useTranslation();
-  const { audioFeedbackEnabled, getSetting } = useSettings();
+  const { audioFeedbackEnabled, getSetting, updateSetting } = useSettings();
   const pushToTalk = getSetting("push_to_talk");
   const isLinux = type() === "linux";
   return (
@@ -26,10 +29,21 @@ export const GeneralSettings: React.FC = () => {
         {!isLinux && !pushToTalk && (
           <ShortcutInput shortcutId="cancel" grouped={true} />
         )}
+        <ShortcutInput
+          shortcutId="translate"
+          descriptionMode="tooltip"
+          grouped={true}
+        />
+        <ShortcutInput
+          shortcutId="ask_ai"
+          descriptionMode="tooltip"
+          grouped={true}
+        />
       </SettingsGroup>
       <ModelSettingsCard />
       <SettingsGroup title={t("settings.sound.title")}>
         <MicrophoneSelector descriptionMode="tooltip" grouped={true} />
+        <MicrophoneGain descriptionMode="tooltip" grouped={true} />
         <MuteWhileRecording descriptionMode="tooltip" grouped={true} />
         <AudioFeedback descriptionMode="tooltip" grouped={true} />
         <OutputDeviceSelector
@@ -38,6 +52,12 @@ export const GeneralSettings: React.FC = () => {
           disabled={!audioFeedbackEnabled}
         />
         <VolumeSlider disabled={!audioFeedbackEnabled} />
+      </SettingsGroup>
+      <SettingsGroup
+        title={t("settings.overlay_and_theme.title", "懸浮窗與主題")}
+      >
+        <ShowOverlay descriptionMode="tooltip" grouped={true} />
+        <ThemeSelector descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
     </div>
   );

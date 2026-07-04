@@ -1,4 +1,8 @@
 fn main() {
+    let dest = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap())
+        .join("transcribe-libs");
+    let _ = std::fs::create_dir_all(&dest);
+
     #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
     build_apple_intelligence_bridge();
 

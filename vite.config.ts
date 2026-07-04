@@ -19,7 +19,11 @@ export default defineConfig(async () => ({
 
   // Multiple entry points for main app and overlay
   build: {
+    minify: false,
+    cssMinify: false,
+    outDir: "dist_new",
     rollupOptions: {
+      maxParallelFileOps: 1,
       input: {
         main: resolve(__dirname, "index.html"),
         overlay: resolve(__dirname, "src/overlay/index.html"),
@@ -33,14 +37,14 @@ export default defineConfig(async () => ({
   clearScreen: false,
   // 2. tauri expects a fixed port, fail if that port is not available
   server: {
-    port: 1420,
+    port: 5173,
     strictPort: true,
-    host: host || false,
+    host: "127.0.0.1",
     hmr: host
       ? {
           protocol: "ws",
           host,
-          port: 1421,
+          port: 5174,
         }
       : undefined,
     watch: {

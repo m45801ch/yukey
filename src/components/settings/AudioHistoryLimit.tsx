@@ -4,25 +4,25 @@ import { useSettings } from "../../hooks/useSettings";
 import { Input } from "../ui/Input";
 import { SettingContainer } from "../ui/SettingContainer";
 
-interface HistoryLimitProps {
+interface AudioHistoryLimitProps {
   descriptionMode?: "tooltip" | "inline";
   grouped?: boolean;
 }
 
-export const HistoryLimit: React.FC<HistoryLimitProps> = ({
+export const AudioHistoryLimit: React.FC<AudioHistoryLimitProps> = ({
   descriptionMode = "inline",
   grouped = false,
 }) => {
   const { t } = useTranslation();
   const { getSetting, updateSetting } = useSettings();
 
-  const historyLimit = getSetting("history_limit") ?? 5;
-  const [localValue, setLocalValue] = React.useState(String(historyLimit));
+  const audioHistoryLimit = getSetting("audio_history_limit") ?? 5;
+  const [localValue, setLocalValue] = React.useState(String(audioHistoryLimit));
 
   // Sync with outer setting if changed elsewhere
   React.useEffect(() => {
-    setLocalValue(String(historyLimit));
-  }, [historyLimit]);
+    setLocalValue(String(audioHistoryLimit));
+  }, [audioHistoryLimit]);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setLocalValue(event.target.value);
@@ -34,9 +34,9 @@ export const HistoryLimit: React.FC<HistoryLimitProps> = ({
       if (value < 0) value = 0;
       if (value > 999) value = 999;
       setLocalValue(String(value));
-      updateSetting("history_limit", value);
+      updateSetting("audio_history_limit", value);
     } else {
-      setLocalValue(String(historyLimit));
+      setLocalValue(String(audioHistoryLimit));
     }
   };
 
@@ -48,8 +48,8 @@ export const HistoryLimit: React.FC<HistoryLimitProps> = ({
 
   return (
     <SettingContainer
-      title={t("settings.debug.historyLimit.title")}
-      description={t("settings.debug.historyLimit.description")}
+      title={t("settings.debug.audioHistoryLimit.title")}
+      description={t("settings.debug.audioHistoryLimit.description")}
       descriptionMode={descriptionMode}
       grouped={grouped}
       layout="horizontal"
@@ -66,7 +66,7 @@ export const HistoryLimit: React.FC<HistoryLimitProps> = ({
           className="w-20"
         />
         <span className="text-sm text-text">
-          {t("settings.debug.historyLimit.entries")}
+          {t("settings.debug.audioHistoryLimit.entries")}
         </span>
       </div>
     </SettingContainer>

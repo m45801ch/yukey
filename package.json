@@ -1,13 +1,14 @@
 {
-  "name": "handy-app",
+  "name": "yukey-app",
   "private": true,
-  "version": "0.9.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "tauri": "tauri",
+    "output": "bun run tauri build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --write . && cd src-tauri && cargo fmt",

@@ -474,7 +474,7 @@ fn run_headless_transcription(app: &AppHandle, args: &CliArgs) -> i32 {
             }
         }
         let t = Instant::now();
-        match tm.transcribe(samples.clone()) {
+        match tm.transcribe(samples.clone(), "transcribe") {
             Ok(out) => text = out,
             Err(e) => {
                 eprintln!("error: transcribe failed: {}", e);
@@ -541,6 +541,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_start_hidden_setting,
             shortcut::change_autostart_setting,
             shortcut::change_translate_to_english_setting,
+            shortcut::change_translate_using_llm_setting,
+            shortcut::change_translate_target_language_setting,
             shortcut::change_selected_language_setting,
             shortcut::change_overlay_position_setting,
             shortcut::change_overlay_style_setting,
@@ -626,16 +628,24 @@ pub fn run(cli_args: CliArgs) {
             commands::audio::set_clamshell_microphone,
             commands::audio::get_clamshell_microphone,
             commands::audio::is_recording,
+            commands::audio::set_microphone_gain_enabled,
+            commands::audio::set_microphone_gain_value,
             commands::transcription::set_model_unload_timeout,
             commands::transcription::get_model_load_status,
             commands::transcription::unload_model_manually,
             commands::history::get_history_entries,
+            commands::history::get_usage_stats,
             commands::history::toggle_history_entry_saved,
             commands::history::get_audio_file_path,
             commands::history::delete_history_entry,
             commands::history::retry_history_entry_transcription,
             commands::history::update_history_limit,
+            commands::history::update_audio_history_limit,
             commands::history::update_recording_retention_period,
+            commands::history::clear_all_history,
+            commands::history::clear_all_saved_history,
+            commands::history::get_history_stats,
+            commands::history::export_audio_file,
             helpers::clamshell::is_laptop,
         ])
         .events(collect_events![
@@ -799,9 +809,9 @@ pub fn run(cli_args: CliArgs) {
             // for portable mode (redirects WebView2 cache to portable Data dir)
             let mut win_builder =
                 tauri::WebviewWindowBuilder::new(app, "main", tauri::WebviewUrl::App("/".into()))
-                    .title("Handy")
-                    .inner_size(680.0, 570.0)
-                    .min_inner_size(680.0, 570.0)
+                    .title("yukey")
+                    .inner_size(1226.0, 800.0)
+                    .min_inner_size(1226.0, 800.0)
                     .resizable(true)
                     .maximizable(false)
                     .visible(false);

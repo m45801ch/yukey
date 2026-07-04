@@ -125,7 +125,7 @@ impl AudioRecorder {
         self
     }
 
-    pub fn open(&mut self, device: Option<Device>) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn open(&mut self, device: Option<Device>, gain: f32) -> Result<(), Box<dyn std::error::Error>> {
         if self.worker_handle.is_some() {
             return Ok(()); // already open
         }
@@ -174,6 +174,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        gain,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I8 => AudioRecorder::build_stream::<i8>(
@@ -182,6 +183,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        gain,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I16 => AudioRecorder::build_stream::<i16>(
@@ -190,6 +192,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        gain,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::I32 => AudioRecorder::build_stream::<i32>(
@@ -198,6 +201,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        gain,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     cpal::SampleFormat::F32 => AudioRecorder::build_stream::<f32>(
@@ -206,6 +210,7 @@ impl AudioRecorder {
                         sample_tx,
                         channels,
                         stop_flag_for_stream,
+                        gain,
                     )
                     .map_err(|e| format!("Failed to build input stream: {e}"))?,
                     sample_format => {
@@ -299,6 +304,7 @@ impl AudioRecorder {
         sample_tx: mpsc::Sender<AudioChunk>,
         channels: usize,
         stop_flag: Arc<AtomicBool>,
+        gain: f32,
     ) -> Result<cpal::Stream, cpal::BuildStreamError>
     where
         T: Sample + SizedSample + Send + 'static,
@@ -320,18 +326,22 @@ impl AudioRecorder {
             output_buffer.clear();
 
             if channels == 1 {
-                output_buffer.extend(data.iter().map(|&sample| sample.to_sample::<f32>()));
+                output_buffer.extend(
+                    data.iter()
+                        .map(|&sample| (sample.to_sample::<f32>() * gain).clamp(-1.0, 1.0)),
+                );
             } else {
                 let frame_count = data.len() / channels;
                 output_buffer.reserve(frame_count);
 
                 for frame in data.chunks_exact(channels) {
-                    let mono_sample = frame
+                    let mono_sample = (frame
                         .iter()
                         .map(|&sample| sample.to_sample::<f32>())
                         .sum::<f32>()
-                        / channels as f32;
-                    output_buffer.push(mono_sample);
+                        / channels as f32)
+                        * gain;
+                    output_buffer.push(mono_sample.clamp(-1.0, 1.0));
                 }
             }
 

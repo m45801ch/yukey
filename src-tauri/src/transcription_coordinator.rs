@@ -5,7 +5,7 @@ use std::sync::mpsc::{self, Sender};
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 const DEBOUNCE: Duration = Duration::from_millis(30);
 
@@ -24,6 +24,7 @@ enum Command {
 }
 
 /// Pipeline lifecycle, owned exclusively by the coordinator thread.
+#[derive(Debug)]
 enum Stage {
     Idle,
     Recording(String), // binding_id
@@ -38,7 +39,10 @@ pub struct TranscriptionCoordinator {
 }
 
 pub fn is_transcribe_binding(id: &str) -> bool {
-    id == "transcribe" || id == "transcribe_with_post_process"
+    id == "transcribe"
+        || id == "transcribe_with_post_process"
+        || id == "translate"
+        || id == "ask_ai"
 }
 
 impl TranscriptionCoordinator {
@@ -72,10 +76,49 @@ impl TranscriptionCoordinator {
                             if push_to_talk {
                                 if is_pressed && matches!(stage, Stage::Idle) {
                                     start(&app, &mut stage, &binding_id, &hotkey_string);
-                                } else if !is_pressed
-                                    && matches!(&stage, Stage::Recording(id) if id == &binding_id)
+                                } else if is_pressed
+                                    && matches!(&stage, Stage::Recording(ref id) if id != &binding_id && (binding_id == "ask_ai" || binding_id == "translate" || binding_id == "transcribe_with_post_process"))
                                 {
-                                    stop(&app, &mut stage, &binding_id, &hotkey_string);
+                                    debug!(
+                                        "Switching active recording from '{:?}' to '{}'",
+                                        stage, binding_id
+                                    );
+                                    let new_id = binding_id.clone();
+                                    stage = Stage::Recording(new_id.clone());
+                                    if let Some(audio_manager) =
+                                        app.try_state::<Arc<AudioRecordingManager>>()
+                                    {
+                                        audio_manager.switch_binding_id(&new_id);
+                                    }
+                                    // Play sound feedback for the switch (1.5x speed for a short blip)
+                                    let sound = match new_id.as_str() {
+                                        "ask_ai" => crate::audio_feedback::SoundType::AiStart,
+                                        "translate" => {
+                                            crate::audio_feedback::SoundType::TranslateStart
+                                        }
+                                        "transcribe_with_post_process" => {
+                                            crate::audio_feedback::SoundType::PostProcessStart
+                                        }
+                                        _ => crate::audio_feedback::SoundType::Start,
+                                    };
+                                    crate::audio_feedback::play_feedback_sound_at_speed(
+                                        &app, sound, 1.5,
+                                    );
+                                    // Notify frontend
+                                    let _ = app.emit("active-binding-changed", new_id);
+                                } else if !is_pressed {
+                                    let mut should_stop = None;
+                                    if let Stage::Recording(ref active_id) = stage {
+                                        if active_id == &binding_id
+                                            || ((active_id == "ask_ai" || active_id == "translate")
+                                                && binding_id != *active_id)
+                                        {
+                                            should_stop = Some(active_id.clone());
+                                        }
+                                    }
+                                    if let Some(stop_id) = should_stop {
+                                        stop(&app, &mut stage, &stop_id, &hotkey_string);
+                                    }
                                 }
                             } else if is_pressed {
                                 match &stage {
@@ -84,6 +127,37 @@ impl TranscriptionCoordinator {
                                     }
                                     Stage::Recording(id) if id == &binding_id => {
                                         stop(&app, &mut stage, &binding_id, &hotkey_string);
+                                    }
+                                    Stage::Recording(id)
+                                        if id != &binding_id
+                                            && (binding_id == "ask_ai"
+                                                || binding_id == "translate"
+                                                || binding_id == "transcribe_with_post_process") =>
+                                    {
+                                        debug!("Switching active recording from '{id}' to '{binding_id}'");
+                                        let new_id = binding_id.clone();
+                                        stage = Stage::Recording(new_id.clone());
+                                        if let Some(audio_manager) =
+                                            app.try_state::<Arc<AudioRecordingManager>>()
+                                        {
+                                            audio_manager.switch_binding_id(&new_id);
+                                        }
+                                        // Play sound feedback for the switch
+                                        let sound = match new_id.as_str() {
+                                            "ask_ai" => crate::audio_feedback::SoundType::AiStart,
+                                            "translate" => {
+                                                crate::audio_feedback::SoundType::TranslateStart
+                                            }
+                                            "transcribe_with_post_process" => {
+                                                crate::audio_feedback::SoundType::PostProcessStart
+                                            }
+                                            _ => crate::audio_feedback::SoundType::Start,
+                                        };
+                                        crate::audio_feedback::play_feedback_sound_at_speed(
+                                            &app, sound, 1.5,
+                                        );
+                                        // Notify frontend
+                                        let _ = app.emit("active-binding-changed", new_id);
                                     }
                                     _ => {
                                         debug!("Ignoring press for '{binding_id}': pipeline busy")

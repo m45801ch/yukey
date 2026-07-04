@@ -174,8 +174,17 @@ const capitalizeKey = (key: string): string => {
  * e.g. "shift_left" -> "Left Shift", "option" -> "Option", "space" -> "Space"
  */
 const formatKeyPart = (part: string): string => {
-  const trimmed = part.trim();
+  let trimmed = part.trim();
   if (!trimmed) return "";
+
+  // Normalize "control" to "ctrl" for cleaner display
+  if (trimmed === "control") {
+    trimmed = "ctrl";
+  } else if (trimmed === "control_left") {
+    trimmed = "ctrl_left";
+  } else if (trimmed === "control_right") {
+    trimmed = "ctrl_right";
+  }
 
   if (trimmed.endsWith("_left")) {
     const name = trimmed.slice(0, -5);

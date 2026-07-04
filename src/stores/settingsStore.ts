@@ -30,7 +30,11 @@ interface SettingsStore {
   refreshSettings: () => Promise<void>;
   refreshAudioDevices: () => Promise<void>;
   refreshOutputDevices: () => Promise<void>;
-  updateBinding: (id: string, binding: string) => Promise<void>;
+  updateBinding: (
+    id: string,
+    binding: string,
+    force?: boolean,
+  ) => Promise<void>;
   resetBinding: (id: string) => Promise<void>;
   getSetting: <K extends keyof Settings>(key: K) => Settings[K] | undefined;
   isUpdatingKey: (key: string) => boolean;
@@ -99,6 +103,10 @@ const settingUpdaters: {
         ? "default"
         : (value as string),
     ),
+  microphone_gain_enabled: (value) =>
+    commands.setMicrophoneGainEnabled(value as boolean),
+  microphone_gain_value: (value) =>
+    commands.setMicrophoneGainValue(value as number),
   clamshell_microphone: (value) =>
     commands.setClamshellMicrophone(
       (value as string) === "Default" ? "default" : (value as string),
@@ -113,6 +121,10 @@ const settingUpdaters: {
     commands.updateRecordingRetentionPeriod(value as string),
   translate_to_english: (value) =>
     commands.changeTranslateToEnglishSetting(value as boolean),
+  translate_using_llm: (value) =>
+    commands.changeTranslateUsingLlmSetting(value as boolean),
+  translate_target_language: (value) =>
+    commands.changeTranslateTargetLanguageSetting(value as string),
   selected_language: (value) =>
     commands.changeSelectedLanguageSetting(value as string),
   overlay_position: (value) =>
@@ -133,6 +145,7 @@ const settingUpdaters: {
   auto_submit_key: (value) =>
     commands.changeAutoSubmitKeySetting(value as string),
   history_limit: (value) => commands.updateHistoryLimit(value as number),
+  audio_history_limit: (value) => commands.updateAudioHistoryLimit(value as number),
   post_process_enabled: (value) =>
     commands.changePostProcessEnabledSetting(value as boolean),
   post_process_selected_prompt_id: (value) =>
@@ -319,7 +332,7 @@ export const useSettingsStore = create<SettingsStore>()(
     },
 
     // Update a specific binding
-    updateBinding: async (id, binding) => {
+    updateBinding: async (id, binding, force = false) => {
       const { settings, setUpdating } = get();
       const updateKey = `binding_${id}`;
       const originalBinding = settings?.bindings?.[id]?.current_binding;
@@ -343,17 +356,40 @@ export const useSettingsStore = create<SettingsStore>()(
             : null,
         }));
 
-        const result = await commands.changeBinding(id, binding);
+        let result = await commands.changeBinding(id, binding, force);
 
         // Check if the command executed successfully
         if (result.status === "error") {
           throw new Error(result.error);
         }
 
-        // Check if the binding change was successful
-        if (!result.data.success) {
+        // Check for conflict
+        if (!result.data.success && result.data.error === "conflict") {
+          const conflictName =
+            result.data.conflict_name || result.data.conflict_id || "其他功能";
+          const confirmOverwrite = window.confirm(
+            `此快捷鍵與「${conflictName}」衝突。是否要覆蓋並清除「${conflictName}」的快捷鍵？`,
+          );
+
+          if (confirmOverwrite) {
+            // Try again with force = true
+            result = await commands.changeBinding(id, binding, true);
+            if (result.status === "error") {
+              throw new Error(result.error);
+            }
+            if (!result.data.success) {
+              throw new Error(result.data.error || "Failed to update binding");
+            }
+          } else {
+            // Cancel and roll back
+            throw new Error("Conflict not resolved by user");
+          }
+        } else if (!result.data.success) {
           throw new Error(result.data.error || "Failed to update binding");
         }
+
+        // Refresh settings to sync any other bindings that might have been cleared/updated due to conflict
+        await get().refreshSettings();
       } catch (error) {
         console.error(`Failed to update binding ${id}:`, error);
 
