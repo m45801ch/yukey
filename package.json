@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && node --max-old-space-size=4096 node_modules/vite/bin/vite.js build",
+    "build": "tsc && bun x --bun vite build",
     "preview": "vite preview",
     "tauri": "tauri",
     "output": "bun run tauri build",
