@@ -42,34 +42,3 @@ blob-report/
 
 # Nix build output
 result
-
-# Models and Binary weights
-*.onnx
-*.bin
-src-tauri/resources/models/
-src-tauri/target/
-target/
-
-# Local env files
-.env
-.env.*
-.env.local
-
-# Sensitive files (Private Keys, Certificates)
-*.key
-*.pem
-*.pfx
-*.cer
-*.crt
-src-tauri/tauri.key
-
-# Databases and user history
-*.db
-*.sqlite
-*.sqlite3
-history.json
-settings.json
-
-# System files
-Thumbs.db
-

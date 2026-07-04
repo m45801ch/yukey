@@ -62,24 +62,20 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
     }
 }
 
-// 靜態內嵌所有托盤圖示，確保在編譯時 100% 打包進 execution 檔案中，排除任何快取問題
-static TRAY_IDLE_BYTES: &[u8] = include_bytes!("../resources/tray_idle.png");
-static TRAY_RECORDING_BYTES: &[u8] = include_bytes!("../resources/tray_recording.png");
-static TRAY_TRANSCRIBING_BYTES: &[u8] = include_bytes!("../resources/tray_transcribing.png");
-
-pub fn get_icon_image(state: TrayIconState) -> Image<'static> {
-    let bytes = match state {
-        TrayIconState::Idle => TRAY_IDLE_BYTES,
-        TrayIconState::Recording => TRAY_RECORDING_BYTES,
-        TrayIconState::Transcribing => TRAY_TRANSCRIBING_BYTES,
-    };
-    Image::from_bytes(bytes).expect("Failed to load tray icon from static bytes")
-}
-
 pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
     let tray = app.state::<TrayIcon>();
-    let image = get_icon_image(icon.clone());
-    let _ = tray.set_icon(Some(image));
+    let theme = get_current_theme(app);
+
+    let icon_path = get_icon_path(theme, icon.clone());
+
+    let _ = tray.set_icon(Some(
+        Image::from_path(
+            app.path()
+                .resolve(icon_path, tauri::path::BaseDirectory::Resource)
+                .expect("failed to resolve"),
+        )
+        .expect("failed to set icon"),
+    ));
 
     // Update menu based on state
     update_tray_menu(app, &icon, None);
@@ -91,9 +87,9 @@ pub fn tray_tooltip() -> String {
 
 fn version_label() -> String {
     if cfg!(debug_assertions) {
-        format!("yukey v{} (Dev)", env!("CARGO_PKG_VERSION"))
+        format!("Handy v{} (Dev)", env!("CARGO_PKG_VERSION"))
     } else {
-        format!("yukey v{}", env!("CARGO_PKG_VERSION"))
+        format!("Handy v{}", env!("CARGO_PKG_VERSION"))
     }
 }
 

@@ -10,6 +10,7 @@ import {
 import { toast } from "sonner";
 import { commands } from "@/bindings";
 import { useSettingsStore } from "@/stores/settingsStore";
+import HandyTextLogo from "../icons/HandyTextLogo";
 import { Keyboard, Mic, Check, Loader2 } from "lucide-react";
 
 interface AccessibilityOnboardingProps {
@@ -307,7 +308,7 @@ const AccessibilityOnboarding: React.FC<AccessibilityOnboardingProps> = ({
   return (
     <div className="h-screen w-screen flex flex-col p-6 gap-6 items-center justify-center">
       <div className="flex flex-col items-center gap-2">
-        <h1 className="text-4xl font-extrabold text-logo-primary tracking-wider my-4">yukey</h1>
+        <HandyTextLogo width={200} />
       </div>
 
       <div className="max-w-md w-full flex flex-col items-center gap-4">

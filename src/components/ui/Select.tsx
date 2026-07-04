@@ -102,10 +102,6 @@ const selectStyles: StylesConfig<SelectOption, false> = {
       "1px solid color-mix(in srgb, var(--color-mid-gray) 30%, transparent)",
     boxShadow: "0 10px 30px rgba(15, 15, 15, 0.2)",
   }),
-  menuPortal: (base) => ({
-    ...base,
-    zIndex: 9999,
-  }),
   option: (base, state) => ({
     ...base,
     backgroundColor: state.isSelected
@@ -164,8 +160,6 @@ export const Select: React.FC<SelectProps> = React.memo(
       onBlur,
       isClearable,
       styles: selectStyles,
-      menuPortalTarget: typeof document !== "undefined" ? document.body : null,
-      menuPosition: "fixed",
     };
 
     if (isCreatable) {

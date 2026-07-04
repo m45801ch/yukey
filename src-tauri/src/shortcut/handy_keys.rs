@@ -167,16 +167,6 @@ impl HandyKeysState {
                     }
                     ManagerCommand::Shutdown => {
                         info!("handy-keys manager thread shutting down");
-                        #[cfg(target_os = "windows")]
-                        {
-                            use enigo::{Enigo, Key, Keyboard, Settings};
-                            if let Ok(mut enigo) = Enigo::new(&Settings::default()) {
-                                let _ = enigo.key(Key::Control, enigo::Direction::Release);
-                                let _ = enigo.key(Key::Alt, enigo::Direction::Release);
-                                let _ = enigo.key(Key::Shift, enigo::Direction::Release);
-                                let _ = enigo.key(Key::Meta, enigo::Direction::Release);
-                            }
-                        }
                         break;
                     }
                 },

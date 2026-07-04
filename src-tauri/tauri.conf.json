@@ -1,12 +1,12 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "yukey",
-  "version": "0.1.0",
-  "identifier": "com.yukey.app",
+  "productName": "Handy",
+  "version": "0.9.0",
+  "identifier": "com.pais.handy",
   "build": {
     "beforeDevCommand": "bun run dev",
-    "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "fnm exec --using=22 -- node.exe node_modules\\typescript\\lib\\tsc.js && fnm exec --using=22 -- node.exe node_modules\\vite\\bin\\vite.js build",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "bun run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -25,16 +25,9 @@
   },
   "bundle": {
     "active": true,
-    "createUpdaterArtifacts": false,
+    "createUpdaterArtifacts": true,
     "targets": "all",
-    "resources": [
-      "resources/default_settings.json",
-      "resources/handy.png",
-      "resources/*.wav",
-      "resources/*.png",
-      "resources/models/silero_vad_v4.onnx",
-      "resources/models/gigaam_vocab.txt"
-    ],
+    "resources": ["resources/**/*"],
     "license": "MIT",
     "icon": [
       "icons/32x32.png",
@@ -52,19 +45,28 @@
     },
     "linux": {
       "deb": {
-        "depends": ["libgtk-layer-shell0"]
+        "depends": ["libgtk-layer-shell0"],
+        "files": {
+          "/usr/lib": "transcribe-libs"
+        }
       },
       "rpm": {
         "compression": {
           "type": "none"
+        },
+        "files": {
+          "/usr/lib": "transcribe-libs"
         }
       },
       "appimage": {
         "bundleMediaFramework": true,
-        "files": {}
+        "files": {
+          "/usr/lib": "transcribe-libs"
+        }
       }
     },
     "windows": {
+      "signCommand": "trusted-signing-cli -e https://eus.codesigning.azure.net/ -a CJ-Signing -c cjpais-dev -d Handy %1",
       "nsis": {
         "template": "nsis/installer.nsi"
       }
@@ -72,9 +74,9 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQzQ0U5RDBDRUNFQjVGNDMKUldSRFgrdnNESjNPUTlsUE1aNDFaOW9PM2ZYYS9oUXZ0SVE1VGM0R1hXYkhFcXljWTNNeWVoaUwK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEJBQjcyMDk1MjA2NjAxRjkKUldUNUFXWWdsU0MzdXRRZi8zYzhqV2FaNUVDbDd2Rk5VM1IvWWowVXdmRFNKQ1BrMXF5RFFsLy8K",
       "endpoints": [
-        "https://github.com/m45801ch/yukey/releases/latest/download/latest.json"
+        "https://github.com/cjpais/Handy/releases/latest/download/latest.json"
       ]
     }
   }

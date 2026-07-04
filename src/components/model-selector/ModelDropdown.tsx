@@ -55,13 +55,18 @@ const ModelDropdown: React.FC<ModelDropdownProps> = ({
                         {t("modelSelector.custom")}
                       </span>
                     )}
+                    {model.supports_streaming && (
+                      <span className="ms-1.5 text-[10px] font-medium text-logo-primary/70 uppercase">
+                        {t("modelSelector.streaming")}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xs text-text/40 italic pe-4">
                     {getTranslatedModelDescription(model, t)}
                   </div>
                 </div>
                 {currentModelId === model.id && (
-                  <div className="text-xs text-logo-primary whitespace-nowrap flex-shrink-0 ms-2">
+                  <div className="text-xs text-logo-primary">
                     {t("modelSelector.active")}
                   </div>
                 )}

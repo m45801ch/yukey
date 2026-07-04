@@ -3,18 +3,46 @@ import { useTranslation } from "react-i18next";
 import { SettingContainer } from "../ui/SettingContainer";
 import { ResetButton } from "../ui/ResetButton";
 import { useSettings } from "../../hooks/useSettings";
-import { LANGUAGES } from "../../lib/constants/languages";
+import {
+  getLanguageLabel,
+  recognitionLanguage,
+  SELECTABLE_LANGUAGES,
+  supportsLanguageCode,
+} from "../../lib/constants/languages";
 
 interface LanguageSelectorProps {
   descriptionMode?: "inline" | "tooltip";
   grouped?: boolean;
   supportedLanguages?: string[];
+  // Whether the model can auto-detect language. Gates the "Auto" option:
+  // must-pick models (no detection) omit it and force a concrete choice.
+  supportsLanguageDetection?: boolean;
 }
+
+// Mirrors the matching logic of `effective_language` in
+// src-tauri/src/managers/model.rs. The Rust function is authoritative for the
+// *concrete* code the engine receives (e.g. "en-US"); this resolves the
+// canonical *base* code ("en") so the highlighted picker item matches an entry
+// in the LANGUAGES list. Matching is base-aware (`supportsLanguageCode` strips
+// region/script subtags), so a model advertising full locales still resolves.
+const effectiveLanguage = (
+  intent: string,
+  supported: string[],
+  supportsDetection: boolean,
+): string => {
+  if (supported.length === 0) return intent;
+  if (intent !== "auto" && supportsLanguageCode(supported, intent))
+    return intent;
+  if (supportsDetection) return "auto";
+  if (supportsLanguageCode(supported, "en")) return "en";
+  return recognitionLanguage(supported[0]);
+};
 
 export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   descriptionMode = "tooltip",
   grouped = false,
   supportedLanguages,
+  supportsLanguageDetection = true,
 }) => {
   const { t } = useTranslation();
   const { getSetting, updateSetting, resetSetting, isUpdating } = useSettings();
@@ -23,7 +51,14 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const selectedLanguage = getSetting("selected_language") || "auto";
+  // The persisted *intent* (auto | code). What's actually used/shown is the
+  // effective value resolved against the current model's capabilities.
+  const intent = getSetting("selected_language") || "auto";
+  const selectedLanguage = effectiveLanguage(
+    intent,
+    supportedLanguages ?? [],
+    supportsLanguageDetection,
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,12 +85,13 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
 
   const availableLanguages = useMemo(() => {
     if (!supportedLanguages || supportedLanguages.length === 0)
-      return LANGUAGES;
-    return LANGUAGES.filter(
-      (lang) =>
-        lang.value === "auto" || supportedLanguages.includes(lang.value),
+      return SELECTABLE_LANGUAGES;
+    return SELECTABLE_LANGUAGES.filter((lang) =>
+      lang.value === "auto"
+        ? supportsLanguageDetection
+        : supportsLanguageCode(supportedLanguages, lang.value),
     );
-  }, [supportedLanguages]);
+  }, [supportedLanguages, supportsLanguageDetection]);
 
   const filteredLanguages = useMemo(
     () =>
@@ -66,8 +102,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   );
 
   const selectedLanguageName =
-    LANGUAGES.find((lang) => lang.value === selectedLanguage)?.label ||
-    t("settings.general.language.auto");
+    getLanguageLabel(selectedLanguage) || t("settings.general.language.auto");
 
   const handleLanguageSelect = async (languageCode: string) => {
     await updateSetting("selected_language", languageCode);
@@ -106,10 +141,10 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       grouped={grouped}
     >
       <div className="flex items-center space-x-1">
-        <div className="relative w-[200px]" ref={dropdownRef}>
+        <div className="relative" ref={dropdownRef}>
           <button
             type="button"
-            className={`px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 rounded w-full text-start flex items-center justify-between transition-all duration-150 ${
+            className={`px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 rounded min-w-[200px] text-start flex items-center justify-between transition-all duration-150 ${
               isUpdating("selected_language")
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:bg-logo-primary/10 cursor-pointer hover:border-logo-primary"
@@ -136,7 +171,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
           </button>
 
           {isOpen && !isUpdating("selected_language") && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-mid-gray/80 rounded shadow-lg z-50 h-auto overflow-visible">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-background border border-mid-gray/80 rounded shadow-lg z-50 max-h-60 overflow-hidden">
               {/* Search input */}
               <div className="p-2 border-b border-mid-gray/80">
                 <input
@@ -150,7 +185,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 />
               </div>
 
-              <div className="max-h-48 overflow-y-auto overflow-x-hidden scrollbar-none">
+              <div className="max-h-48 overflow-y-auto">
                 {filteredLanguages.length === 0 ? (
                   <div className="px-2 py-2 text-sm text-mid-gray text-center">
                     {t("settings.general.language.noResults")}

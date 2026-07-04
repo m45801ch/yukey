@@ -11,23 +11,12 @@ import { useSettings } from "../../../hooks/useSettings";
 import { VolumeSlider } from "../VolumeSlider";
 import { MuteWhileRecording } from "../MuteWhileRecording";
 import { ModelSettingsCard } from "./ModelSettingsCard";
-import { AppLanguageSelector } from "../AppLanguageSelector";
-import { ThemeSelector } from "../ThemeSelector";
-import { LanguageSelector } from "../LanguageSelector";
-import { useModelStore } from "../../../stores/modelStore";
-import type { ModelInfo } from "@/bindings";
 
 export const GeneralSettings: React.FC = () => {
   const { t } = useTranslation();
   const { audioFeedbackEnabled, getSetting } = useSettings();
-  const { currentModel, models } = useModelStore();
   const pushToTalk = getSetting("push_to_talk");
   const isLinux = type() === "linux";
-
-  const currentModelInfo = models.find((m: ModelInfo) => m.id === currentModel);
-  const supportsLanguageSelection =
-    currentModelInfo?.supports_language_selection ?? false;
-
   return (
     <div className="max-w-3xl w-full mx-auto space-y-6">
       <SettingsGroup title={t("settings.general.title")}>
@@ -38,20 +27,7 @@ export const GeneralSettings: React.FC = () => {
           <ShortcutInput shortcutId="cancel" grouped={true} />
         )}
       </SettingsGroup>
-
-      <SettingsGroup title="語言">
-        <AppLanguageSelector descriptionMode="tooltip" grouped={true} />
-        {currentModel && currentModelInfo && supportsLanguageSelection && (
-          <LanguageSelector
-            descriptionMode="tooltip"
-            grouped={true}
-            supportedLanguages={currentModelInfo.supported_languages}
-          />
-        )}
-      </SettingsGroup>
-
       <ModelSettingsCard />
-
       <SettingsGroup title={t("settings.sound.title")}>
         <MicrophoneSelector descriptionMode="tooltip" grouped={true} />
         <MuteWhileRecording descriptionMode="tooltip" grouped={true} />
@@ -62,10 +38,6 @@ export const GeneralSettings: React.FC = () => {
           disabled={!audioFeedbackEnabled}
         />
         <VolumeSlider disabled={!audioFeedbackEnabled} />
-      </SettingsGroup>
-
-      <SettingsGroup title="外觀">
-        <ThemeSelector descriptionMode="tooltip" grouped={true} />
       </SettingsGroup>
     </div>
   );

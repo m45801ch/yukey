@@ -419,6 +419,11 @@ export const PostProcessingSettingsApi = React.memo(
 );
 PostProcessingSettingsApi.displayName = "PostProcessingSettingsApi";
 
+export const PostProcessingSettingsPrompts = React.memo(
+  PostProcessingSettingsPromptsComponent,
+);
+PostProcessingSettingsPrompts.displayName = "PostProcessingSettingsPrompts";
+
 export const PostProcessingSettings: React.FC = () => {
   const { t } = useTranslation();
 
@@ -434,6 +439,10 @@ export const PostProcessingSettings: React.FC = () => {
 
       <SettingsGroup title={t("settings.postProcessing.api.title")}>
         <PostProcessingSettingsApi />
+      </SettingsGroup>
+
+      <SettingsGroup title={t("settings.postProcessing.prompts.title")}>
+        <PostProcessingSettingsPrompts />
       </SettingsGroup>
     </div>
   );

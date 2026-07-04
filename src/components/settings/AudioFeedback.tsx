@@ -26,7 +26,6 @@ export const AudioFeedback: React.FC<AudioFeedbackProps> = React.memo(
           description={t("settings.sound.audioFeedback.description")}
           descriptionMode={descriptionMode}
           grouped={grouped}
-          alignToRightBorder={false}
         />
       </div>
     );

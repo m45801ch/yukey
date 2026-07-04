@@ -119,23 +119,24 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
     );
   }
 
+  // Horizontal layout (default)
   const horizontalContainerClasses = grouped
-    ? "flex items-center justify-between gap-4 px-4 py-3"
-    : "flex items-center justify-between gap-4 px-4 py-3 rounded-lg border border-mid-gray/15 bg-background-ui";
+    ? "flex items-center justify-between min-h-12 px-4 p-2"
+    : "flex items-center justify-between min-h-12 px-4 p-2 rounded-lg border border-mid-gray/20";
 
-  return (
-    <div className={horizontalContainerClasses}>
-      <div className="max-w-2/3">
-        <div className="flex items-center gap-2">
-          <h3
-            className={`text-sm font-semibold text-text ${disabled ? "opacity-50" : ""}`}
-          >
-            {title}
-          </h3>
-          {descriptionMode === "tooltip" && (
+  if (descriptionMode === "tooltip") {
+    return (
+      <div className={horizontalContainerClasses}>
+        <div className="max-w-2/3">
+          <div className="flex items-center gap-2">
+            <h3
+              className={`text-sm font-medium ${disabled ? "opacity-50" : ""}`}
+            >
+              {title}
+            </h3>
             <div
               ref={tooltipRef}
-              className="relative flex items-center"
+              className="relative"
               onMouseEnter={() => setShowTooltip(true)}
               onMouseLeave={() => setShowTooltip(false)}
               onClick={toggleTooltip}
@@ -170,19 +171,24 @@ export const SettingContainer: React.FC<SettingContainerProps> = ({
                 </Tooltip>
               )}
             </div>
-          )}
+          </div>
         </div>
-        {descriptionMode === "inline" && (
-          <p
-            className={`text-xs text-mid-gray mt-0.5 leading-relaxed ${disabled ? "opacity-50" : ""}`}
-          >
-            {description}
-          </p>
-        )}
+        <div className="relative">{children}</div>
       </div>
-      <div className="relative flex-shrink-0 w-[242px] flex items-center justify-end gap-1.5">
-        {children}
+    );
+  }
+
+  return (
+    <div className={horizontalContainerClasses}>
+      <div className="max-w-2/3">
+        <h3 className={`text-sm font-medium ${disabled ? "opacity-50" : ""}`}>
+          {title}
+        </h3>
+        <p className={`text-sm ${disabled ? "opacity-50" : ""}`}>
+          {description}
+        </p>
       </div>
+      <div className="relative">{children}</div>
     </div>
   );
 };
