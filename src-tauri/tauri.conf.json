@@ -6,7 +6,7 @@
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://127.0.0.1:5173",
-    "beforeBuildCommand": "bun run build",
+    "beforeBuildCommand": "fnm exec --using=22 -- node.exe node_modules\\typescript\\lib\\tsc.js && fnm exec --using=22 -- node.exe node_modules\\vite\\bin\\vite.js build",
     "frontendDist": "../dist_new"
   },
   "app": {
@@ -73,7 +73,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQzQ0U5RDBDRUNFQjVGNDMKUldSRFgrdnNESjNPUTlsUE1aNDFaOW9PM2ZYYS9oUXZ0SVE1VGM0R1hXYkhFcXljWTNNeWVoaUwK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDA1MENGNTdFMEEwOUU1NDIKUldSQzVRa0tmdlVNQmFRYzdSVGR5ajU3OEtENCtwNTVEUDJCK0NaeThmS0Fvb2dUN2NtbG1CMnAK",
       "endpoints": [
         "https://github.com/m45801ch/yukey/releases/latest/download/latest.json"
       ]

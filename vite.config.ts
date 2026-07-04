@@ -1,13 +1,25 @@
-import { defineConfig } from "vite";
+import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
+
+function removeCrossoriginPlugin(): Plugin {
+  return {
+    name: "remove-crossorigin",
+    enforce: "post",
+    transformIndexTags(html) {
+      return html
+        .replace(/<script([^>]*)crossorigin[^>]*>/gi, "<script$1>")
+        .replace(/<link([^>]*)crossorigin([^>]*)>/gi, "<link$1$2>");
+    },
+  };
+}
 
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), removeCrossoriginPlugin()],
 
   // Path aliases
   resolve: {
@@ -19,6 +31,7 @@ export default defineConfig(async () => ({
 
   // Multiple entry points for main app and overlay
   build: {
+    base: "./",
     minify: false,
     cssMinify: false,
     outDir: "dist_new",
