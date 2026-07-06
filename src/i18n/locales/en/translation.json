@@ -9,13 +9,213 @@
     "cancel": "Cancel"
   },
   "sidebar": {
+    "overview": "Overview",
     "general": "General",
     "models": "Models",
     "advanced": "Advanced",
     "postProcessing": "Post Process",
     "history": "History",
     "debug": "Debug",
-    "about": "About"
+    "about": "About",
+    "vocab": "Vocabulary",
+    "style": "Style",
+    "settings": "Settings",
+    "center": "Settings Center"
+  },
+  "pages": {
+    "overview": {
+      "title": "Today's Overview",
+      "notEnabled": "Not Enabled",
+      "noModel": "No model loaded",
+      "aiModel": "AI Refinement Model",
+      "todayChars": "Today's Characters",
+      "todayDuration": "Today's Duration",
+      "avgChars": "Avg Chars/Segment",
+      "totalCount": "Total Records",
+      "weeklyChart": "Last 7 Days Distribution",
+      "recentEntries": "Recent Transcriptions",
+      "noEntries": "No transcriptions yet",
+      "charCount": "{{count}} chars",
+      "durationZero": "0 sec",
+      "durationMin": "{{m}} min {{s}} sec",
+      "durationSec": "{{s}} sec"
+    },
+    "history": {
+      "title": "History",
+      "entryList": "Entries",
+      "openFolder": "Recordings Folder",
+      "filterAll": "All",
+      "filterAudio": "With Audio",
+      "filterSaved": "Saved",
+      "loading": "Loading...",
+      "emptyAll": "No history entries yet",
+      "emptySaved": "No saved entries yet",
+      "detailTitle": "Details",
+      "statsText": "Text: {{count}} / {{limit}} entries",
+      "statsAudio": "Audio: {{count}} / {{limit}} files",
+      "statsTextTooltip": "Text history entries count and limit (click to filter all)",
+      "statsAudioTooltip": "Audio files count and limit (click to filter entries with audio)",
+      "clearAll": "Clear All",
+      "clearSaved": "Clear Saved",
+      "clearAllTooltip": "Clear all history entries and audio files",
+      "clearSavedTooltip": "Clear all saved entries and audio files",
+      "searchPlaceholder": "Search history entries...",
+      "timestamp": "Timestamp",
+      "copyTooltipDefault": "Copy (default: raw text)",
+      "copyTooltipRaw": "Copy selected raw text",
+      "copyTooltipPolished": "Copy selected polished text",
+      "copyTooltip": "Copy text",
+      "toggleSave": "Save",
+      "toggleUnsave": "Unsave",
+      "delete": "Delete",
+      "rawText": "Raw Text (Raw ASR)",
+      "polishedText": "Polished Text (Polished)",
+      "clickToSelect": "Click to select & copy",
+      "selectedAndCopied": "Selected & copied",
+      "audioPlayback": "Audio Playback",
+      "downloadAudio": "Download Audio",
+      "noSelection": "Select an entry from the list to view details",
+      "toastDeleteSuccess": "Entry deleted successfully",
+      "toastClearConfirm": "Are you sure you want to clear all history entries and audio files? (Saved items will be preserved. This action cannot be undone.)",
+      "toastClearTitle": "Clear All History",
+      "toastClearError": "Failed to clear history: {{error}}",
+      "toastClearSuccess": "Successfully cleared history entries and audio files (saved items preserved)",
+      "toastClearGenericError": "Error clearing history",
+      "toastClearSavedConfirm": "Are you sure you want to clear all saved history entries and audio files? (This will permanently delete them and cannot be undone.)",
+      "toastClearSavedTitle": "Clear All Saved",
+      "toastClearSavedError": "Failed to clear saved entries: {{error}}",
+      "toastClearSavedSuccess": "Successfully cleared all saved entries and audio files",
+      "toastClearSavedGenericError": "Error clearing saved entries",
+      "toastDownloadSuccess": "Audio file downloaded!",
+      "toastDownloadError": "Failed to download audio: {{error}}",
+      "toastDownloadGenericError": "Error downloading audio file"
+    },
+    "vocab": {
+      "title": "Vocabulary",
+      "infoTitle": "Vocabulary & Correction Rules",
+      "infoHotwords": "Custom hotwords: suitable for proper nouns, names, product names — helps ASR recognition.",
+      "infoRules": "Correction rules: requires a configured AI provider and model in Services, and using a post-processing hotkey during transcription to automatically replace misrecognized words with the correct spelling (e.g. \"face-bookie\" → \"Facebook\").",
+      "hotwordsTitle": "Custom Hotwords",
+      "hotwordsDescription": "Enter your frequently used terms:",
+      "hotwordsPlaceholder": "e.g. Kubernetes",
+      "addHotword": "Add Hotword",
+      "noHotwords": "No hotwords added yet",
+      "rulesTitle": "Correction Rules",
+      "rulesDescription": "Replace misrecognized words with correct spelling:",
+      "rulePatternPlaceholder": "Wrong word/sound",
+      "ruleReplacementPlaceholder": "Correct word",
+      "addRule": "Add",
+      "noRules": "No correction rules added yet",
+      "toastWordExists": "Hotword \"{{word}}\" already exists",
+      "toastWordAdded": "Hotword added successfully",
+      "toastFieldEmpty": "Fields cannot be empty",
+      "toastRuleExists": "Correction rule \"{{pattern}}\" already exists",
+      "toastRuleAdded": "Correction rule added",
+      "toastRuleRemoved": "Correction rule removed"
+    },
+    "style": {
+      "title": "AI Style",
+      "description": "Modular settings to precisely control AI speech-to-text refinement behavior and vocabulary. All changes save and apply automatically.",
+      "tabs": {
+        "mainPrompt": "Main Prompt",
+        "modes": "Refinement Modes",
+        "hotwords": "Hotwords",
+        "dicts": "Domain Dict",
+        "customRules": "Custom Rules",
+        "backup": "Backup & Restore"
+      },
+      "mainPrompt": {
+        "title": "Core System Prompt",
+        "hint": "Tip: Click a card to apply; double-click to view or edit.",
+        "addButton": "New Main Prompt",
+        "defaultBadge": "Default (Read-only)",
+        "customBadge": "Custom",
+        "inUse": "In Use",
+        "viewTooltip": "Double-click to view",
+        "editTooltip": "Double-click to edit",
+        "viewAction": "View",
+        "editAction": "Edit",
+        "deleteAction": "Delete"
+      },
+      "modes": {
+        "title": "Context Refinement Modes",
+        "hint": "Tip: Click a card to switch; double-click to edit.",
+        "addButton": "New Mode",
+        "editTooltip": "Double-click to edit",
+        "modifiedBadge": "Modified",
+        "builtinBadge": "Built-in",
+        "inUse": "In Use",
+        "editAction": "Edit",
+        "deleteAction": "Delete Mode",
+        "resetAction": "Reset to Default"
+      },
+      "hotwords": {
+        "title": "Hotword Management",
+        "description": "Enter frequently used English terms, company names, people names, etc. Changes sync to both the ASR engine (Whisper) and AI refinement prompts.",
+        "placeholder": "e.g. Kubernetes (no spaces)",
+        "addButton": "Add Hotword",
+        "noHotwords": "No custom hotwords yet. Add them here or in the Vocabulary page."
+      },
+      "dicts": {
+        "title": "Domain Dictionaries",
+        "hint": "Tip: Click cards to toggle; double-click to edit content.",
+        "addButton": "New Dictionary",
+        "editTooltip": "Double-click to edit",
+        "modifiedBadge": "Modified",
+        "builtinBadge": "Built-in",
+        "enabled": "Enabled",
+        "editAction": "Edit",
+        "deleteAction": "Delete Dictionary",
+        "resetAction": "Reset to Default"
+      },
+      "customRules": {
+        "title": "Custom Rules",
+        "description": "Enter your personal formatting and refinement preferences. For example: \"Avoid using dashes\", \"Replace informal terms with formal equivalents\".",
+        "placeholder": "Enter custom rules..."
+      },
+      "backup": {
+        "title": "Data Backup & Migration",
+        "description": "One-click export of your custom styles, dictionaries, hotwords, and correction rules as a ZIP file, or restore from a backup.",
+        "exportButton": "Export as ZIP",
+        "importButton": "Import from ZIP"
+      },
+      "editor": {
+        "viewTitle": "View Core Prompt",
+        "editTitleMain": "Edit Main Prompt",
+        "editTitleMode": "Edit Refinement Mode",
+        "editTitleDict": "Edit Domain Dictionary",
+        "newTitleMain": "New Main Prompt",
+        "newTitleMode": "New Refinement Mode",
+        "newTitleDict": "New Domain Dictionary",
+        "nameLabel": "Name",
+        "namePlaceholderMain": "e.g. Custom Core Rules",
+        "namePlaceholderMode": "e.g. Speech Mode",
+        "namePlaceholderDict": "e.g. Biotechnology",
+        "descLabel": "Card Description (shown on UI card)",
+        "descPlaceholder": "Brief description of this item...",
+        "contentLabelMain": "Prompt Content",
+        "contentLabelMode": "Mode Instructions & Tone (AI prompt)",
+        "contentLabelDict": "Vocabulary List (AI reference)",
+        "contentPlaceholderMain": "Write core role settings and base instructions...",
+        "contentPlaceholderMode": "Describe the tone the AI should use...",
+        "contentPlaceholderDict": "e.g. NounA, NounB, NounC...",
+        "closeButton": "Close",
+        "cancelButton": "Cancel",
+        "saveButton": "Save"
+      },
+      "toast": {
+        "rulesAutoSaved": "Custom rules saved and applied!",
+        "changesApplied": "Changes applied!",
+        "confirmDelete": "Are you sure you want to delete this item?",
+        "itemDeleted": "Item deleted and reapplied!",
+        "confirmReset": "Are you sure you want to reset this default item to factory settings?",
+        "resetDone": "Default settings restored and applied!",
+        "wordExists": "Hotword \"{{word}}\" already exists",
+        "wordAdded": "Hotword added and applied",
+        "wordRemoved": "Hotword removed and reapplied"
+      },
+      "descFallback": "Description for {{name}}."
+    }
   },
   "onboarding": {
     "subtitle": "To get started, choose a transcription model",
@@ -73,6 +273,10 @@
       "breeze-asr": {
         "name": "Breeze ASR",
         "description": "Optimized for Taiwanese Mandarin. Code-switching support."
+      },
+      "breeze-asr-26": {
+        "name": "Breeze ASR 26",
+        "description": "Optimized for Taiwanese Hokkien (Taigi). Best for Taiwanese speech."
       },
       "sense-voice-int8": {
         "name": "SenseVoice",
@@ -216,6 +420,9 @@
       },
       "noModelsMatch": "No models match this filter."
     },
+    "overlay_and_theme": {
+      "title": "Overlay & Theme"
+    },
     "sound": {
       "title": "Sound",
       "microphone": {
@@ -284,7 +491,30 @@
         "description": "Display the Handy icon in the system tray."
       },
       "overlay": {
-        "style": {
+    "models": {
+      "sortName": "Sort by Name",
+      "sortAccuracy": "Sort by Accuracy",
+      "sortSpeed": "Sort by Speed",
+      "sortSize": "Sort by Size",
+      "sortPrefix": "Sort: "
+    },
+    "translate": {
+      "languages": {
+        "en": "English",
+        "zh-TW": "Traditional Chinese",
+        "zh-CN": "Simplified Chinese",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German"
+      }
+    },
+    "settings": {
+      "conflictFallback": "other function",
+      "conflictMessage": "This shortcut conflicts with \"{{name}}\". Overwrite and clear \"{{name}}\"?"
+    },
+    "style": {
           "title": "Overlay",
           "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
           "options": {
@@ -445,6 +675,7 @@
     },
     "history": {
       "title": "History",
+      "copied": "Copied to clipboard",
       "openFolder": "Open Recordings Folder",
       "loading": "Loading history...",
       "empty": "No transcriptions yet. Start recording to build your history!",
@@ -573,7 +804,7 @@
       },
       "sourceCode": {
         "title": "Source Code",
-        "description": "View source code and contribute",
+        "description": "View yukey's open source code and development progress.",
         "button": "View on GitHub"
       },
       "supportDevelopment": {
@@ -587,7 +818,11 @@
           "title": "ggml",
           "description": "High-performance tensor library for on-device machine learning inference",
           "details": "Handy's local speech-to-text is built on transcribe.cpp and ggml. Thanks to the amazing work by Georgi Gerganov and contributors."
-        }
+        },
+        "handyTitle": "Acknowledgments to Original Project (Handy)",
+        "handyDescription": "This project yukey is derived from CJ Pais's excellent open-source project Handy with deep customization and modifications. We are grateful for the original author's open-source spirit and outstanding technical architecture contributions to local speech-to-text applications.",
+        "author": "Original Author: CJ Pais",
+        "license": "License: MIT License"
       }
     }
   },
@@ -614,6 +849,7 @@
     "open": "Open",
     "copy": "Copy",
     "clear": "Clear",
+    "default": "Default",
     "noOptionsFound": "No options found"
   },
   "accessibility": {

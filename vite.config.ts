@@ -32,9 +32,10 @@ export default defineConfig(async () => ({
   // Multiple entry points for main app and overlay
   build: {
     base: "./",
-    minify: false,
-    cssMinify: false,
+    minify: "esbuild",
+    cssMinify: true,
     outDir: "dist_new",
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       maxParallelFileOps: 1,
       input: {

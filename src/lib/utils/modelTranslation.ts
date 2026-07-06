@@ -41,7 +41,8 @@ const DESCRIPTION_TRANSLATIONS_ZH_TW: Record<string, string> = {
   "99-language speech-to-text with translation, auto language detection, segment-level timestamps.": "支援翻譯、自動語言偵測與句子級時間戳記的 99 種語言語音轉文字。",
   "English speech-to-text with segment-level timestamps.": "支援句子級時間戳記的英語語音轉文字。",
   "100-language speech-to-text with translation, auto language detection, segment-level timestamps.": "支援翻譯、自動語言偵測與句子級時間戳記的 100 種語言語音轉文字。",
-  "Optimized for Taiwanese Mandarin. Code-switching support.": "針對臺灣華語最佳化。支援語碼轉換。"
+  "Optimized for Taiwanese Mandarin. Code-switching support.": "針對臺灣華語最佳化。支援語碼轉換。",
+  "Optimized for Taiwanese Hokkien (Taigi). Best for Taiwanese speech.": "針對臺灣台語最佳化。最適合臺灣語音辨識。"
 };
 
 /**

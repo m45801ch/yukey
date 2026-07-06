@@ -17,6 +17,31 @@
     "debug": "调试",
     "about": "关于"
   },
+  "pages": {
+    "vocab": {
+      "title": "詞彙字典",
+      "infoTitle": "詞彙與糾錯字典說明",
+      "infoHotwords": "自訂熱詞：適合專有名詞、人名、產品名，能幫助 ASR 識別。",
+      "infoRules": "糾錯規則：需在「服務」中設定供應商與模型，並使用已設定 AI 潤色的快捷鍵進行轉錄，才會自動將轉錄結果中的錯字或口誤替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。",
+      "hotwordsTitle": "自訂熱詞",
+      "hotwordsDescription": "請輸入您常用的專業熱詞：",
+      "hotwordsPlaceholder": "例如：Kubernetes",
+      "addHotword": "新增熱詞",
+      "noHotwords": "尚無新增的自訂熱詞",
+      "rulesTitle": "糾錯對照規則",
+      "rulesDescription": "將轉錄錯字替換為正確拼寫：",
+      "rulePatternPlaceholder": "原始錯字/音",
+      "ruleReplacementPlaceholder": "替換為正確字",
+      "addRule": "新增",
+      "noRules": "尚無新增的糾錯規則",
+      "toastWordExists": "熱詞 \"{{word}}\" 已存在於清單中",
+      "toastWordAdded": "熱詞添加成功",
+      "toastFieldEmpty": "輸入欄位不可為空",
+      "toastRuleExists": "糾錯規則 \"{{pattern}}\" 已存在",
+      "toastRuleAdded": "已新增糾錯規則",
+      "toastRuleRemoved": "已刪除該糾錯規則"
+    }
+  },
   "onboarding": {
     "subtitle": "请选择一个转录模型以开始使用",
     "existingModelsTitle": "Compatible Models",

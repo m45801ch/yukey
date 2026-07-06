@@ -212,7 +212,7 @@ export const HistoryPage: React.FC = () => {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(t("settings.history.copied") || "已複製到剪貼簿");
+      toast.success(t("settings.history.copied"));
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
     }
@@ -249,7 +249,7 @@ export const HistoryPage: React.FC = () => {
       if (result.status !== "ok") {
         loadPage();
       } else {
-        toast.success("已成功刪除該筆聽寫紀錄");
+        toast.success(t("pages.history.toastDeleteSuccess"));
         loadStats();
       }
     } catch (error) {
@@ -260,9 +260,9 @@ export const HistoryPage: React.FC = () => {
 
   const clearAllHistory = async () => {
     const confirmed = await ask(
-      "確定要清空所有的歷史聽寫紀錄以及錄音檔嗎？（已收藏的項目將會被保留，此動作無法復原。）",
+      t("pages.history.toastClearConfirm"),
       {
-        title: "清空所有紀錄",
+        title: t("pages.history.toastClearTitle"),
         kind: "warning",
       },
     );
@@ -272,7 +272,7 @@ export const HistoryPage: React.FC = () => {
     try {
       const result = await commands.clearAllHistory();
       if (result.status !== "ok") {
-        toast.error("清空歷史紀錄失敗：" + String(result.error));
+        toast.error(t("pages.history.toastClearError", { error: String(result.error) }));
       } else {
         setEntries((prev) => prev.filter((e) => e.saved));
         setSelectedId((prevId) => {
@@ -282,20 +282,20 @@ export const HistoryPage: React.FC = () => {
           );
           return stillSaved ? prevId : null;
         });
-        toast.success("已成功清空聽寫紀錄及錄音檔（已保留收藏項目）");
+        toast.success(t("pages.history.toastClearSuccess"));
         loadStats();
       }
     } catch (error) {
       console.error("Failed to clear all history:", error);
-      toast.error("清空歷史紀錄發生錯誤");
+      toast.error(t("pages.history.toastClearGenericError"));
     }
   };
 
   const clearAllSavedHistory = async () => {
     const confirmed = await ask(
-      "確定要清空所有的已收藏聽寫紀錄以及錄音檔嗎？（此動作將永久刪除且無法復原。）",
+      t("pages.history.toastClearSavedConfirm"),
       {
-        title: "清空所有收藏",
+        title: t("pages.history.toastClearSavedTitle"),
         kind: "warning",
       },
     );
@@ -305,7 +305,7 @@ export const HistoryPage: React.FC = () => {
     try {
       const result = await commands.clearAllSavedHistory();
       if (result.status !== "ok") {
-        toast.error("清空收藏紀錄失敗：" + String(result.error));
+        toast.error(t("pages.history.toastClearSavedError", { error: String(result.error) }));
       } else {
         setEntries((prev) => prev.filter((e) => !e.saved));
         setSelectedId((prevId) => {
@@ -315,12 +315,12 @@ export const HistoryPage: React.FC = () => {
           );
           return stillSaved ? prevId : null;
         });
-        toast.success("已成功清空所有已收藏的紀錄及錄音檔");
+        toast.success(t("pages.history.toastClearSavedSuccess"));
         loadStats();
       }
     } catch (error) {
       console.error("Failed to clear all saved history:", error);
-      toast.error("清空收藏紀錄發生錯誤");
+      toast.error(t("pages.history.toastClearSavedGenericError"));
     }
   };
 
@@ -351,14 +351,14 @@ export const HistoryPage: React.FC = () => {
       if (savePath) {
         const result = await commands.exportAudioFile(fileName, savePath);
         if (result.status === "ok") {
-          toast.success("錄音檔下載成功！");
+          toast.success(t("pages.history.toastDownloadSuccess"));
         } else {
-          toast.error("下載錄音檔失敗：" + String(result.error));
+          toast.error(t("pages.history.toastDownloadError", { error: String(result.error) }));
         }
       }
     } catch (error) {
       console.error("Failed to download audio:", error);
-      toast.error("下載錄音檔發生錯誤");
+      toast.error(t("pages.history.toastDownloadGenericError"));
     }
   };
 
@@ -369,7 +369,7 @@ export const HistoryPage: React.FC = () => {
         <div className="p-3 border-b border-mid-gray/20 space-y-2">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold text-mid-gray uppercase tracking-wider">
-              聽寫列表
+              {t("pages.history.entryList")}
             </h3>
             <Button
               onClick={openRecordingsFolder}
@@ -378,7 +378,7 @@ export const HistoryPage: React.FC = () => {
               className="flex items-center gap-1.5"
             >
               <FolderOpen className="w-3.5 h-3.5" />
-              <span>錄音資料夾</span>
+              <span>{t("pages.history.openFolder")}</span>
             </Button>
           </div>
 
@@ -392,7 +392,7 @@ export const HistoryPage: React.FC = () => {
                   : "text-mid-gray hover:text-text"
               }`}
             >
-              全部紀錄
+              {t("pages.history.filterAll")}
             </button>
             <button
               onClick={() => setFilter("audio")}
@@ -402,7 +402,7 @@ export const HistoryPage: React.FC = () => {
                   : "text-mid-gray hover:text-text"
               }`}
             >
-              有語音檔
+              {t("pages.history.filterAudio")}
             </button>
             <button
               onClick={() => setFilter("saved")}
@@ -412,7 +412,7 @@ export const HistoryPage: React.FC = () => {
                   : "text-mid-gray hover:text-text"
               }`}
             >
-              收藏項目
+              {t("pages.history.filterSaved")}
             </button>
           </div>
         </div>
@@ -420,11 +420,11 @@ export const HistoryPage: React.FC = () => {
         <div className="flex-1 overflow-y-auto p-3 space-y-3">
           {loading && filteredEntries.length === 0 ? (
             <div className="p-4 text-center text-xs text-mid-gray">
-              載入中...
+              {t("pages.history.loading")}
             </div>
           ) : filteredEntries.length === 0 ? (
             <div className="p-4 text-center text-xs text-mid-gray">
-              {filter === "saved" ? "尚無已收藏的聽寫紀錄" : "尚無歷史聽寫紀錄"}
+              {t(filter === "saved" ? "pages.history.emptySaved" : "pages.history.emptyAll")}
             </div>
           ) : (
             <>
@@ -466,7 +466,7 @@ export const HistoryPage: React.FC = () => {
         <div className="flex items-center justify-between pb-3 mb-3 border-b border-mid-gray/20 shrink-0">
           <div className="flex items-baseline gap-3">
             <h3 className="text-xs font-semibold text-mid-gray uppercase tracking-wider">
-              紀錄詳情
+              {t("pages.history.detailTitle")}
             </h3>
             {stats && (
               <div className="flex gap-2 select-none">
@@ -477,9 +477,9 @@ export const HistoryPage: React.FC = () => {
                       ? "bg-logo-primary text-white font-semibold shadow-sm"
                       : "bg-mid-gray/10 text-mid-gray hover:bg-logo-primary/10 hover:text-logo-primary"
                   }`}
-                  title="文字歷史紀錄筆數與上限（點擊篩選全部文字紀錄）"
+                  title={t("pages.history.statsTextTooltip")}
                 >
-                  文字：{stats.text_count} / {stats.text_limit} 筆
+                  {t("pages.history.statsText", { count: stats.text_count, limit: stats.text_limit })}
                 </span>
                 <span
                   onClick={() => setFilter("audio")}
@@ -488,9 +488,9 @@ export const HistoryPage: React.FC = () => {
                       ? "bg-logo-primary text-white font-semibold shadow-sm"
                       : "bg-mid-gray/10 text-mid-gray hover:bg-logo-primary/10 hover:text-logo-primary"
                   }`}
-                  title="已保留錄音檔筆數與上限（點擊篩選含有錄音檔的紀錄）"
+                  title={t("pages.history.statsAudioTooltip")}
                 >
-                  語音：{stats.audio_count} / {stats.audio_limit} 檔
+                  {t("pages.history.statsAudio", { count: stats.audio_count, limit: stats.audio_limit })}
                 </span>
               </div>
             )}
@@ -501,15 +501,11 @@ export const HistoryPage: React.FC = () => {
                 filter === "saved" ? clearAllSavedHistory : clearAllHistory
               }
               className="flex items-center gap-1 text-xs text-mid-gray hover:text-red-500 transition-colors cursor-pointer"
-              title={
-                filter === "saved"
-                  ? "清空所有已收藏紀錄與錄音檔"
-                  : "清空所有歷史紀錄與錄音檔"
-              }
+              title={t(filter === "saved" ? "pages.history.clearSavedTooltip" : "pages.history.clearAllTooltip")}
             >
               <Trash2 className="w-4 h-4" />
               <span>
-                {filter === "saved" ? "清空所有收藏" : "清空所有紀錄"}
+                {t(filter === "saved" ? "pages.history.clearSaved" : "pages.history.clearAll")}
               </span>
             </button>
           )}
@@ -519,7 +515,7 @@ export const HistoryPage: React.FC = () => {
         <div className="mb-4 shrink-0 relative">
           <input
             type="text"
-            placeholder="搜尋歷史紀錄中的關鍵字..."
+            placeholder={t("pages.history.searchPlaceholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full text-xs px-3 py-2 pl-9 rounded-lg border border-mid-gray/20 bg-background-ui/5 hover:border-logo-primary/30 focus:border-logo-primary focus:outline-none transition-colors text-text placeholder-mid-gray/60"
@@ -534,7 +530,7 @@ export const HistoryPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-mid-gray/20">
                   <div>
                     <h4 className="text-xs font-semibold text-mid-gray">
-                      詳細時間
+                      {t("pages.history.timestamp")}
                     </h4>
                     <p className="text-sm font-medium">
                       {formatDateTime(
@@ -556,11 +552,11 @@ export const HistoryPage: React.FC = () => {
                       title={
                         selectedEntry.post_processed_text
                           ? currentCopyTarget === "polished"
-                            ? "複製選取的 AI 潤色文字"
+                            ? t("pages.history.copyTooltipPolished")
                             : currentCopyTarget === "raw"
-                              ? "複製選取的原始轉錄文字"
-                              : "複製文字 (預設為原始轉錄)"
-                          : "複製文字"
+                              ? t("pages.history.copyTooltipRaw")
+                              : t("pages.history.copyTooltipDefault")
+                          : t("pages.history.copyTooltip")
                       }
                     >
                       <Copy className="w-4.5 h-4.5" />
@@ -572,7 +568,7 @@ export const HistoryPage: React.FC = () => {
                           ? "text-logo-primary"
                           : "text-mid-gray hover:text-logo-primary"
                       }`}
-                      title={selectedEntry.saved ? "取消收藏" : "加入收藏"}
+                      title={t(selectedEntry.saved ? "pages.history.toggleUnsave" : "pages.history.toggleSave")}
                     >
                       <Star
                         className="w-4.5 h-4.5"
@@ -582,7 +578,7 @@ export const HistoryPage: React.FC = () => {
                     <button
                       onClick={() => deleteEntry(selectedEntry.id)}
                       className="p-2 rounded-lg hover:bg-mid-gray/10 text-mid-gray hover:text-red-500 transition-colors cursor-pointer"
-                      title="刪除"
+                      title={t("pages.history.delete")}
                     >
                       <Trash2 className="w-4.5 h-4.5" />
                     </button>
@@ -603,7 +599,7 @@ export const HistoryPage: React.FC = () => {
                 >
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-mid-gray uppercase tracking-wider">
-                      原始轉錄文字 (Raw ASR)
+                      {t("pages.history.rawText")}
                     </h4>
                     {selectedEntry.post_processed_text && (
                       <span className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${
@@ -611,7 +607,7 @@ export const HistoryPage: React.FC = () => {
                           ? "bg-logo-primary text-white font-medium"
                           : "bg-mid-gray/10 text-mid-gray group-hover:bg-logo-primary/10 group-hover:text-logo-primary"
                       }`}>
-                        {currentCopyTarget === "raw" ? "已選取並複製" : "點擊選取並複製"}
+                        {t(currentCopyTarget === "raw" ? "pages.history.selectedAndCopied" : "pages.history.clickToSelect")}
                       </span>
                     )}
                   </div>
@@ -639,14 +635,14 @@ export const HistoryPage: React.FC = () => {
                   >
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-semibold text-logo-primary uppercase tracking-wider">
-                        AI 潤色修飾文字 (Polished Text)
+                        {t("pages.history.polishedText")}
                       </h4>
                       <span className={`text-[10px] px-2 py-0.5 rounded-full transition-all ${
                         currentCopyTarget === "polished"
                           ? "bg-logo-primary text-white font-medium"
                           : "bg-mid-gray/10 text-mid-gray group-hover:bg-logo-primary/10 group-hover:text-logo-primary"
                       }`}>
-                        {currentCopyTarget === "polished" ? "已選取並複製" : "點擊選取並複製"}
+                        {t(currentCopyTarget === "polished" ? "pages.history.selectedAndCopied" : "pages.history.clickToSelect")}
                       </span>
                     </div>
                     <div className={`p-4 mx-1 rounded-xl border transition-all text-sm leading-relaxed select-text cursor-text whitespace-pre-wrap break-words font-medium min-w-0 glow-card-3d ${
@@ -662,7 +658,7 @@ export const HistoryPage: React.FC = () => {
 
               <div className="pt-4 border-t border-mid-gray/20 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-mid-gray">語音播放</span>
+                  <span className="text-xs font-semibold text-mid-gray">{t("pages.history.audioPlayback")}</span>
                   {selectedEntry.file_name && (
                     <Button
                       onClick={() => handleDownloadAudio(selectedEntry.file_name)}
@@ -671,7 +667,7 @@ export const HistoryPage: React.FC = () => {
                       className="flex items-center gap-1 text-[11px]"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>下載錄音檔</span>
+                      <span>{t("pages.history.downloadAudio")}</span>
                     </Button>
                   )}
                 </div>
@@ -683,7 +679,7 @@ export const HistoryPage: React.FC = () => {
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-mid-gray space-y-2">
-              <p className="text-sm">選擇左側清單中的項目以查看詳情</p>
+              <p className="text-sm">{t("pages.history.noSelection")}</p>
             </div>
           )}
         </div>

@@ -41,8 +41,11 @@ const getLanguageDisplayText = (
 
 // Legacy = a blob (Url-sourced) .bin/ONNX model, kept runnable but no longer the
 // advertised download (catalog GGUFs supersede it).
+// GGUF files are the modern format and should not be marked as legacy.
 export const isLegacySource = (model: ModelInfo): boolean =>
-  typeof model.source === "object" && "Url" in model.source;
+  typeof model.source === "object"
+    && "Url" in model.source
+    && !model.filename.endsWith(".gguf");
 
 // Extract a GGUF quantization label from a filename, if present (e.g. "Q8_0").
 const getQuantLabel = (filename: string): string | null => {

@@ -35,30 +35,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   );
 
   const SECTIONS = [
-    { id: "general", label: "一般設定", icon: Cog, component: GeneralSettings },
-    { id: "models", label: "ASR 模型", icon: Cpu, component: ModelsSettings },
+    { id: "general", label: t("sidebar.general"), icon: Cog, component: GeneralSettings },
+    { id: "models", label: t("sidebar.models"), icon: Cpu, component: ModelsSettings },
     {
       id: "advanced",
-      label: "進階設定",
+      label: t("sidebar.advanced"),
       icon: Sliders,
       component: AdvancedSettings,
     },
     {
       id: "services",
-      label: "服務",
+      label: t("sidebar.postProcessing"),
       icon: Sparkles,
       component: PostProcessingSettings,
     },
     {
       id: "debug",
-      label: "偵錯資訊",
+      label: t("sidebar.debug"),
       icon: HelpCircle,
       component: DebugSettings,
       enabled: settings?.debug_mode ?? false,
     },
     {
       id: "about",
-      label: "關於 yukey",
+      label: t("sidebar.about"),
       icon: HelpCircle,
       component: AboutSettings,
     },
@@ -74,7 +74,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="w-56 bg-mid-gray/5 border-r border-mid-gray/20 flex flex-col justify-between p-4">
           <div className="space-y-4">
             <h3 className="text-xs font-semibold text-mid-gray px-2 uppercase tracking-wider">
-              設定中心
+              {t("sidebar.center")}
             </h3>
             <div className="space-y-1">
               {SECTIONS.map((sec) => {

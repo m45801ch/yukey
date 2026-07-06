@@ -54,7 +54,7 @@ export const GeneralSettings: React.FC = () => {
         <VolumeSlider disabled={!audioFeedbackEnabled} />
       </SettingsGroup>
       <SettingsGroup
-        title={t("settings.overlay_and_theme.title", "懸浮窗與主題")}
+        title={t("settings.overlay_and_theme.title")}
       >
         <ShowOverlay descriptionMode="tooltip" grouped={true} />
         <ThemeSelector descriptionMode="tooltip" grouped={true} />

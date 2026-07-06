@@ -8,6 +8,7 @@ import type {
   OrtAcceleratorSetting,
 } from "@/bindings";
 import { commands } from "@/bindings";
+import i18n from "../i18n";
 
 interface SettingsStore {
   settings: Settings | null;
@@ -366,9 +367,9 @@ export const useSettingsStore = create<SettingsStore>()(
         // Check for conflict
         if (!result.data.success && result.data.error === "conflict") {
           const conflictName =
-            result.data.conflict_name || result.data.conflict_id || "其他功能";
+            result.data.conflict_name || result.data.conflict_id || i18n.t("pages.settings.conflictFallback");
           const confirmOverwrite = window.confirm(
-            `此快捷鍵與「${conflictName}」衝突。是否要覆蓋並清除「${conflictName}」的快捷鍵？`,
+            i18n.t("pages.settings.conflictMessage", { name: conflictName }),
           );
 
           if (confirmOverwrite) {

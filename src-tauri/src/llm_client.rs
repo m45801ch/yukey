@@ -217,6 +217,38 @@ pub async fn send_chat_completion_with_schema(
         .and_then(|choice| choice.message.content.clone()))
 }
 
+/// Test an API connection by hitting the models endpoint
+/// Returns Ok(()) on success, or Err with a description of the failure
+pub async fn test_connection(
+    provider: &PostProcessProvider,
+    api_key: String,
+) -> Result<(), String> {
+    let base_url = provider.base_url.trim_end_matches('/');
+    let url = format!("{}/models", base_url);
+
+    let client = create_client(provider, &api_key)?;
+
+    let response = client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("連線失敗：{}", e))?;
+
+    let status = response.status();
+    if !status.is_success() {
+        let error_text = response
+            .text()
+            .await
+            .unwrap_or_else(|_| "Unknown error".to_string());
+        return Err(format!(
+            "API 請求失敗 ({}): {}",
+            status, error_text
+        ));
+    }
+
+    Ok(())
+}
+
 /// Fetch available models from an OpenAI-compatible API
 /// Returns a list of model IDs
 pub async fn fetch_models(

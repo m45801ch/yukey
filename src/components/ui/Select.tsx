@@ -1,12 +1,14 @@
-import React from "react";
-import SelectComponent from "react-select";
-import CreatableSelect from "react-select/creatable";
+import React, { Suspense } from "react";
 import type {
   ActionMeta,
   Props as ReactSelectProps,
   SingleValue,
   StylesConfig,
 } from "react-select";
+
+// Lazy-load react-select preserving the component type for JSX usage
+const ReactSelect = React.lazy(() => import("react-select")) as any;
+const ReactCreatable = React.lazy(() => import("react-select/creatable")) as any;
 
 export type SelectOption = {
   value: string;
@@ -162,17 +164,27 @@ export const Select: React.FC<SelectProps> = React.memo(
       styles: selectStyles,
     };
 
+    const fallback = (
+      <div className="h-10 w-full animate-pulse rounded-md bg-mid-gray/10" />
+    );
+
     if (isCreatable) {
       return (
-        <CreatableSelect<SelectOption, false>
-          {...sharedProps}
-          onCreateOption={onCreateOption}
-          formatCreateLabel={formatCreateLabel}
-        />
+        <Suspense fallback={fallback}>
+          <ReactCreatable
+            {...sharedProps}
+            onCreateOption={onCreateOption}
+            formatCreateLabel={formatCreateLabel}
+          />
+        </Suspense>
       );
     }
 
-    return <SelectComponent<SelectOption, false> {...sharedProps} />;
+    return (
+      <Suspense fallback={fallback}>
+        <ReactSelect {...sharedProps} />
+      </Suspense>
+    );
   },
 );
 

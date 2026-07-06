@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   LayoutDashboard,
   History,
@@ -26,11 +27,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange,
   onOpenSettings,
 }) => {
+  const { t } = useTranslation();
   const SECTIONS = [
-    { id: "overview", label: "概覽", icon: LayoutDashboard },
-    { id: "history", label: "歷史紀錄", icon: History },
-    { id: "vocab", label: "詞彙字典", icon: BookOpen },
-    { id: "style", label: "修飾風格", icon: Sparkles },
+    { id: "overview", label: t("sidebar.overview"), icon: LayoutDashboard },
+    { id: "history", label: t("sidebar.history"), icon: History },
+    { id: "vocab", label: t("sidebar.vocab"), icon: BookOpen },
+    { id: "style", label: t("sidebar.style"), icon: Sparkles },
   ] as const;
 
   return (
@@ -74,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-mid-gray/10 text-text/80 hover:text-text transition-colors text-start cursor-pointer font-bold"
         >
           <Cog className="w-5 h-5 shrink-0" />
-          <span className="text-sm">設定</span>
+          <span className="text-sm">{t("sidebar.settings")}</span>
         </button>
       </div>
     </div>

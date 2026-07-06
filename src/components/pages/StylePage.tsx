@@ -43,12 +43,12 @@ export const StylePage: React.FC = () => {
   const customWords: string[] = getSetting("custom_words") || [];
 
   const tabs = [
-    { name: "主 Prompt", index: 0 },
-    { name: "修飾模式", index: 1 },
-    { name: "Hotwords", index: 2 },
-    { name: "專業詞庫", index: 3 },
-    { name: "自訂規則", index: 4 },
-    { name: "備份與還原", index: 5 },
+    { name: t("pages.style.tabs.mainPrompt"), index: 0 },
+    { name: t("pages.style.tabs.modes"), index: 1 },
+    { name: t("pages.style.tabs.hotwords"), index: 2 },
+    { name: t("pages.style.tabs.dicts"), index: 3 },
+    { name: t("pages.style.tabs.customRules"), index: 4 },
+    { name: t("pages.style.tabs.backup"), index: 5 },
   ];
 
   // 儲存設定並「立刻」套用編譯後的 Prompt 到後端
@@ -99,7 +99,7 @@ export const StylePage: React.FC = () => {
     if (settings.customRules !== saved.customRules) {
       const handler = setTimeout(() => {
         applyPromptSettings(settings);
-        toast.success("自訂規則已自動儲存套用！");
+        toast.success(t("pages.style.toast.rulesAutoSaved"));
       }, 1000); // 停止輸入 1 秒後自動套用
 
       return () => clearTimeout(handler);
@@ -147,7 +147,7 @@ export const StylePage: React.FC = () => {
 
     const itemData = {
       name: editorName.trim(),
-      description: editorDescription.trim() || `${editorName.trim()}說明。`,
+      description: editorDescription.trim() || t("pages.style.descFallback", { name: editorName.trim() }),
       content: editorContent.trim(),
     };
 
@@ -170,14 +170,14 @@ export const StylePage: React.FC = () => {
 
     setEditorOpen(false);
     await applyPromptSettings(newSettings);
-    toast.success("變更已自動套用！");
+    toast.success(t("pages.style.toast.changesApplied"));
   };
 
   const deleteCustomItem = async (
     type: "main" | "mode" | "dict",
     key: string,
   ) => {
-    if (!confirm(`確定要刪除此項目嗎？`)) return;
+    if (!confirm(t("pages.style.toast.confirmDelete"))) return;
 
     const newSettings = { ...settings };
     if (type === "main") {
@@ -200,14 +200,14 @@ export const StylePage: React.FC = () => {
       );
     }
     await applyPromptSettings(newSettings);
-    toast.success("項目已刪除並重新套用！");
+    toast.success(t("pages.style.toast.itemDeleted"));
   };
 
   const resetDefaultItem = async (
     type: "main" | "mode" | "dict",
     key: string,
   ) => {
-    if (!confirm(`確定要將此預設項目恢復為原始出廠設定嗎？`)) return;
+    if (!confirm(t("pages.style.toast.confirmReset"))) return;
 
     const newSettings = { ...settings };
     if (type === "main") {
@@ -220,7 +220,7 @@ export const StylePage: React.FC = () => {
       newSettings.customDictionaries = rest;
     }
     await applyPromptSettings(newSettings);
-    toast.success("已還原預設設定並自動套用！");
+    toast.success(t("pages.style.toast.resetDone"));
   };
 
   // 整合熱詞新增邏輯 (同步更新系統 settings 中的 custom_words，並立刻自動套用編譯)
@@ -233,14 +233,14 @@ export const StylePage: React.FC = () => {
       sanitizedWord.length <= 50
     ) {
       if (customWords.includes(sanitizedWord)) {
-        toast.error(`熱詞 "${sanitizedWord}" 已存在於清單中`);
+        toast.error(t("pages.style.toast.wordExists", { word: sanitizedWord }));
         return;
       }
       const updated = [...customWords, sanitizedWord];
       await updateSetting("custom_words", updated);
       setNewWord("");
       await applyPromptSettings(settings, updated);
-      toast.success("熱詞添加並套用成功");
+      toast.success(t("pages.style.toast.wordAdded"));
     }
   };
 
@@ -249,7 +249,7 @@ export const StylePage: React.FC = () => {
     const updated = customWords.filter((word) => word !== wordToRemove);
     await updateSetting("custom_words", updated);
     await applyPromptSettings(settings, updated);
-    toast.success("熱詞已移除並重新套用");
+    toast.success(t("pages.style.toast.wordRemoved"));
   };
 
   // 匯出壓縮包 ZIP
@@ -290,8 +290,7 @@ export const StylePage: React.FC = () => {
       {/* 頂部標題（移除右上角儲存按鈕） */}
       <div className="text-start">
         <p className="text-xs text-mid-gray">
-          透過模組化的設定，精確控制 AI
-          語音轉文字的修飾行為與詞彙。所有變更均會自動儲存並即時生效。
+          {t("pages.style.description")}
         </p>
       </div>
 
@@ -319,9 +318,9 @@ export const StylePage: React.FC = () => {
           <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-md font-bold">核心系統提示詞</h3>
+                <h3 className="text-md font-bold">{t("pages.style.mainPrompt.title")}</h3>
                 <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">
-                  提示：點擊卡片直接切換套用；按兩下卡片可觀看或編輯提示詞。
+                  {t("pages.style.mainPrompt.hint")}
                 </p>
               </div>
               <Button
@@ -330,7 +329,7 @@ export const StylePage: React.FC = () => {
                 variant="secondary"
                 className="flex gap-1"
               >
-                <Plus className="w-3.5 h-3.5" /> 新增主 Prompt
+                <Plus className="w-3.5 h-3.5" /> {t("pages.style.mainPrompt.addButton")}
               </Button>
             </div>
 
@@ -349,9 +348,7 @@ export const StylePage: React.FC = () => {
                         })
                       }
                       onDoubleClick={() => openEditor("main", key)}
-                      title={
-                        isDefault ? "按兩下可觀看完整內容" : "按兩下可編輯內容"
-                      }
+                      title={t(isDefault ? "pages.style.mainPrompt.viewTooltip" : "pages.style.mainPrompt.editTooltip")}
                       className={`p-4 rounded-xl border cursor-pointer flex flex-col justify-between transition-all relative group min-h-28 ${
                         isActive
                           ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
@@ -365,12 +362,12 @@ export const StylePage: React.FC = () => {
                               {main.name}
                             </span>
                             <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
-                              {isDefault ? "預設唯讀" : "自訂"}
+                              {t(isDefault ? "pages.style.mainPrompt.defaultBadge" : "pages.style.mainPrompt.customBadge")}
                             </span>
                           </div>
                           {isActive && (
                             <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Check className="w-3 h-3" /> 使用中
+                              <Check className="w-3 h-3" /> {t("pages.style.mainPrompt.inUse")}
                             </span>
                           )}
                         </div>
@@ -386,7 +383,7 @@ export const StylePage: React.FC = () => {
                         <button
                           onClick={() => openEditor("main", key)}
                           className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                          title={isDefault ? "觀看內容" : "編輯內容"}
+                          title={t(isDefault ? "pages.style.mainPrompt.viewAction" : "pages.style.mainPrompt.editAction")}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -394,7 +391,7 @@ export const StylePage: React.FC = () => {
                           <button
                             onClick={() => deleteCustomItem("main", key)}
                             className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500"
-                            title="刪除"
+                            title={t("pages.style.mainPrompt.deleteAction")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -413,9 +410,9 @@ export const StylePage: React.FC = () => {
           <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-md font-bold">情境修飾模式</h3>
+                <h3 className="text-md font-bold">{t("pages.style.modes.title")}</h3>
                 <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">
-                  提示：點擊卡片直接切換套用；按兩下卡片可編輯內容
+                  {t("pages.style.modes.hint")}
                 </p>
               </div>
               <Button
@@ -424,7 +421,7 @@ export const StylePage: React.FC = () => {
                 variant="secondary"
                 className="flex gap-1"
               >
-                <Plus className="w-3.5 h-3.5" /> 新增模式
+                <Plus className="w-3.5 h-3.5" /> {t("pages.style.modes.addButton")}
               </Button>
             </div>
 
@@ -442,7 +439,7 @@ export const StylePage: React.FC = () => {
                         applyPromptSettings({ ...settings, activeMode: key })
                       }
                       onDoubleClick={() => openEditor("mode", key)}
-                      title="按兩下可編輯內容"
+                      title={t("pages.style.modes.editTooltip")}
                       className={`p-4 rounded-xl border cursor-pointer flex flex-col justify-between transition-all relative group min-h-28 ${
                         isActive
                           ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
@@ -457,13 +454,13 @@ export const StylePage: React.FC = () => {
                             </span>
                             {!isCustom && (
                               <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
-                                {isModifiedDefault ? "已修改" : "內建"}
+                                {t(isModifiedDefault ? "pages.style.modes.modifiedBadge" : "pages.style.modes.builtinBadge")}
                               </span>
                             )}
                           </div>
                           {isActive && (
                             <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <Check className="w-3 h-3" /> 使用中
+                              <Check className="w-3 h-3" /> {t("pages.style.modes.inUse")}
                             </span>
                           )}
                         </div>
@@ -479,7 +476,7 @@ export const StylePage: React.FC = () => {
                         <button
                           onClick={() => openEditor("mode", key)}
                           className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                          title="編輯內容"
+                          title={t("pages.style.modes.editAction")}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -487,7 +484,7 @@ export const StylePage: React.FC = () => {
                           <button
                             onClick={() => deleteCustomItem("mode", key)}
                             className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500"
-                            title="刪除模式"
+                            title={t("pages.style.modes.deleteAction")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -496,7 +493,7 @@ export const StylePage: React.FC = () => {
                             <button
                               onClick={() => resetDefaultItem("mode", key)}
                               className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                              title="還原預設值"
+                              title={t("pages.style.modes.resetAction")}
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
@@ -516,11 +513,10 @@ export const StylePage: React.FC = () => {
           <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-5 bg-background-ui/5">
             <div className="space-y-2 text-start">
               <h3 className="text-md font-bold text-logo-primary">
-                專屬熱詞管理
+                {t("pages.style.hotwords.title")}
               </h3>
               <p className="text-xs text-mid-gray">
-                輸入您常用的英文名詞、公司名稱、人名等。在此處變更將同步至「語音識別引擎（Whisper）」與「AI
-                潤色提示詞」。
+                {t("pages.style.hotwords.description")}
               </p>
 
               <div className="flex gap-2 max-w-lg pt-2">
@@ -530,7 +526,7 @@ export const StylePage: React.FC = () => {
                   value={newWord}
                   onChange={(e) => setNewWord(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleAddWord()}
-                  placeholder="例如：Kubernetes (不含空格)"
+                  placeholder={t("pages.style.hotwords.placeholder")}
                   variant="compact"
                   disabled={isUpdating("custom_words")}
                 />
@@ -544,7 +540,7 @@ export const StylePage: React.FC = () => {
                   variant="primary"
                   size="md"
                 >
-                  新增熱詞
+                  {t("pages.style.hotwords.addButton")}
                 </Button>
               </div>
             </div>
@@ -552,7 +548,7 @@ export const StylePage: React.FC = () => {
             <div className="min-h-36 max-h-60 overflow-y-auto p-4 rounded-xl border border-mid-gray/10 bg-mid-gray/5 flex flex-wrap gap-2 items-start content-start">
               {customWords.length === 0 ? (
                 <span className="text-xs text-mid-gray py-8 w-full text-center">
-                  尚無新增的自訂熱詞，您可在此處或「詞彙字典」頁面中加入。
+                  {t("pages.style.hotwords.noHotwords")}
                 </span>
               ) : (
                 customWords.map((word) => (
@@ -578,9 +574,9 @@ export const StylePage: React.FC = () => {
           <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-md font-bold">專業領域詞庫</h3>
+                <h3 className="text-md font-bold">{t("pages.style.dicts.title")}</h3>
                 <p className="text-xs text-mid-gray mt-1 font-medium text-logo-primary/80">
-                  提示：點擊卡片直接勾選啟用；按兩下卡片可編輯詞彙內容
+                  {t("pages.style.dicts.hint")}
                 </p>
               </div>
               <Button
@@ -589,7 +585,7 @@ export const StylePage: React.FC = () => {
                 variant="secondary"
                 className="flex gap-1"
               >
-                <Plus className="w-3.5 h-3.5" /> 新增詞庫
+                <Plus className="w-3.5 h-3.5" /> {t("pages.style.dicts.addButton")}
               </Button>
             </div>
 
@@ -613,7 +609,7 @@ export const StylePage: React.FC = () => {
                         });
                       }}
                       onDoubleClick={() => openEditor("dict", key)}
-                      title="按兩下可編輯內容"
+                      title={t("pages.style.dicts.editTooltip")}
                       className={`p-4 rounded-xl border cursor-pointer transition-all flex flex-col justify-between group min-h-28 ${
                         isActive
                           ? "border-logo-primary bg-logo-primary/5 border-[1.5px]"
@@ -635,13 +631,13 @@ export const StylePage: React.FC = () => {
                             </span>
                             {!isCustom && (
                               <span className="text-[9px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
-                                {isModifiedDefault ? "已修改" : "內建"}
+                                {t(isModifiedDefault ? "pages.style.dicts.modifiedBadge" : "pages.style.dicts.builtinBadge")}
                               </span>
                             )}
                           </div>
                           {isActive && (
                             <span className="text-[10px] font-bold text-logo-primary bg-logo-primary/10 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-                              啟用中
+                               {t("pages.style.dicts.enabled")}
                             </span>
                           )}
                         </div>
@@ -657,7 +653,7 @@ export const StylePage: React.FC = () => {
                         <button
                           onClick={() => openEditor("dict", key)}
                           className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                          title="編輯內容"
+                          title={t("pages.style.dicts.editAction")}
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -665,7 +661,7 @@ export const StylePage: React.FC = () => {
                           <button
                             onClick={() => deleteCustomItem("dict", key)}
                             className="p-1 rounded hover:bg-red-500/10 text-mid-gray hover:text-red-500"
-                            title="刪除詞庫"
+                            title={t("pages.style.dicts.deleteAction")}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -674,7 +670,7 @@ export const StylePage: React.FC = () => {
                             <button
                               onClick={() => resetDefaultItem("dict", key)}
                               className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                              title="還原預設值"
+                              title={t("pages.style.dicts.resetAction")}
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
@@ -692,16 +688,16 @@ export const StylePage: React.FC = () => {
         {/* Tab 5: 自訂規則 */}
         {activeTab === 4 && (
           <div className="space-y-3 shadow-sm border border-mid-gray/10 rounded-xl p-4 bg-background-ui/5">
-            <h3 className="text-md font-bold">使用者自訂規則</h3>
+            <h3 className="text-md font-bold">{t("pages.style.customRules.title")}</h3>
             <p className="text-xs text-mid-gray">
-              在此輸入您個人的排版與修飾偏好指令。例如：「不要使用破折號」、「遇到『的』請盡量換成『地』」。
+              {t("pages.style.customRules.description")}
             </p>
             <Textarea
               value={settings.customRules}
               onChange={(e) => {
                 setSettings({ ...settings, customRules: e.target.value });
               }}
-              placeholder="請輸入自訂規則..."
+              placeholder={t("pages.style.customRules.placeholder")}
               className="w-full h-40 text-sm"
             />
           </div>
@@ -712,19 +708,18 @@ export const StylePage: React.FC = () => {
           <div className="space-y-4 shadow-sm border border-mid-gray/10 rounded-xl p-5 bg-background-ui/5">
             <div>
               <h3 className="text-md font-bold text-logo-primary">
-                資料備份與搬移
+                {t("pages.style.backup.title")}
               </h3>
               <p className="text-xs text-mid-gray mt-1">
-                一鍵將您的「自訂修飾風格、詞庫、熱詞清單、糾錯規則」打包成壓縮檔
-                (ZIP) 匯出備份，或從壓縮檔還原資料。
+                {t("pages.style.backup.description")}
               </p>
             </div>
             <div className="flex gap-2 pt-2">
               <Button onClick={handleExport} variant="primary" size="md">
-                <span>📤 一鍵打包匯出 (ZIP)</span>
+                <span>{t("pages.style.backup.exportButton")}</span>
               </Button>
               <Button onClick={handleImport} variant="secondary" size="md">
-                <span>📥 選擇檔案導入還原 (ZIP)</span>
+                <span>{t("pages.style.backup.importButton")}</span>
               </Button>
             </div>
           </div>
@@ -737,29 +732,25 @@ export const StylePage: React.FC = () => {
           <div className="w-full max-w-lg bg-background border border-mid-gray/20 rounded-2xl p-6 space-y-4 shadow-2xl text-start">
             <h3 className="text-md font-bold text-logo-primary border-b border-mid-gray/10 pb-2">
               {editingKey === "default"
-                ? "觀看核心提示詞"
+                ? t("pages.style.editor.viewTitle")
                 : editingKey
-                  ? `編輯 ${editingType === "main" ? "主 Prompt" : editingType === "mode" ? "修飾模式" : "專業詞庫"}`
-                  : editingType === "main"
-                    ? "新增主 Prompt"
-                    : editingType === "mode"
-                      ? "新增修飾模式"
-                      : "新增專業詞庫"}
+                  ? t(`pages.style.editor.editTitle${editingType === "main" ? "Main" : editingType === "mode" ? "Mode" : "Dict"}`)
+                  : t(`pages.style.editor.newTitle${editingType === "main" ? "Main" : editingType === "mode" ? "Mode" : "Dict"}`)}
             </h3>
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-mid-gray">
-                名稱
+                {t("pages.style.editor.nameLabel")}
               </label>
               <Input
                 value={editorName}
                 onChange={(e) => setEditorName(e.target.value)}
                 placeholder={
                   editingType === "main"
-                    ? "例如：自訂核心規則"
+                    ? t("pages.style.editor.namePlaceholderMain")
                     : editingType === "mode"
-                      ? "例如：演講模式"
-                      : "例如：生化科技"
+                      ? t("pages.style.editor.namePlaceholderMode")
+                      : t("pages.style.editor.namePlaceholderDict")
                 }
                 className="w-full"
                 disabled={isDefaultItem(editingKey)} // 內建/預設項目名稱不可修改
@@ -768,12 +759,12 @@ export const StylePage: React.FC = () => {
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-mid-gray">
-                卡片描述與功能說明 (顯示在 UI 卡片上)
+                {t("pages.style.editor.descLabel")}
               </label>
               <Input
                 value={editorDescription}
                 onChange={(e) => setEditorDescription(e.target.value)}
-                placeholder="簡短描述此項目功能..."
+                placeholder={t("pages.style.editor.descPlaceholder")}
                 className="w-full text-sm"
                 disabled={isDefaultItem(editingKey)} // 內建/預設項目描述不可修改
               />
@@ -781,11 +772,11 @@ export const StylePage: React.FC = () => {
 
             <div className="space-y-1">
               <label className="text-xs font-semibold text-mid-gray">
-                {editingType === "main"
-                  ? "提示詞內容"
+                {t(editingType === "main"
+                  ? "pages.style.editor.contentLabelMain"
                   : editingType === "mode"
-                    ? "模式指令與語氣要求 (給 AI 的提示詞)"
-                    : "詞彙列表 (給 AI 的對照詞)"}
+                    ? "pages.style.editor.contentLabelMode"
+                    : "pages.style.editor.contentLabelDict")}
               </label>
               <Textarea
                 value={editorContent}
@@ -793,10 +784,10 @@ export const StylePage: React.FC = () => {
                 className="w-full h-48 text-sm leading-relaxed"
                 placeholder={
                   editingType === "main"
-                    ? "撰寫核心角色設定與基礎指令..."
+                    ? t("pages.style.editor.contentPlaceholderMain")
                     : editingType === "mode"
-                      ? "請詳細描述 AI 應該使用的語氣..."
-                      : "例如：名詞A, 名詞B, 名詞C..."
+                      ? t("pages.style.editor.contentPlaceholderMode")
+                      : t("pages.style.editor.contentPlaceholderDict")
                 }
                 disabled={isDefaultItem(editingKey)} // 內建/預設項目內容不可修改
               />
@@ -809,7 +800,7 @@ export const StylePage: React.FC = () => {
                   variant="primary"
                   size="md"
                 >
-                  關閉
+                  {t("pages.style.editor.closeButton")}
                 </Button>
               ) : (
                 <>
@@ -818,7 +809,7 @@ export const StylePage: React.FC = () => {
                     variant="secondary"
                     size="md"
                   >
-                    取消
+                    {t("pages.style.editor.cancelButton")}
                   </Button>
                   <Button
                     onClick={saveEditor}
@@ -826,7 +817,7 @@ export const StylePage: React.FC = () => {
                     size="md"
                     disabled={!editorName.trim() || !editorContent.trim()}
                   >
-                    儲存
+                    {t("pages.style.editor.saveButton")}
                   </Button>
                 </>
               )}

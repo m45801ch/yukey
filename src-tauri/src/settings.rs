@@ -273,9 +273,9 @@ pub enum TypingTool {
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum TranscribeAcceleratorSetting {
-    #[default]
     Auto,
     Cpu,
+    #[default]
     Gpu,
 }
 

@@ -27,7 +27,7 @@
     "active": true,
     "createUpdaterArtifacts": true,
     "targets": "all",
-    "resources": ["resources/**/*"],
+    "resources": ["resources/**/*", "!resources/models/*.gguf", "!resources/models/*.ggml", "!resources/models/*.bin"],
     "license": "MIT",
     "icon": [
       "icons/32x32.png",

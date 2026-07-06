@@ -644,6 +644,8 @@ impl ModelManager {
             },
         );
 
+        // Breeze-ASR-26 is now in catalog.json via upload_breeze.py
+
         // Add NVIDIA Parakeet models (directory-based)
         available_models.insert(
             "parakeet-tdt-0.6b-v2".to_string(),

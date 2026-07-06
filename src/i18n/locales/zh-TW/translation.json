@@ -9,13 +9,193 @@
     "cancel": "取消"
   },
   "sidebar": {
+    "overview": "概覽",
     "general": "一般",
     "models": "模型",
     "advanced": "進階",
     "postProcessing": "AI 潤色修飾",
     "history": "歷史紀錄",
     "debug": "偵錯",
-    "about": "關於"
+    "about": "關於",
+    "vocab": "詞彙字典",
+    "style": "修飾風格",
+    "settings": "設定",
+    "center": "設定中心"
+  },
+  "pages": {
+    "overview": {
+      "title": "今日概覽",
+      "notEnabled": "未啟用",
+      "noModel": "未載入模型",
+      "aiModel": "AI 修飾模型",
+      "todayChars": "今日字數",
+      "todayDuration": "今日時長",
+      "avgChars": "平均段落 (字數)",
+      "totalCount": "累計紀錄",
+      "weeklyChart": "過去 7 天聽寫次數分佈",
+      "recentEntries": "最近識別的紀錄",
+      "noEntries": "尚無聽寫紀錄",
+      "charCount": "{{count}} 字",
+      "durationZero": "0 秒",
+      "durationMin": "{{m}} 分 {{s}} 秒",
+      "durationSec": "{{s}} 秒"
+    },
+    "history": {
+      "title": "歷史紀錄",
+      "entryList": "聽寫列表",
+      "openFolder": "錄音資料夾",
+      "filterAll": "全部紀錄",
+      "filterAudio": "有語音檔",
+      "filterSaved": "收藏項目",
+      "loading": "載入中...",
+      "emptyAll": "尚無歷史聽寫紀錄",
+      "emptySaved": "尚無已收藏的聽寫紀錄",
+      "detailTitle": "紀錄詳情",
+      "statsText": "文字：{{count}} / {{limit}} 筆",
+      "statsAudio": "語音：{{count}} / {{limit}} 檔",
+      "statsTextTooltip": "文字歷史紀錄筆數與上限（點擊篩選全部文字紀錄）",
+      "statsAudioTooltip": "已保留錄音檔筆數與上限（點擊篩選含有錄音檔的紀錄）",
+      "clearAll": "清空所有紀錄",
+      "clearSaved": "清空所有收藏",
+      "clearAllTooltip": "清空所有歷史紀錄與錄音檔",
+      "clearSavedTooltip": "清空所有已收藏紀錄與錄音檔",
+      "searchPlaceholder": "搜尋歷史紀錄中的關鍵字...",
+      "timestamp": "詳細時間",
+      "copyTooltipDefault": "複製文字 (預設為原始轉錄)",
+      "copyTooltipRaw": "複製選取的原始轉錄文字",
+      "copyTooltipPolished": "複製選取的 AI 潤色文字",
+      "copyTooltip": "複製文字",
+      "toggleSave": "加入收藏",
+      "toggleUnsave": "取消收藏",
+      "delete": "刪除",
+      "rawText": "原始轉錄文字 (Raw ASR)",
+      "polishedText": "AI 潤色修飾文字 (Polished Text)",
+      "clickToSelect": "點擊選取並複製",
+      "selectedAndCopied": "已選取並複製",
+      "audioPlayback": "語音播放",
+      "downloadAudio": "下載錄音檔",
+      "noSelection": "選擇左側清單中的項目以查看詳情",
+      "toastDeleteSuccess": "已成功刪除該筆聽寫紀錄",
+      "toastClearConfirm": "確定要清空所有的歷史聽寫紀錄以及錄音檔嗎？（已收藏的項目將會被保留，此動作無法復原。）",
+      "toastClearTitle": "清空所有紀錄",
+      "toastClearError": "清空歷史紀錄失敗：{{error}}",
+      "toastClearSuccess": "已成功清空聽寫紀錄及錄音檔（已保留收藏項目）",
+      "toastClearGenericError": "清空歷史紀錄發生錯誤",
+      "toastClearSavedConfirm": "確定要清空所有的已收藏聽寫紀錄以及錄音檔嗎？（此動作將永久刪除且無法復原。）",
+      "toastClearSavedTitle": "清空所有收藏",
+      "toastClearSavedError": "清空收藏紀錄失敗：{{error}}",
+      "toastClearSavedSuccess": "已成功清空所有已收藏的紀錄及錄音檔",
+      "toastClearSavedGenericError": "清空收藏紀錄發生錯誤",
+      "toastDownloadSuccess": "錄音檔下載成功！",
+      "toastDownloadError": "下載錄音檔失敗：{{error}}",
+      "toastDownloadGenericError": "下載錄音檔發生錯誤"
+    },
+    "vocab": {
+      "title": "詞彙字典"
+    },
+    "style": {
+      "title": "AI 修飾風格",
+      "description": "透過模組化的設定，精確控制 AI 語音轉文字的修飾行為與詞彙。所有變更均會自動儲存並即時生效。",
+      "tabs": {
+        "mainPrompt": "主 Prompt",
+        "modes": "修飾模式",
+        "hotwords": "Hotwords",
+        "dicts": "專業詞庫",
+        "customRules": "自訂規則",
+        "backup": "備份與還原"
+      },
+      "mainPrompt": {
+        "title": "核心系統提示詞",
+        "hint": "提示：點擊卡片直接切換套用；按兩下卡片可觀看或編輯提示詞。",
+        "addButton": "新增主 Prompt",
+        "defaultBadge": "預設唯讀",
+        "customBadge": "自訂",
+        "inUse": "使用中",
+        "viewTooltip": "按兩下可觀看完整內容",
+        "editTooltip": "按兩下可編輯內容",
+        "viewAction": "觀看內容",
+        "editAction": "編輯內容",
+        "deleteAction": "刪除"
+      },
+      "modes": {
+        "title": "情境修飾模式",
+        "hint": "提示：點擊卡片直接切換套用；按兩下卡片可編輯內容",
+        "addButton": "新增模式",
+        "editTooltip": "按兩下可編輯內容",
+        "modifiedBadge": "已修改",
+        "builtinBadge": "內建",
+        "inUse": "使用中",
+        "editAction": "編輯內容",
+        "deleteAction": "刪除模式",
+        "resetAction": "還原預設值"
+      },
+      "hotwords": {
+        "title": "專屬熱詞管理",
+        "description": "輸入您常用的英文名詞、公司名稱、人名等。在此處變更將同步至「語音識別引擎（Whisper）」與「AI 潤色提示詞」。",
+        "placeholder": "例如：Kubernetes (不含空格)",
+        "addButton": "新增熱詞",
+        "noHotwords": "尚無新增的自訂熱詞，您可在此處或「詞彙字典」頁面中加入。"
+      },
+      "dicts": {
+        "title": "專業領域詞庫",
+        "hint": "提示：點擊卡片直接勾選啟用；按兩下卡片可編輯詞彙內容",
+        "addButton": "新增詞庫",
+        "editTooltip": "按兩下可編輯內容",
+        "modifiedBadge": "已修改",
+        "builtinBadge": "內建",
+        "enabled": "啟用中",
+        "editAction": "編輯內容",
+        "deleteAction": "刪除詞庫",
+        "resetAction": "還原預設值"
+      },
+      "customRules": {
+        "title": "使用者自訂規則",
+        "description": "在此輸入您個人的排版與修飾偏好指令。例如：「不要使用破折號」、「遇到『的』請盡量換成『地』」。",
+        "placeholder": "請輸入自訂規則..."
+      },
+      "backup": {
+        "title": "資料備份與搬移",
+        "description": "一鍵將您的「自訂修飾風格、詞庫、熱詞清單、糾錯規則」打包成壓縮檔 (ZIP) 匯出備份，或從壓縮檔還原資料。",
+        "exportButton": "📤 一鍵打包匯出 (ZIP)",
+        "importButton": "📥 選擇檔案導入還原 (ZIP)"
+      },
+      "editor": {
+        "viewTitle": "觀看核心提示詞",
+        "editTitleMain": "編輯主 Prompt",
+        "editTitleMode": "編輯修飾模式",
+        "editTitleDict": "編輯專業詞庫",
+        "newTitleMain": "新增主 Prompt",
+        "newTitleMode": "新增修飾模式",
+        "newTitleDict": "新增專業詞庫",
+        "nameLabel": "名稱",
+        "namePlaceholderMain": "例如：自訂核心規則",
+        "namePlaceholderMode": "例如：演講模式",
+        "namePlaceholderDict": "例如：生化科技",
+        "descLabel": "卡片描述與功能說明 (顯示在 UI 卡片上)",
+        "descPlaceholder": "簡短描述此項目功能...",
+        "contentLabelMain": "提示詞內容",
+        "contentLabelMode": "模式指令與語氣要求 (給 AI 的提示詞)",
+        "contentLabelDict": "詞彙列表 (給 AI 的對照詞)",
+        "contentPlaceholderMain": "撰寫核心角色設定與基礎指令...",
+        "contentPlaceholderMode": "請詳細描述 AI 應該使用的語氣...",
+        "contentPlaceholderDict": "例如：名詞A, 名詞B, 名詞C...",
+        "closeButton": "關閉",
+        "cancelButton": "取消",
+        "saveButton": "儲存"
+      },
+      "toast": {
+        "rulesAutoSaved": "自訂規則已自動儲存套用！",
+        "changesApplied": "變更已自動套用！",
+        "confirmDelete": "確定要刪除此項目嗎？",
+        "itemDeleted": "項目已刪除並重新套用！",
+        "confirmReset": "確定要將此預設項目恢復為原始出廠設定嗎？",
+        "resetDone": "已還原預設設定並自動套用！",
+        "wordExists": "熱詞 \"{{word}}\" 已存在於清單中",
+        "wordAdded": "熱詞添加並套用成功",
+        "wordRemoved": "熱詞已移除並重新套用"
+      },
+      "descFallback": "{{name}}說明。"
+    }
   },
   "onboarding": {
     "subtitle": "首先，請選擇一種模型",
@@ -73,6 +253,10 @@
       "breeze-asr": {
         "name": "Breeze ASR",
         "description": "針對臺灣華語最佳化。支援語碼轉換。"
+      },
+      "breeze-asr-26": {
+        "name": "Breeze ASR 26",
+        "description": "針對臺灣台語最佳化。最適合臺灣語音辨識。"
       },
       "sense-voice-int8": {
         "name": "SenseVoice",
@@ -226,6 +410,9 @@
         "tooltip": "重新掃描在 yukey 之外新增到模型資料夾或 Hugging Face 快取中的模型"
       }
     },
+    "overlay_and_theme": {
+      "title": "懸浮窗與主題"
+    },
     "sound": {
       "title": "聲音",
       "microphone": {
@@ -294,7 +481,30 @@
         "description": "在系統匣中顯示 yukey 圖示"
       },
       "overlay": {
-        "style": {
+    "models": {
+      "sortName": "模型名稱",
+      "sortAccuracy": "模型精準度",
+      "sortSpeed": "辨識速度",
+      "sortSize": "檔案大小",
+      "sortPrefix": "排序："
+    },
+    "translate": {
+      "languages": {
+        "en": "English (英文)",
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (簡體中文)",
+        "ja": "Japanese (日文)",
+        "ko": "Korean (韓文)",
+        "es": "Spanish (西班牙文)",
+        "fr": "French (法文)",
+        "de": "German (德文)"
+      }
+    },
+    "settings": {
+      "conflictFallback": "其他功能",
+      "conflictMessage": "此快捷鍵與「{{name}}」衝突。是否要覆蓋並清除「{{name}}」的快捷鍵？"
+    },
+    "style": {
           "title": "懸浮窗風格",
           "description": "選擇錄音懸浮窗顯示樣式：『無』隱藏懸浮窗，『極簡』顯示緊湊的小藥丸，『即時』在您說話時即時顯示轉錄文字（僅支援串流的模型 — 請在模型選取器中尋找有『Streaming』標籤的模型）。在 Linux 上建議選擇『無』。",
           "options": {
@@ -455,6 +665,7 @@
     },
     "history": {
       "title": "歷史紀錄",
+      "copied": "已複製到剪貼簿",
       "openFolder": "開啟錄音資料夾",
       "loading": "載入歷史紀錄中...",
       "empty": "還沒有轉錄紀錄。開始錄製以建立您的歷史紀錄！",
@@ -579,7 +790,7 @@
       },
       "sourceCode": {
         "title": "原始碼",
-        "description": "檢視原始碼並參與貢獻",
+        "description": "檢視 yukey 專案的開源原始碼與開發進度。",
         "button": "在 GitHub 上檢視"
       },
       "supportDevelopment": {
@@ -593,7 +804,11 @@
           "title": "ggml",
           "description": "針對 OpenAI Whisper 自動語音識別模型的高效能推理引擎",
           "details": "yukey 使用 ggml 進行快速的本機語音轉文字處理。感謝 Georgi Gerganov 和貢獻者們的傑出工作"
-        }
+        },
+        "handyTitle": "致謝原創專案 (Handy)",
+        "handyDescription": "本專案 yukey 係基於原作者 CJ Pais 的優秀開源專案 Handy 進行衍生與深度客製修改。我們由衷感謝原作者的開源精神與對本機語音轉文字應用的卓越技術架構貢獻。",
+        "author": "原始專案作者：CJ Pais",
+        "license": "授權條款：MIT License"
       },
       "whatsNewUpdates": {
         "label": "顯示新功能",
@@ -621,6 +836,7 @@
     "open": "開啟",
     "copy": "複製",
     "clear": "清除",
+    "default": "預設",
     "noOptionsFound": "未找到選項"
   },
   "accessibility": {

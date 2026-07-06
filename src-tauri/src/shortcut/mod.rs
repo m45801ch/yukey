@@ -23,8 +23,8 @@ use tauri_plugin_autostart::ManagerExt;
 use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
     self, get_settings, AutoSubmitKey, ClipboardHandling, KeyboardImplementation, LLMPrompt,
-    OverlayPosition, OverlayStyle, PasteMethod, ShortcutBinding, SoundTheme, TypingTool,
-    APPLE_INTELLIGENCE_PROVIDER_ID,
+    OverlayPosition, OverlayStyle, PasteMethod, PostProcessProvider, ShortcutBinding, SoundTheme,
+    TypingTool, APPLE_INTELLIGENCE_PROVIDER_ID,
 };
 use crate::tray;
 
@@ -439,11 +439,6 @@ fn register_all_shortcuts_for_implementation(
     for (id, default_binding) in &default_bindings {
         // Skip cancel shortcut as it's dynamically registered
         if id == "cancel" {
-            continue;
-        }
-
-        // Skip post-processing shortcut when the feature is disabled
-        if id == "transcribe_with_post_process" && !current_settings.post_process_enabled {
             continue;
         }
 
@@ -1170,6 +1165,24 @@ pub async fn fetch_post_process_models(
     }
 
     crate::llm_client::fetch_models(provider, api_key).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn test_post_process_connection(
+    provider_id: String,
+    base_url: String,
+    api_key: String,
+) -> Result<(), String> {
+    let provider = PostProcessProvider {
+        id: provider_id,
+        label: String::new(),
+        base_url,
+        allow_base_url_edit: false,
+        models_endpoint: None,
+        supports_structured_output: false,
+    };
+    crate::llm_client::test_connection(&provider, api_key).await
 }
 
 #[tauri::command]

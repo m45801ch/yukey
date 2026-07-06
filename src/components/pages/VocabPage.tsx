@@ -56,7 +56,7 @@ export const VocabPage: React.FC = () => {
       sanitizedWord.length <= 50
     ) {
       if (customWords.includes(sanitizedWord)) {
-        toast.error(`熱詞 "${sanitizedWord}" 已存在於清單中`);
+        toast.error(t("pages.vocab.toastWordExists", { word: sanitizedWord }));
         return;
       }
       const updated = [...customWords, sanitizedWord];
@@ -66,7 +66,7 @@ export const VocabPage: React.FC = () => {
       syncSystemPromptWithCorrections(rules, updated);
 
       setNewWord("");
-      toast.success("熱詞添加成功");
+      toast.success(t("pages.vocab.toastWordAdded"));
     }
   };
 
@@ -82,11 +82,11 @@ export const VocabPage: React.FC = () => {
     const pattern = rulePattern.trim();
     const replacement = ruleReplacement.trim();
     if (!pattern || !replacement) {
-      toast.error("輸入欄位不可為空");
+      toast.error(t("pages.vocab.toastFieldEmpty"));
       return;
     }
     if (rules.some((r) => r.pattern === pattern)) {
-      toast.error(`糾錯規則 "${pattern}" 已存在`);
+      toast.error(t("pages.vocab.toastRuleExists", { pattern }));
       return;
     }
     const newRule: CorrectionRule = {
@@ -100,7 +100,7 @@ export const VocabPage: React.FC = () => {
     syncSystemPromptWithCorrections(updatedRules, customWords);
     setRulePattern("");
     setRuleReplacement("");
-    toast.success("已新增糾錯規則");
+    toast.success(t("pages.vocab.toastRuleAdded"));
   };
 
   // 刪除糾錯規則
@@ -108,7 +108,7 @@ export const VocabPage: React.FC = () => {
     const updatedRules = rules.filter((r) => r.id !== id);
     saveRules(updatedRules);
     syncSystemPromptWithCorrections(updatedRules, customWords);
-    toast.success("已刪除該糾錯規則");
+    toast.success(t("pages.vocab.toastRuleRemoved"));
   };
 
   // 同步糾錯規則至原 System Prompt（透過前端注入，當後處理執行時即可遵循）
@@ -188,13 +188,12 @@ export const VocabPage: React.FC = () => {
       <div className="flex items-start gap-3 p-4 rounded-xl border border-logo-primary/20 bg-logo-primary/5 text-start">
         <AlertCircle className="w-5 h-5 text-logo-primary shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
-          <p className="font-semibold text-logo-primary">詞彙與糾錯字典說明</p>
+          <p className="font-semibold text-logo-primary">{t("pages.vocab.infoTitle")}</p>
           <p className="text-mid-gray">
-            - **自訂熱詞**：適合專有名詞、人名、產品名，能幫助 ASR 識別。
+            {t("pages.vocab.infoHotwords")}
           </p>
           <p className="text-mid-gray">
-            - **糾錯規則**：在進行 AI
-            潤色修飾時，將轉錄結果中的錯字或口誤自動替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。
+            {t("pages.vocab.infoRules")}
           </p>
         </div>
       </div>
@@ -204,9 +203,9 @@ export const VocabPage: React.FC = () => {
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
             <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
-              自訂熱詞
+              {t("pages.vocab.hotwordsTitle")}
             </h3>
-            <p className="text-xs text-mid-gray/80">請輸入您常用的專業熱詞：</p>
+            <p className="text-xs text-mid-gray/80">{t("pages.vocab.hotwordsDescription")}</p>
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -214,7 +213,7 @@ export const VocabPage: React.FC = () => {
                 value={newWord}
                 onChange={(e) => setNewWord(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleAddWord()}
-                placeholder="例如：Kubernetes"
+                placeholder={t("pages.vocab.hotwordsPlaceholder")}
                 variant="compact"
                 disabled={isUpdating("custom_words")}
               />
@@ -228,7 +227,7 @@ export const VocabPage: React.FC = () => {
                 variant="primary"
                 size="md"
               >
-                新增熱詞
+                {t("pages.vocab.addHotword")}
               </Button>
             </div>
           </div>
@@ -236,7 +235,7 @@ export const VocabPage: React.FC = () => {
           <div className="flex-1 min-h-36 max-h-60 overflow-y-auto p-3 rounded-lg border border-mid-gray/10 bg-mid-gray/5 flex flex-wrap gap-1.5 items-start content-start">
             {customWords.length === 0 ? (
               <span className="text-xs text-mid-gray py-4 w-full text-center">
-                尚無新增的自訂熱詞
+                {t("pages.vocab.noHotwords")}
               </span>
             ) : (
               customWords.map((word) => (
@@ -260,10 +259,10 @@ export const VocabPage: React.FC = () => {
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
             <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
-              糾錯對照規則
+              {t("pages.vocab.rulesTitle")}
             </h3>
             <p className="text-xs text-mid-gray/80">
-              將轉錄錯字替換為正確拼寫：
+              {t("pages.vocab.rulesDescription")}
             </p>
             <div className="flex gap-2 items-center">
               <Input
@@ -271,7 +270,7 @@ export const VocabPage: React.FC = () => {
                 className="w-1/2"
                 value={rulePattern}
                 onChange={(e) => setRulePattern(e.target.value)}
-                placeholder="原始錯字/音"
+                placeholder={t("pages.vocab.rulePatternPlaceholder")}
                 variant="compact"
               />
               <span className="text-xs text-mid-gray">&rarr;</span>
@@ -280,7 +279,7 @@ export const VocabPage: React.FC = () => {
                 className="w-1/2"
                 value={ruleReplacement}
                 onChange={(e) => setRuleReplacement(e.target.value)}
-                placeholder="替換為正確字"
+                placeholder={t("pages.vocab.ruleReplacementPlaceholder")}
                 variant="compact"
               />
               <Button
@@ -290,7 +289,7 @@ export const VocabPage: React.FC = () => {
                 size="md"
                 className="whitespace-nowrap shrink-0"
               >
-                新增
+                {t("pages.vocab.addRule")}
               </Button>
             </div>
           </div>
@@ -298,7 +297,7 @@ export const VocabPage: React.FC = () => {
           <div className="flex-1 min-h-36 max-h-60 overflow-y-auto rounded-lg border border-mid-gray/10 bg-mid-gray/5 divide-y divide-mid-gray/10 text-start">
             {rules.length === 0 ? (
               <div className="text-xs text-mid-gray py-4 text-center">
-                尚無新增的糾錯規則
+                {t("pages.vocab.noRules")}
               </div>
             ) : (
               rules.map((rule) => (

@@ -25,14 +25,14 @@ export const TranslateToEnglish: React.FC<TranslateToEnglishProps> = React.memo(
       getSetting("translate_target_language") || "en";
 
     const languageOptions = [
-      { value: "en", label: "English (英文)" },
-      { value: "zh-TW", label: "Traditional Chinese (繁體中文)" },
-      { value: "zh-CN", label: "Simplified Chinese (簡體中文)" },
-      { value: "ja", label: "Japanese (日文)" },
-      { value: "ko", label: "Korean (韓文)" },
-      { value: "es", label: "Spanish (西班牙文)" },
-      { value: "fr", label: "French (法文)" },
-      { value: "de", label: "German (德文)" },
+      { value: "en", label: t("pages.translate.languages.en") },
+      { value: "zh-TW", label: t("pages.translate.languages.zh-TW") },
+      { value: "zh-CN", label: t("pages.translate.languages.zh-CN") },
+      { value: "ja", label: t("pages.translate.languages.ja") },
+      { value: "ko", label: t("pages.translate.languages.ko") },
+      { value: "es", label: t("pages.translate.languages.es") },
+      { value: "fr", label: t("pages.translate.languages.fr") },
+      { value: "de", label: t("pages.translate.languages.de") },
     ];
 
     if (supportsNativeTranslation) {
@@ -41,10 +41,7 @@ export const TranslateToEnglish: React.FC<TranslateToEnglishProps> = React.memo(
       const targetLangDisabled = !translateUsingLlm;
       const switchDescription = translateUsingLlm
         ? t("settings.advanced.translateUsingLlm.description")
-        : t(
-            "settings.advanced.translateUsingLlm.localSupportedDesc",
-            "預設使用本地模型將語音翻譯為英文，開啟以切換為雲端服務大模型進行多國語言翻譯。",
-          );
+        : t("settings.advanced.translateUsingLlm.localSupportedDesc");
 
       return (
         <div className="flex flex-col gap-4 w-full">

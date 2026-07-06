@@ -564,6 +564,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_post_process_model_setting,
             shortcut::set_post_process_provider,
             shortcut::fetch_post_process_models,
+            shortcut::test_post_process_connection,
             shortcut::add_post_process_prompt,
             shortcut::update_post_process_prompt,
             shortcut::delete_post_process_prompt,
@@ -838,8 +839,18 @@ pub fn run(cli_args: CliArgs) {
             // viewer is the sole consumer and only exists in debug mode). This also
             // honors the runtime `--debug` override applied to `settings` above.
             WEBVIEW_LOG_STREAMING.store(settings.debug_mode, Ordering::Relaxed);
+
+            // Show the window immediately so the frontend starts loading while we
+            // initialize core logic. The frontend shows a loading spinner until the
+            // managers are ready to serve IPC calls (which complete well after JS
+            // parse/compile time, so there is no race).
             let app_handle = app.handle().clone();
             app.manage(TranscriptionCoordinator::new(app_handle.clone()));
+
+            // Show now — frontend loads concurrently with backend init
+            if !cli_args.start_hidden {
+                show_main_window(&app_handle);
+            }
 
             initialize_core_logic(&app_handle);
 
@@ -865,16 +876,19 @@ pub fn run(cli_args: CliArgs) {
                 tray::set_tray_visibility(&app_handle, false);
             }
 
-            // Show main window only if not starting hidden.
-            // CLI --start-hidden flag overrides the setting.
-            // But if permission onboarding is required, always show the window.
-            let should_hide = settings.start_hidden || cli_args.start_hidden;
-            let should_force_show = should_force_show_permissions_window(&app_handle);
-
-            // If start_hidden but tray is disabled, we must show the window
-            // anyway. Without a tray icon, the dock is the only way back in.
+            // If --start-hidden was passed AND tray is available, hide the window
+            // that we already showed above. We show-first to avoid the white screen
+            // delay, then hide if the user wanted a hidden start.
             let tray_available = settings.show_tray_icon && !cli_args.no_tray;
-            if should_force_show || !should_hide || !tray_available {
+            if cli_args.start_hidden && tray_available {
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    let _ = window.hide();
+                }
+            }
+
+            // If permission onboarding is required, make sure the window is visible
+            // (overrides start-hidden).
+            if should_force_show_permissions_window(&app_handle) {
                 show_main_window(&app_handle);
             }
 

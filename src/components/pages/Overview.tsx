@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useModelStore } from "@/stores/modelStore";
@@ -37,16 +36,16 @@ export const Overview: React.FC<OverviewProps> = ({
 
   // 獲取 AI 後處理 Provider 名稱與狀態
   const postProcessStatus = useMemo(() => {
-    if (!settings?.post_process_enabled) {
-      return { enabled: false, label: "未啟用" };
-    }
-    const providerId = settings?.post_process_provider_id || "openai";
+    const providerId = settings?.post_process_provider_id;
     const providers = settings?.post_process_providers || [];
     const activeProvider = providers.find((p) => p.id === providerId);
-    const model = settings?.post_process_models?.[providerId] || "預設模型";
+    const model = providerId ? settings?.post_process_models?.[providerId] : undefined;
+    if (!activeProvider || !model) {
+      return { enabled: false, label: t("pages.overview.notEnabled") };
+    }
     return {
       enabled: true,
-      label: `${activeProvider?.label || providerId} (${model})`,
+      label: `${activeProvider.label} (${model})`,
     };
   }, [settings]);
 
@@ -86,10 +85,11 @@ export const Overview: React.FC<OverviewProps> = ({
     const estimatedDurationSec = todayStat?.estimated_duration_sec || 0;
 
     const formatDuration = (sec: number) => {
-      if (sec === 0) return "0 秒";
+      if (sec === 0) return t("pages.overview.durationZero");
       const m = Math.floor(sec / 60);
       const s = Math.round(sec % 60);
-      return m > 0 ? `${m} 分 ${s} 秒` : `${s} 秒`;
+      if (m > 0) return t("pages.overview.durationMin", { m, s });
+      return t("pages.overview.durationSec", { s });
     };
 
     const avgChars =
@@ -147,7 +147,7 @@ export const Overview: React.FC<OverviewProps> = ({
               {t("sidebar.models")}
             </div>
             <div className="text-sm font-semibold">
-              {currentModelInfo?.name || "未載入模型"}
+              {currentModelInfo?.name || t("pages.overview.noModel")}
             </div>
           </div>
         </div>
@@ -161,7 +161,7 @@ export const Overview: React.FC<OverviewProps> = ({
           </div>
           <div className="text-start">
             <div className="text-xs text-mid-gray uppercase tracking-wider">
-              AI 修飾模型
+              {t("pages.overview.aiModel")}
             </div>
             <div className="text-sm font-semibold">
               {postProcessStatus.label}
@@ -175,7 +175,7 @@ export const Overview: React.FC<OverviewProps> = ({
         <div className="p-4 rounded-xl border border-mid-gray/20 bg-background-ui/5 space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-mid-gray font-medium">
             <FileText className="w-3.5 h-3.5" />
-            今日字數
+            {t("pages.overview.todayChars")}
           </div>
           <div className="text-2xl font-bold text-logo-primary">
             {metrics.charsToday}
@@ -185,7 +185,7 @@ export const Overview: React.FC<OverviewProps> = ({
         <div className="p-4 rounded-xl border border-mid-gray/20 bg-background-ui/5 space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-mid-gray font-medium">
             <Clock className="w-3.5 h-3.5" />
-            今日時長
+            {t("pages.overview.todayDuration")}
           </div>
           <div className="text-2xl font-bold text-logo-primary">
             {metrics.durationTodayStr}
@@ -195,7 +195,7 @@ export const Overview: React.FC<OverviewProps> = ({
         <div className="p-4 rounded-xl border border-mid-gray/20 bg-background-ui/5 space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-mid-gray font-medium">
             <ListFilter className="w-3.5 h-3.5" />
-            平均段落 (字數)
+            {t("pages.overview.avgChars")}
           </div>
           <div className="text-2xl font-bold text-logo-primary">
             {metrics.avgChars}
@@ -205,7 +205,7 @@ export const Overview: React.FC<OverviewProps> = ({
         <div className="p-4 rounded-xl border border-mid-gray/20 bg-background-ui/5 space-y-1">
           <div className="flex items-center gap-1.5 text-xs text-mid-gray font-medium">
             <BarChart3 className="w-3.5 h-3.5" />
-            累計紀錄
+            {t("pages.overview.totalCount")}
           </div>
           <div className="text-2xl font-bold text-logo-primary">
             {metrics.totalCount}
@@ -218,7 +218,7 @@ export const Overview: React.FC<OverviewProps> = ({
         {/* 柱狀圖 */}
         <div className="md:col-span-2 p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between">
           <h3 className="text-sm font-semibold text-mid-gray mb-4">
-            過去 7 天聽寫次數分佈
+            {t("pages.overview.weeklyChart")}
           </h3>
           <div className="flex items-end justify-between h-[210px] px-2">
             {weeklyChartData.map((day, idx) => (
@@ -258,15 +258,15 @@ export const Overview: React.FC<OverviewProps> = ({
           className="md:col-span-3 pt-3 pb-2 px-4 rounded-xl border border-mid-gray/20 bg-background-ui/5 space-y-2 glow-card-3d cursor-pointer hover:bg-mid-gray/10 transition-colors"
         >
           <h3 className="text-sm font-semibold text-mid-gray">
-            最近識別的紀錄
+            {t("pages.overview.recentEntries")}
           </h3>
           {loading ? (
             <div className="text-xs text-mid-gray py-4 text-center">
-              載入中...
+              {t("common.loading")}
             </div>
           ) : recentEntries.length === 0 ? (
             <div className="text-xs text-mid-gray py-4 text-center">
-              尚無聽寫紀錄
+              {t("pages.overview.noEntries")}
             </div>
           ) : (
             <div className="space-y-1.5 max-h-[205px] overflow-y-auto pr-1">
@@ -279,7 +279,7 @@ export const Overview: React.FC<OverviewProps> = ({
                     <span>
                       {formatDateTime(String(entry.timestamp), i18n.language)}
                     </span>
-                    <span>{entry.transcription_text?.length || 0} 字</span>
+                    <span>{t("pages.overview.charCount", { count: entry.transcription_text?.length || 0 })}</span>
                   </div>
                   <p className="text-xs font-medium line-clamp-2 break-all text-text/90">
                     {entry.transcription_text}

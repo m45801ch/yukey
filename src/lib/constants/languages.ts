@@ -12,6 +12,7 @@ export const LANGUAGES: Language[] = [
   { value: "zh-Hans", label: "Chinese (Simplified)" },
   { value: "zh-Hant", label: "Chinese (Traditional)" },
   { value: "yue", label: "Cantonese" },
+  { value: "nan", label: "Taiwanese Hokkien (台語)" },
   { value: "de", label: "German" },
   { value: "es", label: "Spanish" },
   { value: "ru", label: "Russian" },
@@ -168,12 +169,13 @@ export const getUniqueCapabilityLanguages = (
   });
 };
 
-const CHINESE_TRANSLATIONS: Record<string, string> = {
+export const CHINESE_TRANSLATIONS: Record<string, string> = {
   en: "英文",
   zh: "中文",
   "zh-Hans": "簡體中文",
   "zh-Hant": "繁體中文",
   yue: "粵語",
+  nan: "台語",
   de: "德文",
   es: "西班牙文",
   ru: "俄文",

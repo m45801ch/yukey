@@ -47,3 +47,12 @@ result
 .history/
 dist_new/
 temp_history.txt
+
+# Model files
+*.gguf
+*.ggml
+*.bin
+src-tauri/resources/models/*.gguf
+
+# Cloned repos
+whisper.cpp/

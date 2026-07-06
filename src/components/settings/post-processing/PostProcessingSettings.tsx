@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
 import { commands } from "@/bindings";
 
 import { Alert } from "../../ui/Alert";
@@ -25,6 +26,37 @@ import { useSettings } from "../../../hooks/useSettings";
 const PostProcessingSettingsApiComponent: React.FC = () => {
   const { t } = useTranslation();
   const state = usePostProcessProviderState();
+  const [testing, setTesting] = useState(false);
+
+  const handleTestConnection = useCallback(async () => {
+    setTesting(true);
+    try {
+      const baseUrl = state.selectedProvider?.base_url ?? "";
+      const apiKey = state.apiKey;
+      if (!baseUrl) {
+        toast.error("請先設定 API 網址");
+        return;
+      }
+      if (!apiKey) {
+        toast.error("請先輸入 API Key");
+        return;
+      }
+      const result = await commands.testPostProcessConnection(
+        state.selectedProviderId,
+        baseUrl,
+        apiKey,
+      );
+      if (result.status === "ok") {
+        toast.success("連線測試成功");
+      } else {
+        toast.error(`連線測試失敗：${result.error}`);
+      }
+    } catch (e) {
+      toast.error(`連線測試失敗：${e}`);
+    } finally {
+      setTesting(false);
+    }
+  }, [state.selectedProvider, state.selectedProviderId, state.apiKey]);
 
   return (
     <>
@@ -91,6 +123,14 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
                 disabled={state.isApiKeyUpdating}
                 className="min-w-[320px]"
               />
+              <Button
+                onClick={handleTestConnection}
+                disabled={testing || !state.apiKey || !state.selectedProvider?.base_url}
+                variant="secondary"
+                size="sm"
+              >
+                {testing ? "測試中..." : "測試連線"}
+              </Button>
             </div>
           </SettingContainer>
         </>

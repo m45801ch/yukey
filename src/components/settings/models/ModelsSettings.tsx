@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ask } from "@tauri-apps/plugin-dialog";
 import { ChevronDown, Globe, RefreshCw, Search } from "lucide-react";
+import i18n from "../../../i18n";
 import type { ModelCardStatus } from "@/components/onboarding";
 import { ModelCard } from "@/components/onboarding";
 import { useModelStore } from "@/stores/modelStore";
 import {
+  CHINESE_TRANSLATIONS,
   getLanguageLabel,
   MODEL_CAPABILITY_LANGUAGES,
   supportsLanguageCode,
@@ -19,9 +21,11 @@ const modelSupportsLanguage = (model: ModelInfo, langCode: string): boolean => {
 
 // Legacy models are the blob (Url-sourced) .bin/ONNX downloads, superseded by
 // the catalog GGUFs. They stay runnable when already on disk, but we no longer
-// advertise the download.
+// advertise the download. GGUF files are the modern format and excluded.
 const isLegacyModel = (model: ModelInfo): boolean =>
-  typeof model.source === "object" && "Url" in model.source;
+  typeof model.source === "object"
+    && "Url" in model.source
+    && !model.filename.endsWith(".gguf");
 
 export const ModelsSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -40,16 +44,11 @@ export const ModelsSettings: React.FC = () => {
 
   const getSortLabel = (type: string) => {
     switch (type) {
-      case "name":
-        return "模型名稱";
-      case "accuracy":
-        return "模型精準度";
-      case "speed":
-        return "辨識速度";
-      case "size":
-        return "檔案大小";
-      default:
-        return "";
+      case "name": return t("pages.models.sortName");
+      case "accuracy": return t("pages.models.sortAccuracy");
+      case "speed": return t("pages.models.sortSpeed");
+      case "size": return t("pages.models.sortSize");
+      default: return "";
     }
   };
 
@@ -100,9 +99,15 @@ export const ModelsSettings: React.FC = () => {
 
   // filtered languages for dropdown (exclude "auto")
   const filteredLanguages = useMemo(() => {
-    return MODEL_CAPABILITY_LANGUAGES.filter((lang) =>
-      lang.label.toLowerCase().includes(languageSearch.toLowerCase()),
-    );
+    const query = languageSearch.toLowerCase();
+    return MODEL_CAPABILITY_LANGUAGES.filter((lang) => {
+      if (lang.label.toLowerCase().includes(query)) return true;
+      if (i18n.language.startsWith("zh")) {
+        const chineseName = CHINESE_TRANSLATIONS[lang.value];
+        if (chineseName && chineseName.toLowerCase().includes(query)) return true;
+      }
+      return false;
+    });
   }, [languageSearch]);
 
   // Get selected language label
@@ -321,7 +326,7 @@ export const ModelsSettings: React.FC = () => {
                     onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
                     className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors cursor-pointer"
                   >
-                    <span className="truncate">排序：{getSortLabel(sortBy)}</span>
+                    <span className="truncate">{t("pages.models.sortPrefix")}{getSortLabel(sortBy)}</span>
                     <ChevronDown
                       className={`w-3.5 h-3.5 transition-transform ${
                         sortDropdownOpen ? "rotate-180" : ""
@@ -333,10 +338,10 @@ export const ModelsSettings: React.FC = () => {
                     <div className="absolute top-full right-0 mt-1 w-44 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
                       <div className="py-1 flex flex-col">
                         {[
-                          { value: "name", label: "模型名稱" },
-                          { value: "accuracy", label: "模型精準度" },
-                          { value: "speed", label: "辨識速度" },
-                          { value: "size", label: "檔案大小" },
+                          { value: "name", label: t("pages.models.sortName") },
+                          { value: "accuracy", label: t("pages.models.sortAccuracy") },
+                          { value: "speed", label: t("pages.models.sortSpeed") },
+                          { value: "size", label: t("pages.models.sortSize") },
                         ].map((opt) => (
                           <button
                             key={opt.value}
@@ -409,7 +414,7 @@ export const ModelsSettings: React.FC = () => {
                           className="w-full px-2 py-1 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-md focus:outline-none focus:ring-1 focus:ring-logo-primary"
                         />
                       </div>
-                      <div className="max-h-48 overflow-y-auto">
+                      <div className="max-h-48 overflow-y-auto overflow-x-hidden">
                         <button
                           type="button"
                           onClick={() => {
@@ -440,7 +445,7 @@ export const ModelsSettings: React.FC = () => {
                                 : "hover:bg-mid-gray/10"
                             }`}
                           >
-                            {lang.label}
+                            {getLanguageLabel(lang.value, i18n.language) || lang.label}
                           </button>
                         ))}
                         {filteredLanguages.length === 0 && (

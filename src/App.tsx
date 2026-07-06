@@ -288,7 +288,7 @@ function App() {
       <div className="h-screen w-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-logo-primary/30 border-t-logo-primary rounded-full animate-spin" />
-          <p className="text-sm text-text/50">Loading...</p>
+          <p className="text-sm text-text/50">{t("common.loading")}</p>
         </div>
       </div>
     );
@@ -345,10 +345,10 @@ function App() {
               {/* 頁面大標題 */}
               <div className="mb-4 text-start shrink-0">
                 <h1 className="text-xl font-bold text-text">
-                  {currentSection === "overview" && "今日概覽"}
-                  {currentSection === "history" && "歷史紀錄"}
-                  {currentSection === "vocab" && "詞彙字典"}
-                  {currentSection === "style" && "AI 修飾風格"}
+                  {currentSection === "overview" && t("pages.overview.title")}
+                  {currentSection === "history" && t("pages.history.title")}
+                  {currentSection === "vocab" && t("pages.vocab.title")}
+                  {currentSection === "style" && t("pages.style.title")}
                 </h1>
               </div>
 

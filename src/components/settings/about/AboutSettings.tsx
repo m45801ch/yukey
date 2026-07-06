@@ -1,4 +1,3 @@
-/* eslint-disable i18next/no-literal-string */
 import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { getVersion } from "@tauri-apps/api/app";
@@ -43,7 +42,7 @@ export const AboutSettings: React.FC = () => {
 
         <SettingContainer
           title={t("settings.about.sourceCode.title")}
-          description="檢視 yukey 專案的開源原始碼與開發進度。"
+          description={t("settings.about.sourceCode.description")}
           grouped={true}
         >
           <Button
@@ -51,7 +50,7 @@ export const AboutSettings: React.FC = () => {
             size="md"
             onClick={() => openUrl("https://github.com/m45801ch/yukey")}
           >
-            GitHub 原始碼
+            {t("settings.about.sourceCode.button")}
           </Button>
         </SettingContainer>
 
@@ -61,14 +60,14 @@ export const AboutSettings: React.FC = () => {
 
       <SettingsGroup title={t("settings.about.acknowledgments.title")}>
         <SettingContainer
-          title="致謝原創專案 (Handy)"
-          description="本專案 yukey 係基於原作者 CJ Pais 的優秀開源專案 Handy 進行衍生與深度客製修改。我們由衷感謝原作者的開源精神與對本機語音轉文字應用的卓越技術架構貢獻。"
+          title={t("settings.about.acknowledgments.handyTitle")}
+          description={t("settings.about.acknowledgments.handyDescription")}
           grouped={true}
           layout="stacked"
         >
           <div className="text-sm text-mid-gray flex flex-col gap-1 mt-1">
-            <span>• 原始專案作者：CJ Pais</span>
-            <span>• 授權條款：MIT License</span>
+            <span>{t("settings.about.acknowledgments.author")}</span>
+            <span>{t("settings.about.acknowledgments.license")}</span>
             <span className="text-xs text-mid-gray/80 mt-1 font-mono">
               Copyright (c) 2025 CJ Pais
             </span>
