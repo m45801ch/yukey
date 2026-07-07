@@ -195,6 +195,25 @@
         "wordRemoved": "熱詞已移除並重新套用"
       },
       "descFallback": "{{name}}說明。"
+    },
+    "models": {
+      "sortName": "模型名稱",
+      "sortAccuracy": "模型精準度",
+      "sortSpeed": "辨識速度",
+      "sortSize": "檔案大小",
+      "sortPrefix": "排序："
+    },
+    "translate": {
+      "languages": {
+        "en": "English (英文)",
+        "zh-TW": "Traditional Chinese (繁體中文)",
+        "zh-CN": "Simplified Chinese (簡體中文)",
+        "ja": "Japanese (日文)",
+        "ko": "Korean (韓文)",
+        "es": "Spanish (西班牙文)",
+        "fr": "French (法文)",
+        "de": "German (德文)"
+      }
     }
   },
   "onboarding": {
@@ -375,7 +394,9 @@
         "errors": {
           "restore": "無法還原原始快捷鍵",
           "set": "無法設定快捷鍵: {{error}}",
-          "reset": "無法將快捷鍵重設為原始值"
+          "reset": "無法將快捷鍵重設為原始值",
+          "conflictFallback": "其他功能",
+          "conflictMessage": "此快捷鍵與「{{name}}」衝突。是否要覆蓋並清除「{{name}}」的快捷鍵？"
         }
       },
       "language": {
@@ -481,29 +502,6 @@
         "description": "在系統匣中顯示 yukey 圖示"
       },
       "overlay": {
-    "models": {
-      "sortName": "模型名稱",
-      "sortAccuracy": "模型精準度",
-      "sortSpeed": "辨識速度",
-      "sortSize": "檔案大小",
-      "sortPrefix": "排序："
-    },
-    "translate": {
-      "languages": {
-        "en": "English (英文)",
-        "zh-TW": "Traditional Chinese (繁體中文)",
-        "zh-CN": "Simplified Chinese (簡體中文)",
-        "ja": "Japanese (日文)",
-        "ko": "Korean (韓文)",
-        "es": "Spanish (西班牙文)",
-        "fr": "French (法文)",
-        "de": "German (德文)"
-      }
-    },
-    "settings": {
-      "conflictFallback": "其他功能",
-      "conflictMessage": "此快捷鍵與「{{name}}」衝突。是否要覆蓋並清除「{{name}}」的快捷鍵？"
-    },
     "style": {
           "title": "懸浮窗風格",
           "description": "選擇錄音懸浮窗顯示樣式：『無』隱藏懸浮窗，『極簡』顯示緊湊的小藥丸，『即時』在您說話時即時顯示轉錄文字（僅支援串流的模型 — 請在模型選取器中尋找有『Streaming』標籤的模型）。在 Linux 上建議選擇『無』。",

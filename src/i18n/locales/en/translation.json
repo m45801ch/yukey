@@ -215,6 +215,25 @@
         "wordRemoved": "Hotword removed and reapplied"
       },
       "descFallback": "Description for {{name}}."
+    },
+    "models": {
+      "sortName": "Sort by Name",
+      "sortAccuracy": "Sort by Accuracy",
+      "sortSpeed": "Sort by Speed",
+      "sortSize": "Sort by Size",
+      "sortPrefix": "Sort: "
+    },
+    "translate": {
+      "languages": {
+        "en": "English",
+        "zh-TW": "Traditional Chinese",
+        "zh-CN": "Simplified Chinese",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German"
+      }
     }
   },
   "onboarding": {
@@ -304,7 +323,7 @@
     },
     "permissions": {
       "title": "Permissions Required",
-      "description": "Handy needs a couple of permissions to work properly.",
+      "description": "yukey needs a couple of permissions to work properly.",
       "microphone": {
         "title": "Microphone Access",
         "description": "Required to hear your voice for transcription."
@@ -364,7 +383,7 @@
     "general": {
       "title": "General",
       "shortcut": {
-        "title": "Handy Shortcuts",
+        "title": "yukey Shortcuts",
         "description": "Configure keyboard shortcuts to trigger speech-to-text recording",
         "loading": "Loading shortcuts...",
         "none": "No shortcuts configured",
@@ -387,7 +406,9 @@
         "errors": {
           "restore": "Failed to restore original shortcut",
           "set": "Failed to set shortcut: {{error}}",
-          "reset": "Failed to reset shortcut to original value"
+          "reset": "Failed to reset shortcut to original value",
+          "conflictFallback": "other function",
+          "conflictMessage": "This shortcut conflicts with \"{{name}}\". Overwrite and clear \"{{name}}\"?"
         }
       },
       "language": {
@@ -416,7 +437,7 @@
       },
       "rescan": {
         "label": "Rescan",
-        "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside Handy"
+        "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside yukey"
       },
       "noModelsMatch": "No models match this filter."
     },
@@ -484,37 +505,14 @@
       },
       "autostart": {
         "label": "Launch on Startup",
-        "description": "Automatically start Handy when you log in to your computer."
+        "description": "Automatically start yukey when you log in to your computer."
       },
       "showTrayIcon": {
         "label": "Show Tray Icon",
-        "description": "Display the Handy icon in the system tray."
+        "description": "Display the yukey icon in the system tray."
       },
       "overlay": {
-    "models": {
-      "sortName": "Sort by Name",
-      "sortAccuracy": "Sort by Accuracy",
-      "sortSpeed": "Sort by Speed",
-      "sortSize": "Sort by Size",
-      "sortPrefix": "Sort: "
-    },
-    "translate": {
-      "languages": {
-        "en": "English",
-        "zh-TW": "Traditional Chinese",
-        "zh-CN": "Simplified Chinese",
-        "ja": "Japanese",
-        "ko": "Korean",
-        "es": "Spanish",
-        "fr": "French",
-        "de": "German"
-      }
-    },
-    "settings": {
-      "conflictFallback": "other function",
-      "conflictMessage": "This shortcut conflicts with \"{{name}}\". Overwrite and clear \"{{name}}\"?"
-    },
-    "style": {
+        "style": {
           "title": "Overlay",
           "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
           "options": {
@@ -712,7 +710,7 @@
       },
       "updateChecks": {
         "label": "Check for Updates",
-        "description": "Automatically check for new versions of Handy"
+        "description": "Automatically check for new versions of yukey"
       },
       "whatsNewPreview": {
         "title": "Preview What's New",
@@ -792,15 +790,15 @@
       "title": "About",
       "version": {
         "title": "Version",
-        "description": "Current version of Handy"
+        "description": "Current version of yukey"
       },
       "whatsNewUpdates": {
         "label": "Show What's New",
-        "description": "Show release notes after Handy updates"
+        "description": "Show release notes after yukey updates"
       },
       "appDataDirectory": {
         "title": "App Data Directory",
-        "description": "Location where Handy stores its data"
+        "description": "Location where yukey stores its data"
       },
       "sourceCode": {
         "title": "Source Code",
@@ -809,7 +807,7 @@
       },
       "supportDevelopment": {
         "title": "Support Development",
-        "description": "Help us continue building Handy",
+        "description": "Help us continue building yukey",
         "button": "Donate"
       },
       "acknowledgments": {
@@ -840,7 +838,7 @@
     "portableUpdateButton": "Open GitHub Releases"
   },
   "whatsNew": {
-    "title": "New in Handy v{{version}}"
+    "title": "New in yukey v{{version}}"
   },
   "common": {
     "loading": "Loading...",
@@ -853,7 +851,7 @@
     "noOptionsFound": "No options found"
   },
   "accessibility": {
-    "permissionsDescription": "Handy needs accessibility permissions to type transcribed text.",
+    "permissionsDescription": "yukey needs accessibility permissions to type transcribed text.",
     "openSettings": "Open System Settings"
   },
   "errors": {
@@ -879,7 +877,7 @@
   },
   "appLanguage": {
     "title": "Application Language",
-    "description": "Change the language of the Handy interface"
+    "description": "Change the language of the yukey interface"
   },
   "overlay": {
     "transcribing": "Transcribing...",
