@@ -1,3 +1,9 @@
+---dictionary
+name: 工程專案
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # 工程專案與工程設計專有名詞
 
 ## 設計與研發 (Design & Development)

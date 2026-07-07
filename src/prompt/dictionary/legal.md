@@ -1,3 +1,9 @@
+---dictionary
+name: 法律合規
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # 法律合規與合約專有名詞
 
 ## 合約與商務條款 (Contracts & Commercial Terms)

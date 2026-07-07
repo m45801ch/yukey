@@ -1,3 +1,9 @@
+---dictionary
+name: AI 人工智慧
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # AI 人工智慧與機器學習專有名詞
 
 ## 語言模型相關 (Language Models)

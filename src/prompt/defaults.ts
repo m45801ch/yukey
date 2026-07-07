@@ -11,6 +11,18 @@ import modeMeeting from "./modes/meeting.md?raw";
 import modeVerbatim from "./modes/verbatim.md?raw";
 // @ts-ignore
 import modeChat from "./modes/chat.md?raw";
+// @ts-ignore
+import modeEmail from "./modes/email.md?raw";
+// @ts-ignore
+import modeLine from "./modes/line.md?raw";
+// @ts-ignore
+import modeSocial from "./modes/social.md?raw";
+// @ts-ignore
+import modeTeaching from "./modes/teaching.md?raw";
+// @ts-ignore
+import modeNote from "./modes/note.md?raw";
+// @ts-ignore
+import modeOfficial from "./modes/official.md?raw";
 
 // @ts-ignore
 import dictAi from "./dictionary/ai.md?raw";
@@ -55,6 +67,36 @@ export const DEFAULT_MODES: Record<
     name: "聊天",
     description: "適合輕鬆隨意的對話，保留口語情緒語氣，修正錯字並適當斷句。",
     content: modeChat,
+  },
+  email: {
+    name: "Email",
+    description: "將口述內容整理為適合電子郵件發送的正式書信格式。",
+    content: modeEmail,
+  },
+  line: {
+    name: "LINE",
+    description: "適合即時通訊的簡潔口語風格，保留語氣與溫度。",
+    content: modeLine,
+  },
+  social: {
+    name: "社群貼文",
+    description: "將語音整理為適合社群媒體的活潑、有感貼文風格。",
+    content: modeSocial,
+  },
+  teaching: {
+    name: "教學",
+    description: "保留教學邏輯與層次，專有名詞精確，適合學習者閱讀。",
+    content: modeTeaching,
+  },
+  notes: {
+    name: "筆記",
+    description: "精簡濃縮為條列式筆記，保留核心資訊，去除口語贅詞。",
+    content: modeNote,
+  },
+  official: {
+    name: "公文",
+    description: "轉換為正式公文格式與用語，適合簽呈、函文等正式文書。",
+    content: modeOfficial,
   },
 };
 

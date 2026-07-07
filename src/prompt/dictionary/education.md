@@ -1,3 +1,9 @@
+---dictionary
+name: 教育學習
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # 教育學習與教學管理專有名詞
 
 ## 教學規劃與設計 (Instructional Design & Planning)

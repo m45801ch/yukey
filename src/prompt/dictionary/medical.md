@@ -1,3 +1,9 @@
+---dictionary
+name: 醫療保健
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # 醫療保健與醫學專有名詞
 
 ## 臨床診斷與檢查 (Clinical Diagnosis & Exams)

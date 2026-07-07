@@ -276,6 +276,12 @@ export const StylePage: React.FC = () => {
       key === "meeting" ||
       key === "verbatim" ||
       key === "chat" ||
+      key === "email" ||
+      key === "line" ||
+      key === "social" ||
+      key === "teaching" ||
+      key === "notes" ||
+      key === "official" ||
       key === "ai" ||
       key === "coding" ||
       key === "medical" ||

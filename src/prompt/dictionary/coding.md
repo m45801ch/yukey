@@ -1,3 +1,9 @@
+---dictionary
+name: 程式開發
+priority: 3
+allowed_overrides: [terminology]
+---
+
 # 程式開發與資訊工程專有名詞
 
 ## 開發角色與框架 (Roles & Frameworks)
