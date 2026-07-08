@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ask } from "@tauri-apps/plugin-dialog";
-import { ChevronDown, Globe, RefreshCw, Search } from "lucide-react";
+import { ChevronDown, Globe, RefreshCw, Search, Copy, Check, Eye, EyeOff, CheckCircle } from "lucide-react";
 import i18n from "../../../i18n";
+import { useSettingsStore } from "@/stores/settingsStore";
+import { Dropdown } from "../../ui/Dropdown";
+import { toast } from "sonner";
 import type { ModelCardStatus } from "@/components/onboarding";
 import { ModelCard } from "@/components/onboarding";
 import { useModelStore } from "@/stores/modelStore";
@@ -29,6 +32,94 @@ const isLegacyModel = (model: ModelInfo): boolean =>
 
 export const ModelsSettings: React.FC = () => {
   const { t } = useTranslation();
+  const { settings, updateCloudAsrSetting, verifyCloudAsrConnection, fetchCloudAsrModels } = useSettingsStore();
+  const [activeTab, setActiveTab] = useState<"local" | "cloud">("local");
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isPullingModels, setIsPullingModels] = useState(false);
+  const [fetchedModels, setFetchedModels] = useState<string[]>([]);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isManualModelInput, setIsManualModelInput] = useState(false);
+
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+    toast.success(t("settings.models.cloud.copied", "Copied to clipboard!"));
+  };
+
+  const handleApiKeyChange = async (value: string) => {
+    await updateCloudAsrSetting("api_key", value);
+    const provider = settings?.cloud_asr?.provider || "groq";
+    const currentKeys = { ...(settings?.cloud_asr?.api_keys || {}) };
+    currentKeys[provider] = value;
+    await updateCloudAsrSetting("api_keys", currentKeys);
+  };
+
+  const handleProviderChange = async (provider: string) => {
+    await updateCloudAsrSetting("provider", provider);
+    let defaultUrl = "";
+    let defaultModel = "";
+    if (provider === "groq") {
+      defaultUrl = "https://api.groq.com/openai/v1";
+      defaultModel = "whisper-large-v3";
+    } else if (provider === "openai") {
+      defaultUrl = "https://api.openai.com/v1";
+      defaultModel = "whisper-1";
+    } else if (provider === "openrouter") {
+      defaultUrl = "https://openrouter.ai/api/v1";
+      defaultModel = "openai/whisper-large-v3";
+    } else if (provider === "cloudflare") {
+      defaultUrl = "https://api.cloudflare.com/client/v4/accounts/{account_id}/ai/run/@cf/openai/whisper";
+      defaultModel = "@cf/openai/whisper";
+    } else if (provider === "deepgram") {
+      defaultUrl = "https://api.deepgram.com/v1/listen";
+      defaultModel = "nova-2";
+    }
+    await updateCloudAsrSetting("base_url", defaultUrl);
+    await updateCloudAsrSetting("model", defaultModel);
+    
+    // Load saved API Key for the newly selected provider
+    const savedKeys = settings?.cloud_asr?.api_keys || {};
+    const savedKey = savedKeys[provider] || "";
+    await updateCloudAsrSetting("api_key", savedKey);
+
+    setFetchedModels([]);
+    setIsManualModelInput(false);
+  };
+
+  const handlePullModels = async () => {
+    setIsPullingModels(true);
+    try {
+      const models = await fetchCloudAsrModels();
+      if (models && models.length > 0) {
+        setFetchedModels(models);
+        toast.success(t("settings.models.cloud.pullSuccess", "Models pulled successfully!"));
+      } else {
+        toast.error(t("settings.models.cloud.pullFailed", "Failed to pull models. Please check your API key and base URL."));
+      }
+    } catch (e) {
+      toast.error(t("settings.models.cloud.pullError", "An error occurred while pulling models."));
+    } finally {
+      setIsPullingModels(false);
+    }
+  };
+
+  const handleVerifyConnection = async () => {
+    setIsVerifying(true);
+    try {
+      const success = await verifyCloudAsrConnection();
+      if (success) {
+        toast.success(t("settings.models.cloud.verifySuccess", "Connection verified successfully!"));
+      }
+    } catch (e: any) {
+      const errorMsg = e?.message || String(e);
+      toast.error(`${t("settings.models.cloud.verifyFailed", "Connection verification failed.")} (${errorMsg})`);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   const [switchingModelId, setSwitchingModelId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState("all");
@@ -285,224 +376,438 @@ export const ModelsSettings: React.FC = () => {
         </p>
       </div>
 
-      {/* Search bar — filter the catalog by name or description */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder={t("settings.models.searchPlaceholder")}
-          className="w-full pl-9 pr-3 py-2 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-logo-primary placeholder:text-text/40"
-        />
+      {/* Tab bar (Segmented Button Control) */}
+      <div className="inline-flex p-1 bg-mid-gray/10 border border-mid-gray/20 rounded-xl mb-6 max-w-xs w-full">
+        <button
+          type="button"
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            activeTab === "local"
+              ? "bg-logo-primary text-white shadow-sm"
+              : "text-text/60 hover:text-text"
+          }`}
+          onClick={() => setActiveTab("local")}
+        >
+          {t("settings.models.tabs.local", "Local Models")}
+        </button>
+        <button
+          type="button"
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            activeTab === "cloud"
+              ? "bg-logo-primary text-white shadow-sm"
+              : "text-text/60 hover:text-text"
+          }`}
+          onClick={() => setActiveTab("cloud")}
+        >
+          {t("settings.models.tabs.cloud", "Cloud Model")}
+        </button>
       </div>
 
-      {filteredModels.length > 0 ? (
-        <div className="space-y-6">
-          {/* Downloaded Models Section — header always visible so filter stays accessible */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-medium text-text/60">
-                {t("settings.models.yourModels")}
-              </h2>
-              <div className="flex items-center gap-2">
-                {/* Rescan local sources for models added outside yukey */}
-                <button
-                  type="button"
-                  onClick={() => rescanLocalModels()}
-                  disabled={isRescanning}
-                  title={t("settings.models.rescan.tooltip")}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <RefreshCw
-                    className={`w-3.5 h-3.5 ${isRescanning ? "animate-spin" : ""}`}
-                  />
-                  <span>{t("settings.models.rescan.label")}</span>
-                </button>
-                {/* Sorting dropdown */}
-                <div className="relative font-normal" ref={sortDropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors cursor-pointer"
-                  >
-                    <span className="truncate">{t("pages.models.sortPrefix")}{getSortLabel(sortBy)}</span>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform ${
-                        sortDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {sortDropdownOpen && (
-                    <div className="absolute top-full right-0 mt-1 w-44 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
-                      <div className="py-1 flex flex-col">
-                        {[
-                          { value: "name", label: t("pages.models.sortName") },
-                          { value: "accuracy", label: t("pages.models.sortAccuracy") },
-                          { value: "speed", label: t("pages.models.sortSpeed") },
-                          { value: "size", label: t("pages.models.sortSize") },
-                        ].map((opt) => (
-                          <button
-                            key={opt.value}
-                            type="button"
-                            onClick={() => {
-                              setSortBy(opt.value as any);
-                              setSortDropdownOpen(false);
-                            }}
-                            className={`w-full px-3 py-2 text-start text-xs transition-colors hover:bg-mid-gray/10 cursor-pointer ${
-                              sortBy === opt.value
-                                ? "text-logo-primary font-semibold bg-logo-primary/5"
-                                : "text-text/80"
-                            }`}
-                          >
-                            {opt.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {/* Language filter dropdown */}
-                <div className="relative" ref={languageDropdownRef}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setLanguageDropdownOpen(!languageDropdownOpen)
-                    }
-                    className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-                      languageFilter !== "all"
-                        ? "bg-logo-primary/20 text-logo-primary"
-                        : "bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20"
-                    }`}
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    <span className="max-w-[120px] truncate">
-                      {selectedLanguageLabel}
-                    </span>
-                    <ChevronDown
-                      className={`w-3.5 h-3.5 transition-transform ${
-                        languageDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {languageDropdownOpen && (
-                    <div className="absolute top-full right-0 mt-1 w-56 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
-                      <div className="p-2 border-b border-mid-gray/40">
-                        <input
-                          ref={languageSearchInputRef}
-                          type="text"
-                          value={languageSearch}
-                          onChange={(e) => setLanguageSearch(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (
-                              e.key === "Enter" &&
-                              filteredLanguages.length > 0
-                            ) {
-                              setLanguageFilter(filteredLanguages[0].value);
-                              setLanguageDropdownOpen(false);
-                              setLanguageSearch("");
-                            } else if (e.key === "Escape") {
-                              setLanguageDropdownOpen(false);
-                              setLanguageSearch("");
-                            }
-                          }}
-                          placeholder={t(
-                            "settings.general.language.searchPlaceholder",
-                          )}
-                          className="w-full px-2 py-1 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-md focus:outline-none focus:ring-1 focus:ring-logo-primary"
-                        />
-                      </div>
-                      <div className="max-h-48 overflow-y-auto overflow-x-hidden">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLanguageFilter("all");
-                            setLanguageDropdownOpen(false);
-                            setLanguageSearch("");
-                          }}
-                          className={`w-full px-3 py-1.5 text-sm text-left transition-colors ${
-                            languageFilter === "all"
-                              ? "bg-logo-primary/20 text-logo-primary font-semibold"
-                              : "hover:bg-mid-gray/10"
-                          }`}
-                        >
-                          {t("settings.models.filters.allLanguages")}
-                        </button>
-                        {filteredLanguages.map((lang) => (
-                          <button
-                            key={lang.value}
-                            type="button"
-                            onClick={() => {
-                              setLanguageFilter(lang.value);
-                              setLanguageDropdownOpen(false);
-                              setLanguageSearch("");
-                            }}
-                            className={`w-full px-3 py-1.5 text-sm text-left transition-colors ${
-                              languageFilter === lang.value
-                                ? "bg-logo-primary/20 text-logo-primary font-semibold"
-                                : "hover:bg-mid-gray/10"
-                            }`}
-                          >
-                            {getLanguageLabel(lang.value, i18n.language) || lang.label}
-                          </button>
-                        ))}
-                        {filteredLanguages.length === 0 && (
-                          <div className="px-3 py-2 text-sm text-text/50 text-center">
-                            {t("settings.general.language.noResults")}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            {downloadedModels.map((model: ModelInfo) => (
-              <ModelCard
-                key={model.id}
-                model={model}
-                status={getModelStatus(model.id)}
-                onSelect={handleModelSelect}
-                onDownload={handleModelDownload}
-                onDelete={handleModelDelete}
-                onCancel={handleModelCancel}
-                downloadProgress={getDownloadProgress(model.id)}
-                downloadSpeed={getDownloadSpeed(model.id)}
-                showRecommended={false}
-              />
-            ))}
+      {activeTab === "local" ? (
+        <>
+          {/* Search bar — filter the catalog by name or description */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text/40 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={t("settings.models.searchPlaceholder")}
+              className="w-full pl-9 pr-3 py-2 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-logo-primary placeholder:text-text/40"
+            />
           </div>
 
-          {/* Available Models Section */}
-          {availableModels.length > 0 && (
-            <div className="space-y-3">
-              <h2 className="text-sm font-medium text-text/60">
-                {t("settings.models.availableModels")}
-              </h2>
-              {availableModels.map((model: ModelInfo) => (
-                <ModelCard
-                  key={model.id}
-                  model={model}
-                  status={getModelStatus(model.id)}
-                  onSelect={handleModelSelect}
-                  onDownload={handleModelDownload}
-                  onDelete={handleModelDelete}
-                  onCancel={handleModelCancel}
-                  downloadProgress={getDownloadProgress(model.id)}
-                  downloadSpeed={getDownloadSpeed(model.id)}
-                  showRecommended={true}
-                />
-              ))}
+          {filteredModels.length > 0 ? (
+            <div className="space-y-6">
+              {/* Downloaded Models Section — header always visible so filter stays accessible */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-medium text-text/60">
+                    {t("settings.models.yourModels")}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    {/* Rescan local sources for models added outside yukey */}
+                    <button
+                      type="button"
+                      onClick={() => rescanLocalModels()}
+                      disabled={isRescanning}
+                      title={t("settings.models.rescan.tooltip")}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <RefreshCw
+                        className={`w-3.5 h-3.5 ${isRescanning ? "animate-spin" : ""}`}
+                      />
+                      <span>{t("settings.models.rescan.label")}</span>
+                    </button>
+                    {/* Sorting dropdown */}
+                    <div className="relative font-normal" ref={sortDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20 transition-colors cursor-pointer"
+                      >
+                        <span className="truncate">{t("pages.models.sortPrefix")}{getSortLabel(sortBy)}</span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform ${
+                            sortDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {sortDropdownOpen && (
+                        <div className="absolute top-full right-0 mt-1 w-44 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
+                          <div className="py-1 flex flex-col">
+                            {[
+                              { value: "name", label: t("pages.models.sortName") },
+                              { value: "accuracy", label: t("pages.models.sortAccuracy") },
+                              { value: "speed", label: t("pages.models.sortSpeed") },
+                              { value: "size", label: t("pages.models.sortSize") },
+                            ].map((opt) => (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => {
+                                  setSortBy(opt.value as any);
+                                  setSortDropdownOpen(false);
+                                }}
+                                className={`w-full px-3 py-2 text-start text-xs transition-colors hover:bg-mid-gray/10 cursor-pointer ${
+                                  sortBy === opt.value
+                                    ? "text-logo-primary font-semibold bg-logo-primary/5"
+                                    : "text-text/80"
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    {/* Language filter dropdown */}
+                    <div className="relative" ref={languageDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setLanguageDropdownOpen(!languageDropdownOpen)
+                        }
+                        className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors cursor-pointer ${
+                          languageFilter !== "all"
+                            ? "bg-logo-primary/20 text-logo-primary"
+                            : "bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20"
+                        }`}
+                      >
+                        <Globe className="w-3.5 h-3.5" />
+                        <span className="max-w-[120px] truncate">
+                          {selectedLanguageLabel}
+                        </span>
+                        <ChevronDown
+                          className={`w-3.5 h-3.5 transition-transform ${
+                            languageDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {languageDropdownOpen && (
+                        <div className="absolute top-full right-0 mt-1 w-56 bg-background border border-mid-gray/80 rounded-lg shadow-lg z-50 overflow-hidden">
+                          <div className="p-2 border-b border-mid-gray/40">
+                            <input
+                              ref={languageSearchInputRef}
+                              type="text"
+                              value={languageSearch}
+                              onChange={(e) => setLanguageSearch(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (
+                                  e.key === "Enter" &&
+                                  filteredLanguages.length > 0
+                                ) {
+                                  setLanguageFilter(filteredLanguages[0].value);
+                                  setLanguageDropdownOpen(false);
+                                  setLanguageSearch("");
+                                } else if (e.key === "Escape") {
+                                  setLanguageDropdownOpen(false);
+                                  setLanguageSearch("");
+                                }
+                              }}
+                              placeholder={t(
+                                "settings.general.language.searchPlaceholder",
+                              )}
+                              className="w-full px-2 py-1 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-md focus:outline-none focus:ring-1 focus:ring-logo-primary"
+                            />
+                          </div>
+                          <div className="max-h-48 overflow-y-auto overflow-x-hidden">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLanguageFilter("all");
+                                setLanguageDropdownOpen(false);
+                                setLanguageSearch("");
+                              }}
+                              className={`w-full px-3 py-1.5 text-sm text-left transition-colors ${
+                                languageFilter === "all"
+                                  ? "bg-logo-primary/20 text-logo-primary font-semibold"
+                                  : "hover:bg-mid-gray/10"
+                              }`}
+                            >
+                              {t("settings.models.filters.allLanguages")}
+                            </button>
+                            {filteredLanguages.map((lang) => (
+                              <button
+                                key={lang.value}
+                                type="button"
+                                onClick={() => {
+                                  setLanguageFilter(lang.value);
+                                  setLanguageDropdownOpen(false);
+                                  setLanguageSearch("");
+                                }}
+                                className={`w-full px-3 py-1.5 text-sm text-left transition-colors ${
+                                  languageFilter === lang.value
+                                    ? "bg-logo-primary/20 text-logo-primary font-semibold"
+                                    : "hover:bg-mid-gray/10"
+                                }`}
+                              >
+                                {getLanguageLabel(lang.value, i18n.language) || lang.label}
+                              </button>
+                            ))}
+                            {filteredLanguages.length === 0 && (
+                              <div className="px-3 py-2 text-sm text-text/50 text-center">
+                                {t("settings.general.language.noResults")}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                {downloadedModels.map((model: ModelInfo) => (
+                  <ModelCard
+                    key={model.id}
+                    model={model}
+                    status={getModelStatus(model.id)}
+                    onSelect={handleModelSelect}
+                    onDownload={handleModelDownload}
+                    onDelete={handleModelDelete}
+                    onCancel={handleModelCancel}
+                    downloadProgress={getDownloadProgress(model.id)}
+                    downloadSpeed={getDownloadSpeed(model.id)}
+                    showRecommended={false}
+                  />
+                ))}
+              </div>
+
+              {/* Available Models Section */}
+              {availableModels.length > 0 && (
+                <div className="space-y-3">
+                  <h2 className="text-sm font-medium text-text/60">
+                    {t("settings.models.availableModels")}
+                  </h2>
+                  {availableModels.map((model: ModelInfo) => (
+                    <ModelCard
+                      key={model.id}
+                      model={model}
+                      status={getModelStatus(model.id)}
+                      onSelect={handleModelSelect}
+                      onDownload={handleModelDownload}
+                      onDelete={handleModelDelete}
+                      onCancel={handleModelCancel}
+                      downloadProgress={getDownloadProgress(model.id)}
+                      downloadSpeed={getDownloadSpeed(model.id)}
+                      showRecommended={true}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-text/50">
+              {t("settings.models.noModelsMatch")}
             </div>
           )}
-        </div>
+        </>
       ) : (
-        <div className="text-center py-8 text-text/50">
-          {t("settings.models.noModelsMatch")}
+        /* Cloud Model Configurations Panel */
+        <div className="p-5 bg-mid-gray/5 border border-mid-gray/30 rounded-xl space-y-5">
+          {/* Enabled toggle */}
+          <div className="flex items-center justify-between pb-3 border-b border-mid-gray/20">
+            <div>
+              <h3 className="text-sm font-medium text-text">
+                {t("settings.models.cloud.enable.label", "Use Cloud Model for Transcription")}
+              </h3>
+              <p className="text-xs text-text/50 mt-0.5">
+                {t("settings.models.cloud.enable.description", "Enable to route ASR to cloud provider instead of local Whisper.")}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => updateCloudAsrSetting("enabled", !settings?.cloud_asr?.enabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                settings?.cloud_asr?.enabled ? "bg-logo-primary" : "bg-mid-gray/40"
+              }`}
+            >
+              <span
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  settings?.cloud_asr?.enabled ? "translate-x-6" : "translate-x-1"
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Provider selector */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-text/60">
+                {t("settings.models.cloud.provider", "ASR Provider")}
+              </label>
+              <Dropdown
+                options={[
+                  { value: "groq", label: t("settings.models.cloud.providerOption.groq", "Groq (Free ASR Tier)") },
+                  { value: "openai", label: t("settings.models.cloud.providerOption.openai", "OpenAI (ASR Compatible)") },
+                  { value: "openrouter", label: t("settings.models.cloud.providerOption.openrouter", "OpenRouter (Whisper & Multi-model)") },
+                  { value: "cloudflare", label: t("settings.models.cloud.providerOption.cloudflare", "Cloudflare (Workers AI)") },
+                  { value: "deepgram", label: t("settings.models.cloud.providerOption.deepgram", "Deepgram (Credit Free Tier)") },
+                ]}
+                selectedValue={settings?.cloud_asr?.provider || "groq"}
+                onSelect={(val) => handleProviderChange(val)}
+                className="w-full"
+              />
+            </div>
+
+            {/* API Key */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-text/60">
+                {t("settings.models.cloud.apiKey", "API Key")}
+              </label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type={showApiKey ? "text" : "password"}
+                    value={settings?.cloud_asr?.api_key || ""}
+                    onChange={(e) => handleApiKeyChange(e.target.value)}
+                    placeholder={t("settings.models.cloud.apiKeyPlaceholder", "Enter your API Key")}
+                    className="w-full px-3 py-2 pr-10 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-logo-primary placeholder:text-text/30 text-text"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowApiKey(!showApiKey)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text/40 hover:text-text transition-colors cursor-pointer"
+                  >
+                    {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(settings?.cloud_asr?.api_key || "", "api_key")}
+                  className="px-3 py-2 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/75 hover:bg-mid-gray/20 transition-colors flex items-center justify-center cursor-pointer"
+                  title={t("settings.models.cloud.copy", "Copy API Key")}
+                >
+                  {copiedField === "api_key" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Base URL / Endpoint */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-semibold text-text/60">
+                {t("settings.models.cloud.baseUrl", "API Base URL / Endpoint")}
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={settings?.cloud_asr?.base_url || ""}
+                  onChange={(e) => updateCloudAsrSetting("base_url", e.target.value)}
+                  placeholder="https://api.example.com/v1"
+                  className="flex-1 px-3 py-2 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-logo-primary placeholder:text-text/30 text-text"
+                />
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(settings?.cloud_asr?.base_url || "", "base_url")}
+                  className="px-3 py-2 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/75 hover:bg-mid-gray/20 transition-colors flex items-center justify-center cursor-pointer"
+                  title={t("settings.models.cloud.copy", "Copy Endpoint")}
+                >
+                  {copiedField === "base_url" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Model Name Selector/Input */}
+            <div className="flex flex-col gap-1.5">
+              <div className="flex justify-between items-center">
+                <label className="text-xs font-semibold text-text/60">
+                  {t("settings.models.cloud.model", "Model Name")}
+                </label>
+                {fetchedModels.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsManualModelInput(!isManualModelInput)}
+                    className="text-xs text-logo-primary hover:underline font-medium cursor-pointer"
+                  >
+                    {isManualModelInput 
+                      ? t("settings.models.cloud.selectFromPulled", "Select from pulled list") 
+                      : t("settings.models.cloud.manualInput", "Manual Text Input")
+                    }
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                {!isManualModelInput && fetchedModels.length > 0 ? (
+                  <Dropdown
+                    options={fetchedModels.map((m) => ({ value: m, label: m }))}
+                    selectedValue={settings?.cloud_asr?.model || ""}
+                    onSelect={(val) => updateCloudAsrSetting("model", val)}
+                    className="flex-1"
+                  />
+                ) : (
+                  <input
+                    type="text"
+                    value={settings?.cloud_asr?.model || ""}
+                    onChange={(e) => updateCloudAsrSetting("model", e.target.value)}
+                    placeholder="whisper-large-v3"
+                    className="flex-1 px-3 py-2 text-sm bg-mid-gray/10 border border-mid-gray/40 rounded-lg focus:outline-none focus:ring-1 focus:ring-logo-primary placeholder:text-text/30 text-text"
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={() => copyToClipboard(settings?.cloud_asr?.model || "", "model")}
+                  className="px-3 py-2 text-sm font-medium rounded-lg bg-mid-gray/10 text-text/75 hover:bg-mid-gray/20 transition-colors flex items-center justify-center cursor-pointer"
+                  title={t("settings.models.cloud.copy", "Copy Model Name")}
+                >
+                  {copiedField === "model" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            {/* Actions: Pull Models and Verify Connection */}
+            <div className="flex gap-3 pt-3 border-t border-mid-gray/10">
+              <button
+                type="button"
+                onClick={handlePullModels}
+                disabled={isPullingModels || !settings?.cloud_asr?.api_key}
+                className="flex-1 py-2 text-sm font-medium rounded-lg bg-logo-primary/10 text-logo-primary hover:bg-logo-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {isPullingModels ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" />
+                )}
+                {t("settings.models.cloud.pullButton", "Pull ASR Models")}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleVerifyConnection}
+                disabled={isVerifying || !settings?.cloud_asr?.api_key}
+                className="flex-1 py-2 text-sm font-medium rounded-lg bg-logo-primary text-white hover:bg-logo-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                {isVerifying ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="w-4 h-4" />
+                )}
+                {t("settings.models.cloud.verifyButton", "Verify Connection")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
-};
+}

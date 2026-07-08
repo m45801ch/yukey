@@ -579,6 +579,65 @@ pub fn change_translate_using_llm_setting(app: AppHandle, enabled: bool) -> Resu
 
 #[tauri::command]
 #[specta::specta]
+pub fn change_cloud_asr_enabled_setting(app: AppHandle, enabled: bool) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.enabled = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cloud_asr_provider_setting(app: AppHandle, provider: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.provider = provider;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cloud_asr_api_key_setting(app: AppHandle, api_key: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.api_key = api_key;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cloud_asr_base_url_setting(app: AppHandle, base_url: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.base_url = base_url;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cloud_asr_model_setting(app: AppHandle, model: String) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.model = model;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_cloud_asr_api_keys_setting(
+    app: AppHandle,
+    api_keys: std::collections::HashMap<String, String>,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.cloud_asr.api_keys = api_keys;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+
+#[tauri::command]
+#[specta::specta]
 pub fn change_translate_target_language_setting(
     app: AppHandle,
     target: String,

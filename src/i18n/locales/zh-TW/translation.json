@@ -429,6 +429,42 @@
       "rescan": {
         "label": "重新掃描",
         "tooltip": "重新掃描在 yukey 之外新增到模型資料夾或 Hugging Face 快取中的模型"
+      },
+      "tabs": {
+        "local": "本地端模型",
+        "cloud": "雲端模型"
+      },
+      "cloud": {
+        "enable": {
+          "label": "使用雲端模型進行轉寫",
+          "description": "啟用此選項以將語音轉文字 (ASR) 路由至雲端供應商，而非使用本地端模型。"
+        },
+        "provider": "雲端 ASR 供應商",
+        "apiKey": "API 密鑰 (API Key)",
+        "apiKeyPlaceholder": "請輸入您的 API 密鑰",
+        "baseUrl": "API 接口端點 (Endpoint)",
+        "model": "模型名稱 (Model Name)",
+        "selectFromPulled": "從已獲取列表選擇",
+        "manualInput": "手動文字輸入",
+        "copy": "複製內容",
+        "pullButton": "獲取雲端 ASR 模型",
+        "verifyButton": "驗證連線",
+        "copied": "已複製到剪貼簿！",
+        "pullSuccess": "模型獲取成功！",
+        "pullFailed": "模型獲取失敗，請檢查 API 金鑰與接口端點。",
+        "pullError": "獲取模型時發生錯誤。",
+        "verifySuccess": "連線驗證成功！",
+        "verifyFailed": "連線驗證失敗，請檢查您的設定。",
+        "verifyError": "驗證連線時發生錯誤。",
+        "providerOption": {
+          "groq": "Groq (免費 ASR)",
+          "gemini": "Gemini (Google AI Studio 免費額度)",
+          "openai": "OpenAI (ASR 相容)",
+          "openrouter": "OpenRouter (Whisper 與多模型)",
+          "huggingface": "Hugging Face (免伺服器推理)",
+          "cloudflare": "Cloudflare (Workers AI)",
+          "deepgram": "Deepgram (額度免費額度)"
+        }
       }
     },
     "overlay_and_theme": {
@@ -860,7 +896,12 @@
     "transcriptionFailedTitle": "轉錄失敗",
     "noProvider": "請先至設定中配置 AI 潤色修飾服務商。",
     "noModel": "請先至設定中配置 AI 潤色模型。",
-    "noApiKey": "請先在設定中填寫 API 金鑰才能使用提問 AI 功能。"
+    "noApiKey": "請先在設定中填寫 API 金鑰才能使用提問 AI 功能。",
+    "cloudAsrFailedTitle": "雲端 ASR 服務無法使用",
+    "cloudAsrFallback": {
+      "no_api_key": "未填寫 API 密鑰，系統已自動切換為本地端服務進行轉寫。",
+      "network_error": "連線雲端 ASR 失敗，系統已自動切換為本地端服務進行轉寫。"
+    }
   },
   "appLanguage": {
     "title": "應用程式語言",

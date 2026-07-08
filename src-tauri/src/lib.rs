@@ -10,6 +10,7 @@ mod commands;
 mod helpers;
 mod input;
 mod llm_client;
+pub mod cloud_asr_client;
 mod managers;
 mod overlay;
 pub mod portable;
@@ -532,7 +533,16 @@ pub fn run(cli_args: CliArgs) {
 
     let specta_builder = Builder::<tauri::Wry>::new()
         .commands(collect_commands![
+            cloud_asr_client::verify_cloud_asr_connection,
+            cloud_asr_client::fetch_cloud_asr_models,
+            shortcut::change_cloud_asr_enabled_setting,
+            shortcut::change_cloud_asr_provider_setting,
+            shortcut::change_cloud_asr_api_key_setting,
+            shortcut::change_cloud_asr_base_url_setting,
+            shortcut::change_cloud_asr_model_setting,
+            shortcut::change_cloud_asr_api_keys_setting,
             shortcut::change_binding,
+
             shortcut::reset_binding,
             shortcut::change_ptt_setting,
             shortcut::change_audio_feedback_setting,
@@ -542,6 +552,7 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_autostart_setting,
             shortcut::change_translate_to_english_setting,
             shortcut::change_translate_using_llm_setting,
+
             shortcut::change_translate_target_language_setting,
             shortcut::change_selected_language_setting,
             shortcut::change_overlay_position_setting,

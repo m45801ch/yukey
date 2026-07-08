@@ -431,6 +431,14 @@ impl AudioRecordingManager {
         binding_id: &str,
         vad_policy: VadPolicy,
     ) -> Result<(), String> {
+        let settings = crate::settings::get_settings(&self.app_handle);
+        if settings.cloud_asr.enabled && settings.cloud_asr.api_key.trim().is_empty() {
+            error!("Cannot start recording: Cloud ASR enabled but API Key is empty.");
+            use tauri::Emitter;
+            let _ = self.app_handle.emit("cloud-asr-fallback", "no_api_key");
+            return Err("Cloud ASR API Key is missing. Transcription cancelled.".to_string());
+        }
+
         let mut state = self.state.lock().unwrap();
 
         if let RecordingState::Idle = *state {

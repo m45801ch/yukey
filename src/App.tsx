@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
+import { message } from "@tauri-apps/plugin-dialog";
 import { platform } from "@tauri-apps/plugin-os";
 import {
   checkAccessibilityPermission,
@@ -73,6 +74,9 @@ function App() {
   );
   const refreshOutputDevices = useSettingsStore(
     (state) => state.refreshOutputDevices,
+  );
+  const updateCloudAsrSetting = useSettingsStore(
+    (state) => state.updateCloudAsrSetting,
   );
   const hasCompletedPostOnboardingInit = useRef(false);
 
@@ -183,6 +187,36 @@ function App() {
       unlisten.then((fn) => fn());
     };
   }, [t]);
+
+  // Listen for Cloud ASR fallback errors
+  useEffect(() => {
+    const unlisten = listen<string>("cloud-asr-fallback", async (event) => {
+      const reason = event.payload;
+      const title = t("errors.cloudAsrFailedTitle", "Cloud ASR Failed");
+      const description = t(`errors.cloudAsrFallback.${reason}`, "Cloud ASR failed, fallback to local model.");
+      
+      toast.error(title, {
+        description: description,
+      });
+
+      // Turn off Cloud ASR setting permanently and write to config store
+      try {
+        await updateCloudAsrSetting("enabled", false);
+      } catch (e) {
+        console.error("Failed to disable cloud ASR:", e);
+      }
+
+      // Show native system modal dialog for visibility
+      try {
+        await message(description, { title: title, kind: "warning" });
+      } catch (e) {
+        console.error("Failed to show tauri dialog:", e);
+      }
+    });
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, [t, updateCloudAsrSetting]);
 
   // Listen for model loading failures and show a toast
   useEffect(() => {

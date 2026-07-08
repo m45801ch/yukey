@@ -34,6 +34,16 @@ export const Overview: React.FC<OverviewProps> = ({
     return models.find((m) => m.id === currentModel);
   }, [models, currentModel]);
 
+  const displayModelName = useMemo(() => {
+    if (settings?.cloud_asr?.enabled) {
+      const provider = settings.cloud_asr.provider;
+      const providerFormatted = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "";
+      const model = settings.cloud_asr.model || "Unknown";
+      return `雲端 ASR (${providerFormatted}: ${model})`;
+    }
+    return currentModelInfo?.name || t("pages.overview.noModel");
+  }, [settings?.cloud_asr, currentModelInfo, t]);
+
   // 獲取 AI 後處理 Provider 名稱與狀態
   const postProcessStatus = useMemo(() => {
     const providerId = settings?.post_process_provider_id;
@@ -147,7 +157,7 @@ export const Overview: React.FC<OverviewProps> = ({
               {t("sidebar.models")}
             </div>
             <div className="text-sm font-semibold">
-              {currentModelInfo?.name || t("pages.overview.noModel")}
+              {displayModelName}
             </div>
           </div>
         </div>

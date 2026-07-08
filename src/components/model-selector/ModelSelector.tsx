@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import { commands } from "@/bindings";
 import { getTranslatedModelName } from "../../lib/utils/modelTranslation";
 import { useModelStore } from "../../stores/modelStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import ModelStatusButton from "./ModelStatusButton";
 import ModelDropdown from "./ModelDropdown";
 import DownloadProgressDisplay from "./DownloadProgressDisplay";
@@ -26,6 +27,7 @@ interface ModelSelectorProps {
 
 const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
   const { t } = useTranslation();
+  const { settings } = useSettingsStore();
   const {
     models,
     currentModel,
@@ -198,6 +200,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onError }) => {
           count: progressValues.length,
         });
       }
+    }
+
+    if (settings?.cloud_asr?.enabled) {
+      const provider = settings.cloud_asr.provider;
+      const providerFormatted = provider ? provider.charAt(0).toUpperCase() + provider.slice(1) : "";
+      const model = settings.cloud_asr.model || "Unknown";
+      return `雲端 ASR (${providerFormatted}: ${model})`;
     }
 
     const currentModelInfo = models.find((m) => m.id === displayModelId);

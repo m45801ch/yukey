@@ -1116,6 +1116,88 @@ impl TranscriptionManager {
             return Ok(String::new());
         }
 
+        let settings = get_settings(&self.app_handle);
+
+        if settings.cloud_asr.enabled {
+            debug!("Cloud ASR is enabled, bypassing local model");
+            
+            // Check if API Key is empty
+            if settings.cloud_asr.api_key.trim().is_empty() {
+                error!("Cloud ASR enabled but API Key is empty. Falling back to local model.");
+                let _ = self.app_handle.emit("cloud-asr-fallback", "no_api_key");
+            } else {
+                let mut buffer = std::io::Cursor::new(Vec::new());
+                let spec = hound::WavSpec {
+                    channels: 1,
+                    sample_rate: 16000,
+                    bits_per_sample: 16,
+                    sample_format: hound::SampleFormat::Int,
+                };
+                
+                let mut success = false;
+                let mut filtered_result = String::new();
+                let mut write_success = false;
+                
+                {
+                    if let Ok(mut writer) = hound::WavWriter::new(&mut buffer, spec) {
+                        let mut write_ok = true;
+                        for &sample in &audio {
+                            let amplitude = (sample * i16::MAX as f32).clamp(i16::MIN as f32, i16::MAX as f32) as i16;
+                            if writer.write_sample(amplitude).is_err() {
+                                write_ok = false;
+                                break;
+                            }
+                        }
+                        if write_ok && writer.finalize().is_ok() {
+                            write_success = true;
+                        }
+                    }
+                }
+                
+                if write_success {
+                    let wav_bytes = buffer.into_inner();
+                    let cloud_settings = settings.cloud_asr.clone();
+                    
+                    let (tx, rx) = std::sync::mpsc::channel();
+                    std::thread::spawn(move || {
+                        let res = tauri::async_runtime::block_on(async {
+                            crate::cloud_asr_client::transcribe_audio_bytes(&cloud_settings, wav_bytes, "audio.wav").await
+                        });
+                        let _ = tx.send(res);
+                    });
+                    
+                    let run_result = match rx.recv() {
+                        Ok(res) => res,
+                        Err(e) => Err(format!("Thread channel receiver error: {}", e)),
+                    };
+                    
+                    match run_result {
+                        Ok(result_text) => {
+                            let model_takes_initial_prompt = true;
+                            filtered_result = post_process_transcription_text(result_text, &settings, model_takes_initial_prompt);
+                            success = true;
+                        }
+                        Err(e) => {
+                            error!("Cloud ASR transcription request failed: {}. Falling back to local model.", e);
+                            let _ = self.app_handle.emit("cloud-asr-fallback", "network_error");
+                        }
+                    }
+                }
+                
+                if success {
+                    let elapsed_secs = (std::time::Instant::now() - st).as_secs_f64();
+                    let audio_secs = audio_len as f64 / 16000.0;
+                    let rtf = audio_secs / elapsed_secs;
+                    info!(
+                        "Cloud Transcription completed in {:.2}s, audio={:.2}s, rtf={:.2}x",
+                        elapsed_secs, audio_secs, rtf
+                    );
+                    return Ok(filtered_result);
+                }
+            }
+            // Fallback: Code execution continues below to run local Whisper model
+        }
+
         // Check if model is loaded, if not try to load it
         {
             // If the model is loading, wait for it to complete.
@@ -1129,9 +1211,6 @@ impl TranscriptionManager {
                 return Err(anyhow::anyhow!("Model is not loaded for transcription."));
             }
         }
-
-        // Get current settings for configuration
-        let settings = get_settings(&self.app_handle);
 
         // Validate selected language against the model's supported languages.
         // If the language isn't supported, fall back to "auto" to prevent errors.

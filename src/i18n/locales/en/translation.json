@@ -439,6 +439,42 @@
         "label": "Rescan",
         "tooltip": "Rescan for models added to the models folder or Hugging Face cache outside yukey"
       },
+      "tabs": {
+        "local": "Local Models",
+        "cloud": "Cloud Model"
+      },
+      "cloud": {
+        "enable": {
+          "label": "Use Cloud Model for Transcription",
+          "description": "Enable to route ASR to cloud provider instead of local Whisper."
+        },
+        "provider": "ASR Provider",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "Enter your API Key",
+        "baseUrl": "API Base URL / Endpoint",
+        "model": "Model Name",
+        "selectFromPulled": "Select from pulled list",
+        "manualInput": "Manual Text Input",
+        "copy": "Copy Content",
+        "pullButton": "Pull ASR Models",
+        "verifyButton": "Verify Connection",
+        "copied": "Copied to clipboard!",
+        "pullSuccess": "Models pulled successfully!",
+        "pullFailed": "Failed to pull models. Please check your API key and base URL.",
+        "pullError": "An error occurred while pulling models.",
+        "verifySuccess": "Connection verified successfully!",
+        "verifyFailed": "Connection verification failed. Please check your settings.",
+        "verifyError": "An error occurred during verification.",
+        "providerOption": {
+          "groq": "Groq (Free ASR Tier)",
+          "gemini": "Gemini (Google AI Studio Free Tier)",
+          "openai": "OpenAI (ASR Compatible)",
+          "openrouter": "OpenRouter (Whisper & Multi-model)",
+          "huggingface": "Hugging Face (Serverless Inference)",
+          "cloudflare": "Cloudflare (Workers AI)",
+          "deepgram": "Deepgram (Credit Free Tier)"
+        }
+      },
       "noModelsMatch": "No models match this filter."
     },
     "overlay_and_theme": {
@@ -873,7 +909,12 @@
     "transcriptionFailedTitle": "Transcription Failed",
     "noProvider": "Please configure an AI post-processing provider in settings.",
     "noModel": "Please select a post-processing AI model in settings.",
-    "noApiKey": "Please enter your API key in settings to use the Ask AI feature."
+    "noApiKey": "Please enter your API key in settings to use the Ask AI feature.",
+    "cloudAsrFailedTitle": "Cloud ASR Unavailable",
+    "cloudAsrFallback": {
+      "no_api_key": "API Key is missing. System automatically switched to local model for transcription.",
+      "network_error": "Failed to connect to Cloud ASR. System automatically switched to local model for transcription."
+    }
   },
   "appLanguage": {
     "title": "Application Language",

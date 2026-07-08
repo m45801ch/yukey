@@ -58,6 +58,12 @@ interface SettingsStore {
   updatePostProcessModel: (providerId: string, model: string) => Promise<void>;
   fetchPostProcessModels: (providerId: string) => Promise<string[]>;
   setPostProcessModelOptions: (providerId: string, models: string[]) => void;
+  updateCloudAsrSetting: (
+    key: "enabled" | "provider" | "api_key" | "base_url" | "model" | "api_keys",
+    value: any,
+  ) => Promise<void>;
+  verifyCloudAsrConnection: () => Promise<boolean>;
+  fetchCloudAsrModels: () => Promise<string[]>;
 
   // Internal state setters
   setSettings: (settings: Settings | null) => void;
@@ -600,6 +606,70 @@ export const useSettingsStore = create<SettingsStore>()(
           [providerId]: models,
         },
       })),
+
+    updateCloudAsrSetting: async (key, value) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `cloud_asr_${key}`;
+
+      setUpdating(updateKey, true);
+      try {
+        let result;
+        switch (key) {
+          case "enabled":
+            result = await commands.changeCloudAsrEnabledSetting(value as boolean);
+            break;
+          case "provider":
+            result = await commands.changeCloudAsrProviderSetting(value as string);
+            break;
+          case "api_key":
+            result = await commands.changeCloudAsrApiKeySetting(value as string);
+            break;
+          case "base_url":
+            result = await commands.changeCloudAsrBaseUrlSetting(value as string);
+            break;
+          case "model":
+            result = await commands.changeCloudAsrModelSetting(value as string);
+            break;
+          case "api_keys":
+            result = await commands.changeCloudAsrApiKeysSetting(value as Record<string, string>);
+            break;
+        }
+        await refreshSettings();
+      } catch (error) {
+        console.error(`Failed to update cloud ASR setting ${key}:`, error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    verifyCloudAsrConnection: async () => {
+      const { settings } = get();
+      if (!settings || !settings.cloud_asr) return false;
+
+      const result = await commands.verifyCloudAsrConnection(settings.cloud_asr);
+      if (result.status === "error") {
+        throw new Error(result.error || "Unknown verification error");
+      }
+      return true;
+    },
+
+    fetchCloudAsrModels: async () => {
+      const { settings } = get();
+      if (!settings || !settings.cloud_asr) return [];
+
+      try {
+        const result = await commands.fetchCloudAsrModels(settings.cloud_asr);
+        if (result.status === "ok") {
+          return result.data;
+        } else {
+          console.error("Failed to fetch cloud ASR models:", result.error);
+          return [];
+        }
+      } catch (error) {
+        console.error("Failed to fetch cloud ASR models:", error);
+        return [];
+      }
+    },
 
     // Load default settings from Rust
     loadDefaultSettings: async () => {

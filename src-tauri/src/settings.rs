@@ -448,7 +448,32 @@ pub struct AppSettings {
     pub microphone_gain_enabled: bool,
     #[serde(default = "default_microphone_gain_value")]
     pub microphone_gain_value: f32,
+    #[serde(default = "default_cloud_asr")]
+    pub cloud_asr: CloudAsrSettings,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone, Type, PartialEq, Eq)]
+pub struct CloudAsrSettings {
+    pub enabled: bool,
+    pub provider: String,
+    pub api_key: String,
+    pub base_url: String,
+    pub model: String,
+    #[serde(default)]
+    pub api_keys: std::collections::HashMap<String, String>,
+}
+
+fn default_cloud_asr() -> CloudAsrSettings {
+    CloudAsrSettings {
+        enabled: false,
+        provider: "groq".to_string(),
+        api_key: "".to_string(),
+        base_url: "https://api.groq.com/openai/v1".to_string(),
+        model: "whisper-large-v3".to_string(),
+        api_keys: std::collections::HashMap::new(),
+    }
+}
+
 
 fn default_microphone_gain_enabled() -> bool {
     false
@@ -596,17 +621,9 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             supports_structured_output: true,
         },
         PostProcessProvider {
-            id: "zai".to_string(),
-            label: "Z.AI".to_string(),
-            base_url: "https://api.z.ai/api/paas/v4".to_string(),
-            allow_base_url_edit: false,
-            models_endpoint: Some("/models".to_string()),
-            supports_structured_output: true,
-        },
-        PostProcessProvider {
-            id: "openrouter".to_string(),
-            label: "OpenRouter".to_string(),
-            base_url: "https://openrouter.ai/api/v1".to_string(),
+            id: "google".to_string(),
+            label: "Google (Gemini)".to_string(),
+            base_url: "https://generativelanguage.googleapis.com/v1beta/openai".to_string(),
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
@@ -620,6 +637,14 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             supports_structured_output: false,
         },
         PostProcessProvider {
+            id: "openrouter".to_string(),
+            label: "OpenRouter".to_string(),
+            base_url: "https://openrouter.ai/api/v1".to_string(),
+            allow_base_url_edit: false,
+            models_endpoint: Some("/models".to_string()),
+            supports_structured_output: true,
+        },
+        PostProcessProvider {
             id: "groq".to_string(),
             label: "Groq".to_string(),
             base_url: "https://api.groq.com/openai/v1".to_string(),
@@ -631,6 +656,14 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             id: "cerebras".to_string(),
             label: "Cerebras".to_string(),
             base_url: "https://api.cerebras.ai/v1".to_string(),
+            allow_base_url_edit: false,
+            models_endpoint: Some("/models".to_string()),
+            supports_structured_output: true,
+        },
+        PostProcessProvider {
+            id: "zai".to_string(),
+            label: "Z.AI".to_string(),
+            base_url: "https://api.z.ai/api/paas/v4".to_string(),
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
@@ -919,6 +952,7 @@ pub fn get_default_settings() -> AppSettings {
         overlay_style: default_overlay_style(),
         microphone_gain_enabled: default_microphone_gain_enabled(),
         microphone_gain_value: default_microphone_gain_value(),
+        cloud_asr: default_cloud_asr(),
     }
 }
 
