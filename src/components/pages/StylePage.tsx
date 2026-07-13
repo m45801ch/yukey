@@ -779,7 +779,7 @@ export const StylePage: React.FC = () => {
                                 onChange={(e) => setNewEntryTerm(e.target.value)}
                                 placeholder={t("pages.style.dicts.termLabel")}
                                 className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
-                                onKeyDown={(e) => e.key === "Enter" && newEntryTerm.trim() && handleAddEntry(key)}
+                                onKeyDown={(e) => e.key === "Enter" && handleAddEntry(key)}
                               />
                               <input
                                 type="text"
@@ -787,7 +787,7 @@ export const StylePage: React.FC = () => {
                                 onChange={(e) => setNewEntryExplanation(e.target.value)}
                                 placeholder={t("pages.style.dicts.explanationLabel")}
                                 className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
-                                onKeyDown={(e) => e.key === "Enter" && newEntryExplanation.trim() && handleAddEntry(key)}
+                                onKeyDown={(e) => e.key === "Enter" && handleAddEntry(key)}
                               />
                               <button
                                 onClick={() => handleAddEntry(key)}

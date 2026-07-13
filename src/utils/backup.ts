@@ -47,7 +47,31 @@ const generateReadableMarkdown = (data: BackupData): string => {
       lines.push(`### 詞庫名稱：${dict.name}`);
       lines.push(`- **用途描述**：${dict.description}`);
       lines.push(`- **專有名詞列表**：\n\`\`\`\n${dict.content}\n\`\`\`\n`);
+      const customEntries = promptSettings.dictionaryCustomEntries[key];
+      if (customEntries && customEntries.length > 0) {
+        lines.push(`  **使用者自訂詞語：**`);
+        customEntries.forEach((entry) => {
+          lines.push(`  - ${entry.term} → ${entry.explanation}`);
+        });
+      }
     });
+  }
+
+  // 2.5. 內建詞庫自訂詞語
+  const allCustomEntries = Object.entries(
+    promptSettings.dictionaryCustomEntries,
+  );
+  const builtInEntryKeys = allCustomEntries.filter(
+    ([key]) => !key.startsWith("custom_"),
+  );
+  if (builtInEntryKeys.length > 0) {
+    lines.push(`## 2.5. 內建詞庫自訂詞語`);
+    for (const [key, entries] of builtInEntryKeys) {
+      lines.push(`\n### 詞庫：${key}`);
+      entries.forEach((entry) => {
+        lines.push(`- ${entry.term} → ${entry.explanation}`);
+      });
+    }
   }
 
   // 3. 熱詞
