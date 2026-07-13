@@ -166,7 +166,17 @@
         "enabled": "Enabled",
         "editAction": "Edit",
         "deleteAction": "Delete Dictionary",
-        "resetAction": "Reset to Default"
+        "resetAction": "Reset to Default",
+        "expand": "Expand",
+        "collapse": "Collapse",
+        "customEntries": "Custom Terms",
+        "termLabel": "Term",
+        "explanationLabel": "Explanation",
+        "addEntry": "Add",
+        "deleteEntry": "Remove",
+        "noEntries": "No custom terms yet.",
+        "entryAdded": "Custom term added!",
+        "entryDeleted": "Custom term removed!"
       },
       "customRules": {
         "title": "Custom Rules",
