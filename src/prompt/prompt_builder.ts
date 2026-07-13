@@ -21,6 +21,7 @@ export interface PromptPluginSettings {
     string,
     { name: string; description: string; content: string }
   >;
+  dictionaryCustomEntries: Record<string, Array<{ term: string; explanation: string }>>;
 }
 
 export interface StyleMetadata {
@@ -46,6 +47,7 @@ export const getDefaultSettings = (): PromptPluginSettings => ({
   customRules: "",
   customModes: {},
   customDictionaries: {},
+  dictionaryCustomEntries: {},
 });
 
 export const loadPromptSettings = (): PromptPluginSettings => {
@@ -145,7 +147,7 @@ function extractStyleMetadata(
   };
 }
 
-function extractDictMetadata(
+export function extractDictMetadata(
   content: string,
 ): { metadata: DictMetadata; body: string } {
   const { metadata, body } = parseFrontMatter(content);
