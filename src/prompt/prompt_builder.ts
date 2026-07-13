@@ -257,13 +257,12 @@ ${style.body}`);
 
   // 4. 專業詞庫 - parse front matter from each dictionary
   const dicts = getAvailableDictionaries(settings);
-  const activeDicts = settings.activeDictionaries
-    .map((key) => dicts[key])
-    .filter(Boolean);
+  const activeDictKeys = settings.activeDictionaries.filter((key) => dicts[key]);
 
-  if (activeDicts.length > 0) {
+  if (activeDictKeys.length > 0) {
     const dictParts: string[] = [];
-    for (const dict of activeDicts) {
+    for (const key of activeDictKeys) {
+      const dict = dicts[key];
       const parsed = extractDictMetadata(dict.content);
       blocks.push({
         type: "dictionary",
@@ -272,7 +271,11 @@ ${style.body}`);
         forbidden_overrides: [],
         fields: parsed.metadata.allowed_overrides,
       });
-      dictParts.push(`- **${parsed.metadata.name}**：${parsed.body}`);
+      const customEntries = settings.dictionaryCustomEntries[key] || [];
+      const customPart = customEntries.length > 0
+        ? `\n\n  **使用者自訂詞語：**\n  - ${customEntries.map(e => `**${e.term}**: ${e.explanation}`).join("\n  - ")}`
+        : "";
+      dictParts.push(`- **${parsed.metadata.name}**：${parsed.body}${customPart}`);
     }
     parts.push(`---
 
