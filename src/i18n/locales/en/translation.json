@@ -446,7 +446,11 @@
       "pushToTalk": {
         "label": "Push To Talk",
         "description": "Hold to record, release to stop"
-      }
+      },
+      "copyFormat": "Default copy format",
+      "copyFormatPlain": "Plain text",
+      "copyFormatMarkdown": "Markdown",
+      "copyFormatDesc": "Choose how transcription text is formatted when copied"
     },
     "models": {
       "title": "Transcription Models",

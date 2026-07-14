@@ -53,8 +53,28 @@ interface SettingsStore {
   ) => Promise<void>;
   updatePostProcessApiKey: (
     providerId: string,
+    index: number,
     apiKey: string,
   ) => Promise<void>;
+  updatePostProcessApiKeyNote: (
+    providerId: string,
+    index: number,
+    note: string,
+  ) => Promise<void>;
+  addPostProcessApiKey: (
+    providerId: string,
+    apiKey: string,
+  ) => Promise<void>;
+  removePostProcessApiKey: (
+    providerId: string,
+    index: number,
+  ) => Promise<void>;
+  changePostProcessApiKeyIndex: (
+    providerId: string,
+    index: number,
+  ) => Promise<void>;
+  updatePostProcessAutoSwitchModelEnabled: (enabled: boolean) => Promise<void>;
+  updatePostProcessAutoSwitchModelThreshold: (threshold: number) => Promise<void>;
   updatePostProcessModel: (providerId: string, model: string) => Promise<void>;
   fetchPostProcessModels: (providerId: string) => Promise<string[]>;
   setPostProcessModelOptions: (providerId: string, models: string[]) => void;
@@ -73,6 +93,8 @@ interface SettingsStore {
   setAudioDevices: (devices: AudioDevice[]) => void;
   setOutputDevices: (devices: AudioDevice[]) => void;
   setCustomSounds: (sounds: { start: boolean; stop: boolean }) => void;
+  copyFormat: "plain" | "markdown";
+  setCopyFormat: (format: "plain" | "markdown") => void;
 }
 
 // Note: Default settings are now fetched from Rust via commands.getDefaultSettings()
@@ -205,6 +227,8 @@ export const useSettingsStore = create<SettingsStore>()(
     setAudioDevices: (audioDevices) => set({ audioDevices }),
     setOutputDevices: (outputDevices) => set({ outputDevices }),
     setCustomSounds: (customSounds) => set({ customSounds }),
+    copyFormat: "plain",
+    setCopyFormat: (copyFormat) => set({ copyFormat }),
 
     // Getters
     getSetting: (key) => get().settings?.[key],
@@ -498,7 +522,7 @@ export const useSettingsStore = create<SettingsStore>()(
         if (settingType === "base_url") {
           await commands.changePostProcessBaseUrlSetting(providerId, value);
         } else if (settingType === "api_key") {
-          await commands.changePostProcessApiKeySetting(providerId, value);
+          // api_key via generic updater is deprecated - use add/change by index
         } else if (settingType === "model") {
           await commands.changePostProcessModelSetting(providerId, value);
         }
@@ -559,15 +583,108 @@ export const useSettingsStore = create<SettingsStore>()(
       }
     },
 
-    updatePostProcessApiKey: async (providerId, apiKey) => {
-      // Clear cached models when API key changes - user should click refresh after
+    updatePostProcessApiKey: async (providerId, index, apiKey) => {
       set((state) => ({
         postProcessModelOptions: {
           ...state.postProcessModelOptions,
           [providerId]: [],
         },
       }));
-      return get().updatePostProcessSetting("api_key", providerId, apiKey);
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `post_process_api_key:${providerId}:${index}`;
+      setUpdating(updateKey, true);
+      try {
+        await commands.changePostProcessApiKeySetting(providerId, index, apiKey);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update API key:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    updatePostProcessApiKeyNote: async (providerId, index, note) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `post_process_api_key_note:${providerId}:${index}`;
+      setUpdating(updateKey, true);
+      try {
+        await commands.changePostProcessApiKeyNoteSetting(providerId, index, note);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update API key note:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    addPostProcessApiKey: async (providerId, apiKey) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `post_process_add_api_key:${providerId}`;
+      setUpdating(updateKey, true);
+      try {
+        await commands.addPostProcessApiKeySetting(providerId, apiKey);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to add API key:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    removePostProcessApiKey: async (providerId, index) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `post_process_remove_api_key:${providerId}:${index}`;
+      setUpdating(updateKey, true);
+      try {
+        await commands.removePostProcessApiKeySetting(providerId, index);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to remove API key:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    changePostProcessApiKeyIndex: async (providerId, index) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = `post_process_api_key_index:${providerId}`;
+      setUpdating(updateKey, true);
+      try {
+        await commands.changePostProcessApiKeyIndexSetting(providerId, index);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to change active API key index:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    updatePostProcessAutoSwitchModelEnabled: async (enabled) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = "post_process_auto_switch_model_enabled";
+      setUpdating(updateKey, true);
+      try {
+        await commands.changePostProcessAutoSwitchModelEnabledSetting(enabled);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update model auto-switch:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
+    },
+
+    updatePostProcessAutoSwitchModelThreshold: async (threshold) => {
+      const { setUpdating, refreshSettings } = get();
+      const updateKey = "post_process_auto_switch_model_threshold";
+      setUpdating(updateKey, true);
+      try {
+        await commands.changePostProcessAutoSwitchModelThresholdSetting(threshold);
+        await refreshSettings();
+      } catch (error) {
+        console.error("Failed to update model auto-switch threshold:", error);
+      } finally {
+        setUpdating(updateKey, false);
+      }
     },
 
     updatePostProcessModel: async (providerId, model) => {

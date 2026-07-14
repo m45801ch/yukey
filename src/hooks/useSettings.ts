@@ -37,10 +37,32 @@ interface UseSettingsReturn {
   ) => Promise<void>;
   updatePostProcessApiKey: (
     providerId: string,
+    index: number,
     apiKey: string,
   ) => Promise<void>;
+  updatePostProcessApiKeyNote: (
+    providerId: string,
+    index: number,
+    note: string,
+  ) => Promise<void>;
+  addPostProcessApiKey: (
+    providerId: string,
+    apiKey: string,
+  ) => Promise<void>;
+  removePostProcessApiKey: (
+    providerId: string,
+    index: number,
+  ) => Promise<void>;
+  changePostProcessApiKeyIndex: (
+    providerId: string,
+    index: number,
+  ) => Promise<void>;
+  updatePostProcessAutoSwitchModelEnabled: (enabled: boolean) => Promise<void>;
+  updatePostProcessAutoSwitchModelThreshold: (threshold: number) => Promise<void>;
   updatePostProcessModel: (providerId: string, model: string) => Promise<void>;
   fetchPostProcessModels: (providerId: string) => Promise<string[]>;
+  copyFormat: "plain" | "markdown";
+  setCopyFormat: (format: "plain" | "markdown") => void;
 }
 
 export const useSettings = (): UseSettingsReturn => {
@@ -72,7 +94,15 @@ export const useSettings = (): UseSettingsReturn => {
     setPostProcessProvider: store.setPostProcessProvider,
     updatePostProcessBaseUrl: store.updatePostProcessBaseUrl,
     updatePostProcessApiKey: store.updatePostProcessApiKey,
+    updatePostProcessApiKeyNote: store.updatePostProcessApiKeyNote,
+    addPostProcessApiKey: store.addPostProcessApiKey,
+    removePostProcessApiKey: store.removePostProcessApiKey,
+    changePostProcessApiKeyIndex: store.changePostProcessApiKeyIndex,
+    updatePostProcessAutoSwitchModelEnabled: store.updatePostProcessAutoSwitchModelEnabled,
+    updatePostProcessAutoSwitchModelThreshold: store.updatePostProcessAutoSwitchModelThreshold,
     updatePostProcessModel: store.updatePostProcessModel,
     fetchPostProcessModels: store.fetchPostProcessModels,
+    copyFormat: store.copyFormat,
+    setCopyFormat: store.setCopyFormat,
   };
 };
