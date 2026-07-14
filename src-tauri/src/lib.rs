@@ -572,6 +572,12 @@ pub fn run(cli_args: CliArgs) {
             shortcut::change_experimental_enabled_setting,
             shortcut::change_post_process_base_url_setting,
             shortcut::change_post_process_api_key_setting,
+            shortcut::change_post_process_api_key_note_setting,
+            shortcut::add_post_process_api_key_setting,
+            shortcut::remove_post_process_api_key_setting,
+            shortcut::change_post_process_api_key_index_setting,
+            shortcut::change_post_process_auto_switch_model_enabled_setting,
+            shortcut::change_post_process_auto_switch_model_threshold_setting,
             shortcut::change_post_process_model_setting,
             shortcut::set_post_process_provider,
             shortcut::fetch_post_process_models,
@@ -658,6 +664,7 @@ pub fn run(cli_args: CliArgs) {
             commands::history::clear_all_saved_history,
             commands::history::get_history_stats,
             commands::history::export_audio_file,
+            commands::transcribe_file::transcribe_audio_file,
             helpers::clamshell::is_laptop,
         ])
         .events(collect_events![
