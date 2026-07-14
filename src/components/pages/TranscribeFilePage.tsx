@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { Upload, FileAudio, Trash2, Copy, Loader2 } from "lucide-react";
 import { commands } from "@/bindings";
 import { toast } from "sonner";
@@ -41,16 +42,11 @@ function isAllowedFile(name: string): boolean {
   return ALLOWED_EXTENSIONS.some((ext) => lower.endsWith(ext));
 }
 
-interface FileWithPath extends File {
-  path?: string;
-}
-
 export const TranscribeFilePage: React.FC = () => {
   const { t } = useTranslation();
   const { copyFormat } = useSettings();
   const [files, setFiles] = useState<QueuedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const dragCounterRef = useRef(0);
 
   const addEntries = useCallback((entries: { path: string; name: string }[]) => {
     const allowed = entries.filter((e) => isAllowedFile(e.name));
@@ -71,37 +67,23 @@ export const TranscribeFilePage: React.FC = () => {
     });
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      dragCounterRef.current = 0;
-      const droppedFiles = Array.from(e.dataTransfer.files) as FileWithPath[];
-      const entries = droppedFiles
-        .filter((f) => f.path)
-        .map((f) => ({ path: f.path!, name: f.name }));
-      addEntries(entries);
-    },
-    [addEntries],
-  );
-
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounterRef.current++;
-    setIsDragging(true);
-  }, []);
-
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    dragCounterRef.current--;
-    if (dragCounterRef.current === 0) {
-      setIsDragging(false);
-    }
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-  }, []);
+  useEffect(() => {
+    const unlistenPromise = getCurrentWebviewWindow().onDragDropEvent((event) => {
+      if (event.payload.type === "over") {
+        setIsDragging(true);
+      } else if (event.payload.type === "leave") {
+        setIsDragging(false);
+      } else if (event.payload.type === "drop") {
+        setIsDragging(false);
+        const entries = event.payload.paths.map((p) => ({
+          path: p,
+          name: p.split(/[/\\]/).pop() || p,
+        }));
+        addEntries(entries);
+      }
+    });
+    return () => { unlistenPromise.then((fn) => fn()); };
+  }, [addEntries]);
 
   const handleOpenDialog = useCallback(async () => {
     const selected = await open({
@@ -188,10 +170,6 @@ export const TranscribeFilePage: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 h-full">
       <div
-        onDrop={handleDrop}
-        onDragEnter={handleDragEnter}
-        onDragLeave={handleDragLeave}
-        onDragOver={handleDragOver}
         onClick={handleOpenDialog}
         className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed cursor-pointer transition-colors py-12 ${
           isDragging
