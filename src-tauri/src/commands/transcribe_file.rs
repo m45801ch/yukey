@@ -1,7 +1,7 @@
 use crate::audio_toolkit::audio::decode_mp3;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings::get_settings;
-use log::info;
+use log::{debug, info};
 use rubato::{FftFixedIn, Resampler};
 use serde::Serialize;
 use specta::Type;
@@ -76,11 +76,20 @@ pub fn transcribe_audio_file(
         .map(|e| e.to_lowercase())
         .unwrap_or_default();
 
+    debug!(
+        "transcribe_audio_file: path={:?}, ext={:?}, file_exists={}",
+        path,
+        ext,
+        path.exists()
+    );
+
     let (samples, duration_ms) = match ext.as_str() {
         "wav" => read_wav_mono_16k(path)?,
         "mp3" => decode_mp3(path).map_err(|e| format!("Failed to decode MP3: {}", e))?,
         _ => return Err(format!("Unsupported file format: {}", ext)),
     };
+
+    debug!("Decoded {} samples, duration_ms={}", samples.len(), duration_ms);
 
     if samples.is_empty() {
         return Err("No audio samples found".into());

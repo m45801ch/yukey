@@ -60,7 +60,12 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         probe::Hint,
     };
 
-    let file = std::fs::File::open(path).map_err(|e| format!("Cannot open file: {}", e))?;
+    debug!("decode_mp3: opening {:?}", path);
+    let file = std::fs::File::open(path).map_err(|e| {
+        let msg = format!("Cannot open file {:?}: {}", path, e);
+        debug!("{}", msg);
+        msg
+    })?;
     let mss = MediaSourceStream::new(Box::new(file), Default::default());
 
     let mut hint = Hint::new();
@@ -92,6 +97,14 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
             (n as f64 / rate * 1000.0) as u64
         })
         .unwrap_or(0);
+
+    debug!(
+        "decode_mp3: track_id={}, src_sample_rate={}, n_frames={:?}, duration_ms={}",
+        track_id,
+        src_sample_rate,
+        codec_params.n_frames,
+        duration_ms
+    );
 
     let mut decoder = symphonia::default::get_codecs()
         .make(&codec_params, &DecoderOptions::default())
@@ -130,6 +143,8 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         }
     }
 
+    debug!("decode_mp3: decoded {} mono samples", all_samples.len());
+
     if (src_sample_rate as f64 - 16000.0).abs() > 0.1 {
         let mut resampler = FftFixedIn::<f32>::new(src_sample_rate, 16000, 1024, 1, 1)
             .map_err(|e| format!("Resampler error: {}", e))?;
@@ -141,6 +156,7 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         for buf in out {
             resampled.extend_from_slice(&buf);
         }
+        debug!("decode_mp3: resampled to {} samples", resampled.len());
         Ok((resampled, duration_ms))
     } else {
         Ok((all_samples, duration_ms))
