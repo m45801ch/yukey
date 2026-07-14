@@ -173,7 +173,17 @@
         "enabled": "啟用中",
         "editAction": "編輯內容",
         "deleteAction": "刪除詞庫",
-        "resetAction": "還原預設值"
+        "resetAction": "還原預設值",
+        "expand": "展開",
+        "collapse": "收起",
+        "customEntries": "自訂詞語",
+        "termLabel": "詞語",
+        "explanationLabel": "解釋",
+        "addEntry": "新增",
+        "deleteEntry": "移除",
+        "noEntries": "尚無自訂詞語。",
+        "entryAdded": "自訂詞語已新增！",
+        "entryDeleted": "自訂詞語已移除！"
       },
       "customRules": {
         "title": "使用者自訂規則",
@@ -244,6 +254,7 @@
     }
   },
   "transcribeFile": {
+    "title": "轉錄音檔",
     "dropHint": "將音檔拖放到此處或點擊選擇 (WAV, MP3)",
     "transcribeAll": "全部轉錄 ({{count}})",
     "transcribing": "轉錄中...",
@@ -767,7 +778,13 @@
       "retranscribe": "重新轉錄",
       "retranscribeError": "重新轉錄失敗，請重試。",
       "transcribing": "轉錄中...",
-      "transcriptionFailed": "轉錄失敗。您可以使用重試圖示重新轉錄。"
+      "transcriptionFailed": "轉錄失敗。您可以使用重試圖示重新轉錄。",
+      "correctionHint": "將錯字替換為正確的拼寫",
+      "correctionPatternPlaceholder": "原始錯字",
+      "correctionPlaceholder": "輸入替換為正確的字...",
+      "correctionConfirm": "確定",
+      "correctionCancel": "取消",
+      "correctionAdded": "已新增糾錯規則"
     },
     "debug": {
       "title": "偵錯",
