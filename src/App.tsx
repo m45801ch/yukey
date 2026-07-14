@@ -20,6 +20,7 @@ import { Overview } from "./components/pages/Overview";
 import { HistoryPage } from "./components/pages/HistoryPage";
 import { VocabPage } from "./components/pages/VocabPage";
 import { StylePage } from "./components/pages/StylePage";
+import { TranscribeFilePage } from "./components/pages/TranscribeFilePage";
 import { useSettings } from "./hooks/useSettings";
 import { useSettingsStore } from "./stores/settingsStore";
 import { commands } from "@/bindings";
@@ -46,6 +47,8 @@ const renderPageContent = (
       return <VocabPage />;
     case "style":
       return <StylePage />;
+    case "transcribe_file":
+      return <TranscribeFilePage />;
     default:
       return <Overview onNavigateToSettings={onNavigateToSettings} />;
   }
@@ -383,6 +386,7 @@ function App() {
                   {currentSection === "history" && t("pages.history.title")}
                   {currentSection === "vocab" && t("pages.vocab.title")}
                   {currentSection === "style" && t("pages.style.title")}
+                  {currentSection === "transcribe_file" && t("transcribeFile.title")}
                 </h1>
               </div>
 

@@ -9,150 +9,248 @@
     "cancel": "取消"
   },
   "sidebar": {
+    "overview": "概览",
     "general": "通用",
+    "vocab": "词汇",
+    "style": "风格",
+    "transcribeFile": "转录音档",
     "models": "模型",
     "advanced": "高级",
     "postProcessing": "后处理",
     "history": "历史记录",
     "debug": "调试",
-    "about": "关于"
+    "about": "关于",
+    "settings": "设置",
+    "center": "设置中心"
   },
   "pages": {
+    "overview": {
+      "title": "今日概览",
+      "notEnabled": "未启用",
+      "noModel": "未加载模型",
+      "aiModel": "AI 润色模型",
+      "todayChars": "今日字符数",
+      "todayDuration": "今日时长",
+      "avgChars": "平均字符/段",
+      "totalCount": "总记录数",
+      "weeklyChart": "最近 7 天分布",
+      "recentEntries": "最近转录",
+      "noEntries": "暂无转录记录",
+      "charCount": "{{count}} 字符",
+      "durationZero": "0 秒",
+      "durationMin": "{{m}} 分 {{s}} 秒",
+      "durationSec": "{{s}} 秒"
+    },
     "vocab": {
-      "title": "詞彙字典",
-      "infoTitle": "詞彙與糾錯字典說明",
-      "infoHotwords": "自訂熱詞：適合專有名詞、人名、產品名，能幫助 ASR 識別。",
-      "infoRules": "糾錯規則：需在「服務」中設定供應商與模型，並使用已設定 AI 潤色的快捷鍵進行轉錄，才會自動將轉錄結果中的錯字或口誤替換成正確詞彙（例如將「飛斯不可」更正為「Facebook」）。",
-      "hotwordsTitle": "自訂熱詞",
-      "hotwordsDescription": "請輸入您常用的專業熱詞：",
+      "title": "词汇字典",
+      "infoTitle": "词汇与纠错字典说明",
+      "infoHotwords": "自定义热词：输入专有名词、人名、产品名等，这些词会作为提示语送入 ASR 引擎（Whisper），帮助提升特定词汇的辨识准确度。",
+      "infoRules": "纠错对照规则：仅在 AI 润色（后处理）时生效，不影响原始转录文字。需在「服务」中设定供应商与模型，并使用已设定 AI 润色的快捷键进行转录，才会自动将转录结果中的错字替换成正确词汇（例如将「飞斯不可」更正为「Facebook」）。",
+      "hotwordsTitle": "自定义热词",
+      "hotwordsDescription": "请输入您希望 ASR 引擎正确辨识的词语：",
       "hotwordsPlaceholder": "例如：Kubernetes",
-      "addHotword": "新增熱詞",
-      "noHotwords": "尚無新增的自訂熱詞",
-      "rulesTitle": "糾錯對照規則",
-      "rulesDescription": "將轉錄錯字替換為正確拼寫：",
-      "rulePatternPlaceholder": "原始錯字/音",
-      "ruleReplacementPlaceholder": "替換為正確字",
+      "addHotword": "新增热词",
+      "noHotwords": "尚无新增的自定义热词",
+      "rulesTitle": "纠错对照规则",
+      "rulesDescription": "在 AI 润色时将转录错字替换为正确拼写（不影响原始转录结果）：",
+      "rulePatternPlaceholder": "原始错字/音",
+      "ruleReplacementPlaceholder": "替换为正确字",
       "addRule": "新增",
-      "noRules": "尚無新增的糾錯規則",
-      "toastWordExists": "熱詞 \"{{word}}\" 已存在於清單中",
-      "toastWordAdded": "熱詞添加成功",
-      "toastFieldEmpty": "輸入欄位不可為空",
-      "toastRuleExists": "糾錯規則 \"{{pattern}}\" 已存在",
-      "toastRuleAdded": "已新增糾錯規則",
-      "toastRuleRemoved": "已刪除該糾錯規則"
+      "noRules": "尚无新增的纠错规则",
+      "toastWordExists": "热词 \"{{word}}\" 已存在于清单中",
+      "toastWordAdded": "热词添加成功",
+      "toastFieldEmpty": "输入栏位不可为空",
+      "toastRuleExists": "纠错规则「{{pattern}} → {{replacement}}」已存在",
+      "toastRuleAdded": "已新增纠错规则",
+      "toastRuleRemoved": "已删除该纠错规则"
     },
     "style": {
-      "title": "AI 風格",
-      "description": "模組化設定，精準控制 AI 語音轉文字的潤飾行為與詞彙。所有變更會自動儲存並套用。",
+      "title": "AI 风格",
+      "description": "模块化设定，精准控制 AI 语音转文字的润饰行为与词汇。所有变更会自动储存并套用。",
       "tabs": {
-        "mainPrompt": "主提示詞",
-        "modes": "潤飾模式",
-        "hotwords": "熱詞",
-        "dicts": "專業詞庫",
-        "customRules": "自訂規則",
-        "backup": "備份與還原"
+        "mainPrompt": "主提示词",
+        "modes": "润饰模式",
+        "hotwords": "热词",
+        "dicts": "专业词库",
+        "customRules": "自定义规则",
+        "backup": "备份与还原"
       },
       "mainPrompt": {
-        "title": "核心系統提示詞",
-        "hint": "提示：點擊卡片套用；雙擊查看或編輯。",
-        "addButton": "新增主提示詞",
-        "defaultBadge": "預設（唯讀）",
-        "customBadge": "自訂",
+        "title": "核心系统提示词",
+        "hint": "提示：点击卡片套用；双击查看或编辑。",
+        "addButton": "新增主提示词",
+        "defaultBadge": "预设（只读）",
+        "customBadge": "自订",
         "inUse": "使用中",
-        "viewTooltip": "雙擊查看",
-        "editTooltip": "雙擊編輯",
+        "viewTooltip": "双击查看",
+        "editTooltip": "双击编辑",
         "viewAction": "查看",
-        "editAction": "編輯",
-        "deleteAction": "刪除"
+        "editAction": "编辑",
+        "deleteAction": "删除"
       },
       "modes": {
-        "title": "語境潤飾模式",
-        "hint": "提示：點擊卡片切換；雙擊編輯。",
+        "title": "语境润饰模式",
+        "hint": "提示：点击卡片切换；双击编辑。",
         "addButton": "新增模式",
-        "editTooltip": "雙擊編輯",
+        "editTooltip": "双击编辑",
         "modifiedBadge": "已修改",
-        "builtinBadge": "內建",
+        "builtinBadge": "内置",
         "inUse": "使用中",
-        "editAction": "編輯",
-        "deleteAction": "刪除模式",
-        "resetAction": "重設為預設"
+        "editAction": "编辑",
+        "deleteAction": "删除模式",
+        "resetAction": "重设为预设"
       },
       "hotwords": {
-        "title": "熱詞管理",
-        "description": "輸入常用英文詞彙、公司名、人名等。變更會同步至 ASR 引擎（Whisper）與 AI 潤飾提示詞。",
+        "title": "热词管理",
+        "description": "输入常用英文词汇、公司名、人名等。变更会同步至 ASR 引擎（Whisper）与 AI 润饰提示词。",
         "placeholder": "例如：Kubernetes（不可含空格）",
-        "addButton": "新增熱詞",
-        "noHotwords": "尚無自訂熱詞。請在此處或詞彙字典頁面新增。"
+        "addButton": "新增热词",
+        "noHotwords": "尚无自定义热词。请在此处或词汇字典页面新增。"
       },
       "dicts": {
-        "title": "專業領域詞庫",
-        "hint": "提示：點擊卡片切換啟用；雙擊編輯內容。",
-        "addButton": "新增詞庫",
-        "editTooltip": "雙擊編輯",
+        "title": "专业领域词库",
+        "hint": "提示：点击卡片切换启用；双击编辑内容。",
+        "addButton": "新增词库",
+        "editTooltip": "双击编辑",
         "modifiedBadge": "已修改",
-        "builtinBadge": "內建",
-        "enabled": "已啟用",
-        "editAction": "編輯",
-        "deleteAction": "刪除詞庫",
-        "resetAction": "重設為預設",
-        "expand": "展開",
-        "collapse": "收合",
-        "customEntries": "自訂詞語",
-        "termLabel": "詞語",
-        "explanationLabel": "解釋",
+        "builtinBadge": "内置",
+        "enabled": "已启用",
+        "editAction": "编辑",
+        "deleteAction": "删除词库",
+        "resetAction": "重设为预设",
+        "expand": "展开",
+        "collapse": "收起",
+        "customEntries": "自定义词语",
+        "termLabel": "词语",
+        "explanationLabel": "解释",
         "addEntry": "新增",
         "deleteEntry": "移除",
-        "noEntries": "尚無自訂詞語。",
-        "entryAdded": "自訂詞語已新增！",
-        "entryDeleted": "自訂詞語已移除！"
+        "noEntries": "尚无自定义词语。",
+        "entryAdded": "自定义词语已新增！",
+        "entryDeleted": "自定义词语已移除！"
       },
       "customRules": {
-        "title": "自訂規則",
-        "description": "輸入您的個人格式化與潤飾偏好。例如：「避免使用破折號」、「將非正式用語替換為正式用語」。",
-        "placeholder": "輸入自訂規則..."
+        "title": "自定义规则",
+        "description": "输入您的个人格式化与润饰偏好。例如：「避免使用破折号」、「将非正式用语替换为正式用语」。",
+        "placeholder": "输入自定义规则..."
       },
       "backup": {
-        "title": "資料備份與遷移",
-        "description": "一鍵匯出自訂風格、詞庫、熱詞與糾錯規則為 ZIP 檔案，或從備份還原。",
-        "exportButton": "匯出為 ZIP",
-        "importButton": "從 ZIP 匯入"
+        "title": "资料备份与迁移",
+        "description": "一键汇出自订风格、词库、热词与纠错规则为 ZIP 档案，或从备份还原。",
+        "exportButton": "汇出为 ZIP",
+        "importButton": "从 ZIP 汇入"
       },
       "editor": {
-        "viewTitle": "查看核心提示詞",
-        "editTitleMain": "編輯主提示詞",
-        "editTitleMode": "編輯潤飾模式",
-        "editTitleDict": "編輯專業詞庫",
-        "newTitleMain": "新增主提示詞",
-        "newTitleMode": "新增潤飾模式",
-        "newTitleDict": "新增專業詞庫",
-        "nameLabel": "名稱",
-        "namePlaceholderMain": "例如：自訂核心規則",
-        "namePlaceholderMode": "例如：語音模式",
+        "viewTitle": "查看核心提示词",
+        "editTitleMain": "编辑主提示词",
+        "editTitleMode": "编辑润饰模式",
+        "editTitleDict": "编辑专业词库",
+        "newTitleMain": "新增主提示词",
+        "newTitleMode": "新增润饰模式",
+        "newTitleDict": "新增专业词库",
+        "nameLabel": "名称",
+        "namePlaceholderMain": "例如：自定义核心规则",
+        "namePlaceholderMode": "例如：语音模式",
         "namePlaceholderDict": "例如：生物科技",
-        "descLabel": "卡片描述（顯示於 UI 卡片上）",
-        "descPlaceholder": "簡述此項目...",
-        "contentLabelMain": "提示詞內容",
-        "contentLabelMode": "模式指示與語調（AI 提示詞）",
-        "contentLabelDict": "詞彙列表（AI 參考用）",
-        "contentPlaceholderMain": "撰寫核心角色設定與基礎指示...",
-        "contentPlaceholderMode": "描述 AI 應使用的語調...",
-        "contentPlaceholderDict": "例如：名詞A、名詞B、名詞C...",
-        "closeButton": "關閉",
+        "descLabel": "卡片描述（显示于 UI 卡片上）",
+        "descPlaceholder": "简述此项目...",
+        "contentLabelMain": "提示词内容",
+        "contentLabelMode": "模式指示与语调（AI 提示词）",
+        "contentLabelDict": "词汇列表（AI 参考用）",
+        "contentPlaceholderMain": "撰写核心角色设定与基础指示...",
+        "contentPlaceholderMode": "描述 AI 应使用的语调...",
+        "contentPlaceholderDict": "例如：名词A、名词B、名词C...",
+        "closeButton": "关闭",
         "cancelButton": "取消",
-        "saveButton": "儲存"
+        "saveButton": "储存"
       },
       "toast": {
-        "rulesAutoSaved": "自訂規則已儲存並套用！",
-        "changesApplied": "變更已套用！",
-        "confirmDelete": "確定要刪除此項目嗎？",
-        "itemDeleted": "項目已刪除並重新套用！",
-        "confirmReset": "確定要將此預設項目重設為原廠設定嗎？",
-        "resetDone": "預設設定已還原並套用！",
-        "wordExists": "熱詞「{{word}}」已存在",
-        "wordAdded": "熱詞已新增並套用",
-        "wordRemoved": "熱詞已移除並重新套用"
+        "rulesAutoSaved": "自定义规则已储存并套用！",
+        "changesApplied": "变更已套用！",
+        "confirmDelete": "确定要删除此项目吗？",
+        "itemDeleted": "项目已删除并重新套用！",
+        "confirmReset": "确定要将此预设项目重设为原厂设定吗？",
+        "resetDone": "预设设定已还原并套用！",
+        "wordExists": "热词「{{word}}」已存在",
+        "wordAdded": "热词已新增并套用",
+        "wordRemoved": "热词已移除并重新套用"
       },
       "descFallback": "「{{name}}」的描述。"
+    },
+    "history": {
+      "title": "历史记录",
+      "entryList": "条目",
+      "openFolder": "录音文件夹",
+      "filterAll": "全部",
+      "filterAudio": "含录音",
+      "filterSaved": "已保存",
+      "loading": "加载中...",
+      "emptyAll": "暂无历史记录",
+      "emptySaved": "暂无已保存的条目",
+      "detailTitle": "详情",
+      "statsText": "文字：{{count}} / {{limit}} 条",
+      "statsAudio": "录音：{{count}} / {{limit}} 个文件",
+      "statsTextTooltip": "文本历史条目数和上限（点击过滤全部）",
+      "statsAudioTooltip": "录音文件数和上限（点击过滤含录音的条目）",
+      "clearAll": "清除全部",
+      "clearSaved": "清除已保存",
+      "clearAllTooltip": "清除所有历史条目和录音文件",
+      "clearSavedTooltip": "清除所有已保存条目和录音文件",
+      "searchPlaceholder": "搜索历史记录...",
+      "timestamp": "时间戳",
+      "copyTooltipDefault": "复制（默认：原始文本）",
+      "copyTooltipRaw": "复制选中的原始文本",
+      "copyTooltipPolished": "复制选中的润色文本",
+      "copyTooltip": "复制文本",
+      "toggleSave": "保存",
+      "toggleUnsave": "取消保存",
+      "delete": "删除",
+      "rawText": "原始文本（ASR 输出）",
+      "polishedText": "润色文本（AI 优化）",
+      "clickToSelect": "点击选择并复制",
+      "selectedAndCopied": "已选择并复制",
+      "audioPlayback": "音频回放",
+      "downloadAudio": "下载录音",
+      "noSelection": "请从列表中选择条目以查看详情",
+      "toastDeleteSuccess": "条目已成功删除",
+      "toastClearConfirm": "确定要清除所有历史条目和录音文件吗？（已保存的项目将被保留。此操作不可撤销。）",
+      "toastClearTitle": "清除全部历史",
+      "toastClearError": "清除历史失败：{{error}}",
+      "toastClearSuccess": "已成功清除历史条目和录音文件（已保存项目已保留）",
+      "toastClearGenericError": "清除历史时出错",
+      "toastClearSavedConfirm": "确定要清除所有已保存的历史条目和录音文件吗？（这将永久删除它们，且不可撤销。）",
+      "toastClearSavedTitle": "清除全部已保存",
+      "toastClearSavedError": "清除已保存条目失败：{{error}}",
+      "toastClearSavedSuccess": "已成功清除所有已保存条目和录音文件",
+      "toastClearSavedGenericError": "清除已保存条目时出错",
+      "toastDownloadSuccess": "录音文件已下载！",
+      "toastDownloadError": "下载录音失败：{{error}}",
+      "toastDownloadGenericError": "下载录音文件时出错",
+      "correctionHint": "将错字替换为正确拼写",
+      "correctionPatternPlaceholder": "原始错字",
+      "correctionPlaceholder": "替换为正确文本...",
+      "correctionConfirm": "确认",
+      "correctionCancel": "取消",
+      "correctionAdded": "已新增纠错规则"
+    },
+    "translate": {
+      "languages": {
+        "en": "英语",
+        "zh-TW": "繁体中文",
+        "zh-CN": "简体中文",
+        "ja": "日语",
+        "ko": "韩语",
+        "es": "西班牙语",
+        "fr": "法语",
+        "de": "德语"
+      }
+    },
+    "models": {
+      "sortName": "按名称排序",
+      "sortAccuracy": "按准确度排序",
+      "sortSpeed": "按速度排序",
+      "sortSize": "按大小排序",
+      "sortPrefix": "排序："
     }
   },
   "onboarding": {
@@ -170,67 +268,71 @@
     "models": {
       "small": {
         "name": "Whisper Small",
-        "description": "快速且相當準確。"
+        "description": "快速且相当准确。"
       },
       "medium": {
         "name": "Whisper Medium",
-        "description": "準確度高，速度適中"
+        "description": "准确度高，速度适中"
       },
       "turbo": {
         "name": "Whisper Turbo",
-        "description": "準確度和速度均衡。"
+        "description": "准确度和速度均衡。"
       },
       "large": {
         "name": "Whisper Large",
-        "description": "準確度高，但速度較慢。"
+        "description": "准确度高，但速度较慢。"
       },
       "parakeet-tdt-0.6b-v2": {
         "name": "Parakeet V2",
-        "description": "僅支援英語。英語使用者的最佳模型。"
+        "description": "仅支援英语。英语使用者的最佳模型。"
       },
       "parakeet-tdt-0.6b-v3": {
         "name": "Parakeet V3",
-        "description": "快速且準確"
+        "description": "快速且准确"
       },
       "moonshine-base": {
         "name": "Moonshine Base",
-        "description": "速度極快，僅支援英語。口音處理良好。"
+        "description": "速度极快，仅支援英语。口音处理良好。"
       },
       "moonshine-tiny-streaming-en": {
         "name": "Moonshine V2 Tiny",
-        "description": "超快速，僅支援英語"
+        "description": "超快速，仅支援英语"
       },
       "moonshine-small-streaming-en": {
         "name": "Moonshine V2 Small",
-        "description": "快速，僅支援英語。速度與準確度的良好平衡。"
+        "description": "快速，仅支援英语。速度与准确度的良好平衡。"
       },
       "moonshine-medium-streaming-en": {
         "name": "Moonshine V2 Medium",
-        "description": "僅支援英語。高品質。"
+        "description": "仅支援英语。高品质。"
       },
       "breeze-asr": {
         "name": "Breeze ASR",
-        "description": "針對臺灣華語最佳化。支援語碼轉換。"
+        "description": "针对台湾华语最佳化。支援语码转换。"
+      },
+      "breeze-asr-26": {
+        "name": "Breeze ASR 26",
+        "description": "针对台湾闽南语最佳化。最适合台湾语音辨识。"
       },
       "sense-voice-int8": {
         "name": "SenseVoice",
-        "description": "速度極快。支援中文、英語、日語、韓語、粵語。"
+        "description": "速度极快。支援中文、英语、日语、韩语、粤语。"
       },
       "gigaam-v3-e2e-ctc": {
         "name": "GigaAM v3",
-        "description": "俄語語音辨識。快速且準確。"
+        "description": "俄语语音辨识。快速且准确。"
       },
       "canary-180m-flash": {
         "name": "Canary 180M Flash",
-        "description": "速度極快。支援英語、德語、西班牙語、法語。支援翻譯。"
+        "description": "速度极快。支援英语、德语、西班牙语、法语。支援翻译。"
       },
       "canary-1b-v2": {
         "name": "Canary 1B v2",
-        "description": "準確的多語言模型。25種歐洲語言。支援翻譯。"
+        "description": "准确的多语言模型。25种欧洲语言。支援翻译。"
       },
       "cohere-int8": {
         "name": "Cohere",
-        "description": "大型模型，速度較慢，但多語言辨識非常準確。"
+        "description": "大型模型，速度较慢，但多语言辨识非常准确。"
       }
     },
     "errors": {
@@ -311,6 +413,42 @@
       "rescan": {
         "label": "重新扫描",
         "tooltip": "重新扫描在 yukey 之外添加到模型文件夹或 Hugging Face 缓存中的模型"
+      },
+      "tabs": {
+        "local": "本地模型",
+        "cloud": "云端模型"
+      },
+      "cloud": {
+        "enable": {
+          "label": "使用云端模型转录",
+          "description": "启用后将 ASR 路由到云端提供商，而非本地 Whisper。"
+        },
+        "provider": "ASR 提供商",
+        "apiKey": "API 密钥",
+        "apiKeyPlaceholder": "输入您的 API 密钥",
+        "baseUrl": "API 基础 URL / 端点",
+        "model": "模型名称",
+        "selectFromPulled": "从已拉取的列表中选择",
+        "manualInput": "手动输入",
+        "copy": "复制内容",
+        "pullButton": "拉取 ASR 模型",
+        "verifyButton": "验证连接",
+        "copied": "已复制到剪贴板！",
+        "pullSuccess": "模型拉取成功！",
+        "pullFailed": "拉取模型失败。请检查您的 API 密钥和基础 URL。",
+        "pullError": "拉取模型时发生错误。",
+        "verifySuccess": "连接验证成功！",
+        "verifyFailed": "连接验证失败。请检查您的设置。",
+        "verifyError": "验证过程中发生错误。",
+        "providerOption": {
+          "groq": "Groq（免费 ASR 套餐）",
+          "gemini": "Gemini（Google AI Studio 免费套餐）",
+          "openai": "OpenAI（ASR 兼容）",
+          "openrouter": "OpenRouter（Whisper 及多模型）",
+          "huggingface": "Hugging Face（无服务器推理）",
+          "cloudflare": "Cloudflare（Workers AI）",
+          "deepgram": "Deepgram（免费额度套餐）"
+        }
       }
     },
     "general": {
@@ -334,12 +472,22 @@
           "transcribe_with_post_process": {
             "name": "后处理快捷键",
             "description": "可选：一个专用快捷键，始终对您的转录应用 AI 后处理。"
+          },
+          "translate": {
+            "name": "翻译快捷键",
+            "description": "将您的语音翻译为目标语言。"
+          },
+          "ask_ai": {
+            "name": "询问 AI 快捷键",
+            "description": "将您的语音发送给 AI 并输入回答。"
           }
         },
         "errors": {
           "restore": "无法恢复原始快捷键",
           "set": "无法设置快捷键: {{error}}",
-          "reset": "无法将快捷键重置为原始值"
+          "reset": "无法将快捷键重置为原始值",
+          "conflictFallback": "快捷键冲突，已恢复为默认值",
+          "conflictMessage": "快捷键 \"{{shortcut}}\" 已被 \"{{app}}\" 使用。是否仍要使用？"
         }
       },
       "language": {
@@ -357,6 +505,9 @@
     "sound": {
       "title": "声音",
       "microphone": {
+        "gainLabel": "麦克风增益",
+        "gainTooltip": "如果您使用的是高品质或高灵敏度麦克风，建议关闭增益，以免放大背景噪声或导致音频削波。",
+        "gainValueLabel": "增益值",
         "title": "麦克风",
         "description": "选择您偏好的麦克风设备",
         "placeholder": "选择麦克风...",
@@ -376,6 +527,9 @@
         "title": "音量",
         "description": "调整音频反馈的音量"
       }
+    },
+    "overlay_and_theme": {
+      "title": "悬浮窗与主题"
     },
     "advanced": {
       "groups": {
@@ -420,8 +574,8 @@
       },
       "overlay": {
         "style": {
-          "title": "Overlay",
-          "description": "Choose the recording overlay: None hides it, Minimal shows a compact pill, Live shows transcription in real time as you speak (streaming-capable models only — look for the Streaming badge in the model picker). On Linux 'None' is recommended.",
+          "title": "悬浮窗",
+          "description": "选择录制悬浮窗：无隐藏，简约显示紧凑药丸状指示器，实时在您说话时显示转录文本（仅限支持流式的模型——在模型选择器中寻找流式标记）。在 Linux 上建议选择「无」。",
           "options": {
             "none": "无",
             "minimal": "Minimal",
@@ -476,6 +630,23 @@
           "ctrlEnter": "Ctrl+Enter"
         }
       },
+      "translateLanguage": {
+        "label": "翻译语言",
+        "description": "使用云服务进行翻译。"
+      },
+      "translateUsingLlm": {
+        "label": "使用云服务翻译",
+        "description": "启用使用已配置的 AI 服务提供商进行自定义目标语言翻译。",
+        "localSupportedDesc": "默认使用本地模型将语音翻译为英语。启用后切换到云服务 LLM 进行多语言翻译。"
+      },
+      "cloudTranslation": {
+        "label": "云服务翻译",
+        "description": "使用云服务进行翻译。"
+      },
+      "translateTargetLanguage": {
+        "label": "翻译目标语言",
+        "description": "选择 LLM 翻译的目标语言。"
+      },
       "translateToEnglish": {
         "label": "翻译为英语",
         "description": "在转录过程中自动将其他语言的语音翻译为英语。"
@@ -503,8 +674,8 @@
         "duplicate": "\"{{word}}\" 已存在"
       },
       "voiceActivityDetection": {
-        "title": "Voice Activity Detection",
-        "description": "Filter silence from recordings. Streaming-capable models use a longer VAD tail; disabling VAD records raw audio."
+        "title": "语音活动检测",
+        "description": "从录音中过滤静音。支持流式的模型使用更长的 VAD 尾部；禁用 VAD 则录制原始音频。"
       }
     },
     "postProcessing": {
@@ -528,7 +699,23 @@
         "apiKey": {
           "title": "API 密钥",
           "description": "所选提供商的 API 密钥。",
-          "placeholder": "sk-..."
+          "placeholder": "sk-...",
+          "notePlaceholder": "备注（可选）",
+          "addApiKey": "添加 API 密钥",
+          "removeKey": "删除密钥",
+          "dailyUsage": "今日 {{count}} 次",
+          "testConnection": "测试连接",
+          "testing": "测试中...",
+          "testSuccess": "连接测试成功",
+          "testFailed": "连接测试失败：{{error}}",
+          "noBaseUrl": "请先设置 API 网址",
+          "noApiKey": "请输入 API 密钥"
+        },
+        "autoSwitchApi": {
+          "title": "API 自动切换",
+          "description": "当前密钥每使用 N 次后，自动轮换到下一个 API 密钥。",
+          "after": "每",
+          "uses": "次使用后切换"
         },
         "model": {
           "title": "模型",
@@ -574,7 +761,14 @@
       "retranscribe": "重新转录",
       "retranscribeError": "重新转录失败。请重试。",
       "transcribing": "转录中...",
-      "transcriptionFailed": "转录失败。您可以使用重试图标重新转录。"
+      "transcriptionFailed": "转录失败。您可以使用重试图标重新转录。",
+      "correctionHint": "将错误拼写替换为正确拼写",
+      "correctionPatternPlaceholder": "原始错字",
+      "correctionPlaceholder": "输入替换为正确的字...",
+      "correctionConfirm": "确定",
+      "correctionCancel": "取消",
+      "correctionAdded": "已新增纠错规则",
+      "copied": "已复制"
     },
     "debug": {
       "title": "调试",
@@ -614,6 +808,11 @@
         "description": "保留的最大历史条目数",
         "entries": "条"
       },
+      "audioHistoryLimit": {
+        "title": "录音文件上限",
+        "description": "保留的最大录音文件数（超出此限制的最旧录音文件将被删除，但文本历史记录不受影响）",
+        "entries": "个"
+      },
       "recordingRetention": {
         "title": "自动删除录音",
         "description": "自动删除旧录音以节省空间",
@@ -647,7 +846,9 @@
       "keyboardImplementation": {
         "title": "键盘实现",
         "description": "选择键盘快捷键的后端。",
-        "bindingsReset": "键盘快捷键不兼容，已重置为默认值"
+        "bindingsReset": "键盘快捷键不兼容，已重置为默认值",
+        "optionTauri": "Tauri 全局快捷键",
+        "optionDirect": "直接键盘钩子"
       },
       "paths": {
         "appData": "应用数据:",
@@ -692,6 +893,10 @@
       },
       "acknowledgments": {
         "title": "致谢",
+        "handyTitle": "致谢原始项目（Handy）",
+        "handyDescription": "本项目 yukey 基于 CJ Pais 的出色开源项目 Handy 进行了深度定制和修改。感谢原作者的开放源代码精神和在本地语音转文字应用方面出色的技术架构贡献。",
+        "author": "原作者：CJ Pais",
+        "license": "许可证：MIT License",
         "ggml": {
           "title": "ggml",
           "description": "OpenAI Whisper 自动语音识别模型的高性能推理",
@@ -724,7 +929,8 @@
     "open": "打开",
     "copy": "复制",
     "clear": "清除",
-    "noOptionsFound": "未找到选项"
+    "noOptionsFound": "未找到选项",
+    "default": "默认"
   },
   "accessibility": {
     "permissionsDescription": "yukey 需要辅助功能权限才能输入转录的文字。",
@@ -746,7 +952,17 @@
     "modelLoadFailedUnknown": "未知模型",
     "pasteFailedTitle": "粘贴文本失败",
     "pasteFailed": "无法将文本粘贴到当前活动的应用程序中。",
-    "transcriptionFailedTitle": "转录失败"
+    "postProcessFailedTitle": "AI 后处理失败",
+    "postProcessFailed": "AI 润色步骤失败，已改用原始转录结果。\n\n错误：{{error}}",
+    "transcriptionFailedTitle": "转录失败",
+    "noProvider": "请在设置中配置 AI 后处理提供商。",
+    "noModel": "请在设置中选择后处理 AI 模型。",
+    "noApiKey": "请在设置中输入 API 密钥以使用提问 AI 功能。",
+    "cloudAsrFailedTitle": "云端 ASR 不可用",
+    "cloudAsrFallback": {
+      "no_api_key": "缺少 API 密钥。系统已自动切换到本地模型进行转录。",
+      "network_error": "无法连接到云端 ASR。系统已自动切换到本地模型进行转录。"
+    }
   },
   "appLanguage": {
     "title": "应用语言",
@@ -763,5 +979,15 @@
   },
   "whatsNew": {
     "title": "yukey v{{version}} 新功能"
+  },
+  "transcribeFile": {
+    "title": "转录音档",
+    "dropHint": "将音档拖放到此处或点击选择 (WAV, MP3)",
+    "transcribeAll": "全部转录 ({{count}})",
+    "transcribing": "转录中...",
+    "queued": "佇列中",
+    "copy": "複製",
+    "remove": "移除",
+    "noFiles": "尚未选择档案"
   }
 }

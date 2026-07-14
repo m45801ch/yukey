@@ -19,6 +19,7 @@
     "about": "About",
     "vocab": "Vocabulary",
     "style": "Style",
+    "transcribeFile": "Transcribe File",
     "settings": "Settings",
     "center": "Settings Center"
   },
@@ -88,20 +89,26 @@
       "toastClearSavedGenericError": "Error clearing saved entries",
       "toastDownloadSuccess": "Audio file downloaded!",
       "toastDownloadError": "Failed to download audio: {{error}}",
-      "toastDownloadGenericError": "Error downloading audio file"
+      "toastDownloadGenericError": "Error downloading audio file",
+      "correctionHint": "Replace typo with correct spelling",
+      "correctionPatternPlaceholder": "Original typo",
+      "correctionPlaceholder": "Correct text...",
+      "correctionConfirm": "Confirm",
+      "correctionCancel": "Cancel",
+      "correctionAdded": "Correction rule added"
     },
     "vocab": {
       "title": "Vocabulary",
       "infoTitle": "Vocabulary & Correction Rules",
-      "infoHotwords": "Custom hotwords: suitable for proper nouns, names, product names — helps ASR recognition.",
-      "infoRules": "Correction rules: requires a configured AI provider and model in Services, and using a post-processing hotkey during transcription to automatically replace misrecognized words with the correct spelling (e.g. \"face-bookie\" → \"Facebook\").",
+      "infoHotwords": "Custom hotwords: enter proper nouns, names, product names, etc. These are sent as hints to the ASR engine (Whisper) to improve recognition accuracy for your specific terms.",
+      "infoRules": "Correction rules: only applied during AI polishing (post-processing), does NOT affect raw transcription output. Requires a configured AI provider in Services and using a post-processing hotkey during transcription to automatically replace misrecognized words with the correct spelling (e.g. \"face-bookie\" → \"Facebook\").",
       "hotwordsTitle": "Custom Hotwords",
-      "hotwordsDescription": "Enter your frequently used terms:",
+      "hotwordsDescription": "Enter words you want the ASR engine to recognize accurately:",
       "hotwordsPlaceholder": "e.g. Kubernetes",
       "addHotword": "Add Hotword",
       "noHotwords": "No hotwords added yet",
       "rulesTitle": "Correction Rules",
-      "rulesDescription": "Replace misrecognized words with correct spelling:",
+      "rulesDescription": "Replace misrecognized words during AI polishing (does not affect raw transcription):",
       "rulePatternPlaceholder": "Wrong word/sound",
       "ruleReplacementPlaceholder": "Correct word",
       "addRule": "Add",
@@ -109,7 +116,7 @@
       "toastWordExists": "Hotword \"{{word}}\" already exists",
       "toastWordAdded": "Hotword added successfully",
       "toastFieldEmpty": "Fields cannot be empty",
-      "toastRuleExists": "Correction rule \"{{pattern}}\" already exists",
+      "toastRuleExists": "Correction rule \"{{pattern}} → {{replacement}}\" already exists",
       "toastRuleAdded": "Correction rule added",
       "toastRuleRemoved": "Correction rule removed"
     },
@@ -411,6 +418,14 @@
           "transcribe_with_post_process": {
             "name": "Post-Processing Hotkey",
             "description": "Optional: A dedicated hotkey that always applies AI post-processing to your transcription."
+          },
+          "translate": {
+            "name": "Translate Shortcut",
+            "description": "Translates your speech into the target language."
+          },
+          "ask_ai": {
+            "name": "Ask AI Shortcut",
+            "description": "Sends your speech to AI and types the answer."
           }
         },
         "errors": {
@@ -684,7 +699,23 @@
         "apiKey": {
           "title": "API Key",
           "description": "API key for the selected provider.",
-          "placeholder": "sk-..."
+          "placeholder": "sk-...",
+          "notePlaceholder": "Note (optional)",
+          "addApiKey": "Add API Key",
+          "removeKey": "Remove key",
+          "dailyUsage": "{{count}} today",
+          "testConnection": "Test Connection",
+          "testing": "Testing...",
+          "testSuccess": "Connection test successful",
+          "testFailed": "Connection test failed: {{error}}",
+          "noBaseUrl": "Please set the API URL first",
+          "noApiKey": "Please enter an API Key"
+        },
+        "autoSwitchApi": {
+          "title": "Auto-switch API",
+          "description": "Automatically rotate to the next API key after N uses of the current key.",
+          "after": "After",
+          "uses": "uses"
         },
         "model": {
           "title": "Model",
@@ -816,7 +847,9 @@
       "keyboardImplementation": {
         "title": "Keyboard Implementation",
         "description": "Choose the keyboard shortcut backend.",
-        "bindingsReset": "Keyboard shortcuts were incompatible and reset to defaults"
+        "bindingsReset": "Keyboard shortcuts were incompatible and reset to defaults",
+        "optionTauri": "Tauri Global Shortcut",
+        "optionDirect": "Direct Hooks"
       },
       "paths": {
         "appData": "App Data:",
@@ -924,7 +957,9 @@
     "cloudAsrFallback": {
       "no_api_key": "API Key is missing. System automatically switched to local model for transcription.",
       "network_error": "Failed to connect to Cloud ASR. System automatically switched to local model for transcription."
-    }
+    },
+    "postProcessFailedTitle": "AI Post-Processing Failed",
+    "postProcessFailed": "The AI post-processing step failed. The original transcription was pasted instead.\n\nError: {{error}}"
   },
   "appLanguage": {
     "title": "Application Language",
@@ -938,5 +973,15 @@
     "translate_listening": "Translating speech...",
     "translate_processing": "Translating...",
     "post_process_processing": "Post-processing..."
+  },
+  "transcribeFile": {
+    "title": "Transcribe File",
+    "dropHint": "Drop audio files here or click to select (WAV, MP3)",
+    "transcribeAll": "Transcribe All ({{count}})",
+    "transcribing": "Transcribing...",
+    "queued": "Queued",
+    "copy": "Copy",
+    "remove": "Remove",
+    "noFiles": "No files selected"
   }
 }

@@ -6,15 +6,17 @@ import {
   BookOpen,
   Sparkles,
   Cog,
+  Upload,
 } from "lucide-react";
 import { Overview } from "./pages/Overview";
 import { HistoryPage } from "./pages/HistoryPage";
 import { VocabPage } from "./pages/VocabPage";
 import { StylePage } from "./pages/StylePage";
+import { TranscribeFilePage } from "./pages/TranscribeFilePage";
 
 import yukeyStartImg from "../assets/yukey-start.png";
 
-export type SidebarSection = "overview" | "history" | "vocab" | "style";
+export type SidebarSection = "overview" | "history" | "vocab" | "style" | "transcribe_file";
 
 interface SidebarProps {
   activeSection: SidebarSection;
@@ -33,6 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: "history", label: t("sidebar.history"), icon: History },
     { id: "vocab", label: t("sidebar.vocab"), icon: BookOpen },
     { id: "style", label: t("sidebar.style"), icon: Sparkles },
+    { id: "transcribe_file", label: t("sidebar.transcribeFile"), icon: Upload },
   ] as const;
 
   return (
