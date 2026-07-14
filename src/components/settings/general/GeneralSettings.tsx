@@ -14,10 +14,11 @@ import { MuteWhileRecording } from "../MuteWhileRecording";
 import { ModelSettingsCard } from "./ModelSettingsCard";
 import { ShowOverlay } from "../ShowOverlay";
 import { ThemeSelector } from "../ThemeSelector";
+import { Select } from "../../ui/Select";
 
 export const GeneralSettings: React.FC = () => {
   const { t } = useTranslation();
-  const { audioFeedbackEnabled, getSetting, updateSetting } = useSettings();
+  const { audioFeedbackEnabled, getSetting, updateSetting, copyFormat, setCopyFormat } = useSettings();
   const pushToTalk = getSetting("push_to_talk");
   const isLinux = type() === "linux";
   return (
@@ -39,6 +40,21 @@ export const GeneralSettings: React.FC = () => {
           descriptionMode="tooltip"
           grouped={true}
         />
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">{t("settings.general.copyFormat")}</p>
+            <p className="text-xs text-mid-gray">{t("settings.general.copyFormatDesc")}</p>
+          </div>
+          <Select
+            value={copyFormat}
+            onChange={(value) => setCopyFormat(value as "plain" | "markdown")}
+            options={[
+              { value: "plain", label: t("settings.general.copyFormatPlain") },
+              { value: "markdown", label: t("settings.general.copyFormatMarkdown") },
+            ]}
+            isClearable={false}
+          />
+        </div>
       </SettingsGroup>
       <ModelSettingsCard />
       <SettingsGroup title={t("settings.sound.title")}>

@@ -4,6 +4,17 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Upload, FileAudio, Trash2, Copy, Loader2 } from "lucide-react";
 import { commands } from "@/bindings";
 import { toast } from "sonner";
+import { useSettings } from "@/hooks/useSettings";
+
+const formatCopyText = (text: string, format: "plain" | "markdown"): string => {
+  if (format === "markdown") {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+    return `**${dateStr} ${timeStr}**\n\n${text}`;
+  }
+  return text;
+};
 
 type FileStatus = "queued" | "transcribing" | "done" | "error";
 
@@ -36,6 +47,7 @@ interface FileWithPath extends File {
 
 export const TranscribeFilePage: React.FC = () => {
   const { t } = useTranslation();
+  const { copyFormat } = useSettings();
   const [files, setFiles] = useState<QueuedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -166,9 +178,9 @@ export const TranscribeFilePage: React.FC = () => {
   }, [files]);
 
   const copyText = useCallback((text: string) => {
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(formatCopyText(text, copyFormat));
     toast.success(t("transcribeFile.copy"));
-  }, [t]);
+  }, [t, copyFormat]);
 
   const pendingCount = files.filter((f) => f.status === "queued").length;
   const isTranscribing = files.some((f) => f.status === "transcribing");

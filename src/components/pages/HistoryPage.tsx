@@ -31,12 +31,26 @@ import { useOsType } from "@/hooks/useOsType";
 import { formatDateTime } from "@/utils/dateFormat";
 import { AudioPlayer } from "../ui/AudioPlayer";
 import { Button } from "../ui/Button";
+import { Input } from "../ui/Input";
+import { addCorrectionRule } from "@/utils/correctionRules";
+import { useSettings } from "@/hooks/useSettings";
+
+const formatCopyText = (text: string, format: "plain" | "markdown"): string => {
+  if (format === "markdown") {
+    const now = new Date();
+    const dateStr = now.toLocaleDateString();
+    const timeStr = now.toLocaleTimeString();
+    return `**${dateStr} ${timeStr}**\n\n${text}`;
+  }
+  return text;
+};
 
 const PAGE_SIZE = 30;
 
 export const HistoryPage: React.FC = () => {
   const { t, i18n } = useTranslation();
   const osType = useOsType();
+  const { copyFormat } = useSettings();
 
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,6 +60,14 @@ export const HistoryPage: React.FC = () => {
   const [stats, setStats] = useState<HistoryStats | null>(null);
   const [filter, setFilter] = useState<"all" | "saved" | "audio">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const [popover, setPopover] = useState<{
+    x: number;
+    y: number;
+    selectedText: string;
+  } | null>(null);
+  const [correctionPattern, setCorrectionPattern] = useState("");
+  const [correctionInput, setCorrectionInput] = useState("");
 
   const selectedEntry = useMemo(() => {
     return entries.find((e) => e.id === selectedId) || null;
@@ -211,7 +233,7 @@ export const HistoryPage: React.FC = () => {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(formatCopyText(text, copyFormat));
       toast.success(t("settings.history.copied"));
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
@@ -361,6 +383,77 @@ export const HistoryPage: React.FC = () => {
       toast.error(t("pages.history.toastDownloadGenericError"));
     }
   };
+
+  const handleRawTextMouseUp = useCallback(() => {
+    setTimeout(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+
+      const text = selection.toString().trim();
+      if (!text) return;
+
+      const range = selection.getRangeAt(0);
+      const rect = range.getBoundingClientRect();
+
+      setPopover({
+        x: rect.left + rect.width / 2,
+        y: rect.bottom + window.scrollY + 4,
+        selectedText: text,
+      });
+      setCorrectionPattern(text);
+      setCorrectionInput("");
+    }, 10);
+  }, []);
+
+  const handleCorrectionConfirm = useCallback(() => {
+    const pattern = correctionPattern.trim();
+    const correction = correctionInput.trim();
+    if (!pattern || !correction || !popover || !selectedEntry) return;
+
+    setEntries((prev) =>
+      prev.map((e) =>
+        e.id === selectedEntry.id
+          ? {
+              ...e,
+              transcription_text: e.transcription_text.replace(
+                pattern,
+                correction,
+              ),
+            }
+          : e,
+      ),
+    );
+
+    const customWords: string[] = JSON.parse(
+      localStorage.getItem("openless_prompt_plugin_settings") || "{}",
+    ).custom_words || [];
+
+    addCorrectionRule(pattern, correction, customWords);
+
+    toast.success(t("pages.history.correctionAdded"));
+
+    setPopover(null);
+    setCorrectionPattern("");
+    setCorrectionInput("");
+  }, [correctionPattern, correctionInput, popover, selectedEntry, t]);
+
+  const handleCorrectionCancel = useCallback(() => {
+    setPopover(null);
+    setCorrectionPattern("");
+    setCorrectionInput("");
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && popover) {
+        setPopover(null);
+        setCorrectionPattern("");
+        setCorrectionInput("");
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [popover]);
 
   return (
     <div className="w-full h-[calc(100vh-140px)] flex flex-col md:flex-row gap-4 select-none text-text">
@@ -617,7 +710,8 @@ export const HistoryPage: React.FC = () => {
                         ? "bg-logo-primary/5 border-logo-primary ring-1 ring-logo-primary/30"
                         : "bg-mid-gray/5 border-mid-gray/10 hover:border-logo-primary/30"
                       : "bg-mid-gray/5 border-mid-gray/10"
-                  }`}>
+                  }`}
+                  onMouseUp={handleRawTextMouseUp}>
                     {selectedEntry.transcription_text}
                   </div>
                 </div>
@@ -681,6 +775,61 @@ export const HistoryPage: React.FC = () => {
             <div className="flex flex-col items-center justify-center h-full text-mid-gray space-y-2">
               <p className="text-sm">{t("pages.history.noSelection")}</p>
             </div>
+          )}
+
+          {popover && (
+            <>
+              <div
+                className="fixed inset-0 z-[200]"
+                onClick={handleCorrectionCancel}
+              />
+              <div
+                className="fixed z-[201] bg-background border border-mid-gray/20 rounded-xl shadow-2xl p-4 space-y-3 w-[32rem]"
+                style={{
+                  left: Math.max(
+                    8,
+                    Math.min(popover.x - 256, window.innerWidth - 520),
+                  ),
+                  top: popover.y,
+                }}
+              >
+                <p className="text-xs font-semibold text-mid-gray">
+                  {t("pages.history.correctionHint")}
+                </p>
+                <div className="flex items-center gap-2">
+                  <Input
+                    type="text"
+                    value={correctionPattern}
+                    onChange={(e) => setCorrectionPattern(e.target.value)}
+                    placeholder={t("pages.history.correctionPatternPlaceholder")}
+                    variant="compact"
+                    className="w-1/3"
+                  />
+                  <span className="text-xs text-mid-gray shrink-0">&rarr;</span>
+                  <Input
+                    type="text"
+                    value={correctionInput}
+                    onChange={(e) => setCorrectionInput(e.target.value)}
+                    placeholder={t("pages.history.correctionPlaceholder")}
+                    variant="compact"
+                    className="w-1/3"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCorrectionConfirm();
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    onClick={handleCorrectionConfirm}
+                    disabled={!correctionPattern.trim() || !correctionInput.trim()}
+                    variant="primary"
+                    size="md"
+                    className="whitespace-nowrap shrink-0"
+                  >
+                    {t("pages.history.correctionConfirm")}
+                  </Button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
