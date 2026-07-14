@@ -15,6 +15,7 @@
     "advanced": "進階",
     "postProcessing": "AI 潤色修飾",
     "history": "歷史紀錄",
+    "transcribeFile": "轉錄音檔",
     "debug": "偵錯",
     "about": "關於",
     "vocab": "詞彙字典",
@@ -88,10 +89,36 @@
       "toastClearSavedGenericError": "清空收藏紀錄發生錯誤",
       "toastDownloadSuccess": "錄音檔下載成功！",
       "toastDownloadError": "下載錄音檔失敗：{{error}}",
-      "toastDownloadGenericError": "下載錄音檔發生錯誤"
+      "toastDownloadGenericError": "下載錄音檔發生錯誤",
+      "correctionHint": "將轉入錯字替換為正確的拼寫",
+      "correctionPatternPlaceholder": "原始錯字",
+      "correctionPlaceholder": "輸入替換為正確的字...",
+      "correctionConfirm": "確定",
+      "correctionCancel": "取消",
+      "correctionAdded": "已新增糾錯規則"
     },
     "vocab": {
-      "title": "詞彙字典"
+      "title": "詞彙字典",
+      "infoTitle": "詞彙與糾錯字典說明",
+      "infoHotwords": "自訂熱詞：輸入專有名詞、人名、產品名等。這些詞會作為提示語送入 ASR 引擎（Whisper），幫助提升特定詞彙的辨識準確度。",
+      "infoRules": "糾錯對照規則：僅在 AI 潤色（後處理）時生效，不影響原始轉錄文字。需在「服務」中設定供應商與模型，並使用已設定 AI 潤色的快捷鍵進行轉錄，才會自動將轉錄結果中的錯字替換成正確詞彙。",
+      "hotwordsTitle": "自訂熱詞",
+      "hotwordsDescription": "請輸入您希望 ASR 引擎正確辨識的詞語：",
+      "hotwordsPlaceholder": "例如：Kubernetes",
+      "addHotword": "新增熱詞",
+      "noHotwords": "尚無新增的自訂熱詞",
+      "rulesTitle": "糾錯對照規則",
+      "rulesDescription": "在 AI 潤色時將轉錄錯字替換為正確拼寫（不影響原始轉錄結果）：",
+      "rulePatternPlaceholder": "原始錯字/音",
+      "ruleReplacementPlaceholder": "替換為正確字",
+      "addRule": "新增",
+      "noRules": "尚無新增的糾錯規則",
+      "toastWordExists": "熱詞 \"{{word}}\" 已存在於清單中",
+      "toastWordAdded": "熱詞添加成功",
+      "toastFieldEmpty": "輸入欄位不可為空",
+      "toastRuleExists": "糾錯規則「{{pattern}} → {{replacement}}」已存在",
+      "toastRuleAdded": "已新增糾錯規則",
+      "toastRuleRemoved": "已刪除該糾錯規則"
     },
     "style": {
       "title": "AI 修飾風格",
@@ -215,6 +242,15 @@
         "de": "German (德文)"
       }
     }
+  },
+  "transcribeFile": {
+    "dropHint": "將音檔拖放到此處或點擊選擇 (WAV, MP3)",
+    "transcribeAll": "全部轉錄 ({{count}})",
+    "transcribing": "轉錄中...",
+    "queued": "佇列中",
+    "copy": "複製",
+    "remove": "移除",
+    "noFiles": "尚未選擇檔案"
   },
   "onboarding": {
     "subtitle": "首先，請選擇一種模型",
@@ -411,7 +447,11 @@
         "description": "按住錄製，放開停止"
       },
       "translate_target_title": "翻譯目標",
-      "translate_target_description": "選擇翻譯模式下的口述目標語言 (此功能需要所選模型支援多語言資源，如 Whisper 系列)"
+      "translate_target_description": "選擇翻譯模式下的口述目標語言 (此功能需要所選模型支援多語言資源，如 Whisper 系列)",
+      "copyFormat": "預設複製格式",
+      "copyFormatPlain": "純文字",
+      "copyFormatMarkdown": "Markdown",
+      "copyFormatDesc": "選擇複製轉寫文字時的格式"
     },
     "models": {
       "title": "轉錄模型",
@@ -663,8 +703,24 @@
         },
         "apiKey": {
           "title": "API 金鑰",
-          "description": "所選供應商的 API 金鑰",
-          "placeholder": "sk-..."
+          "description": "所選供應商的 API 金鑰。",
+          "placeholder": "sk-...",
+          "notePlaceholder": "備註（選填）",
+          "addApiKey": "新增 API 金鑰",
+          "removeKey": "刪除金鑰",
+          "dailyUsage": "今日 {{count}} 次",
+          "testConnection": "測試連線",
+          "testing": "測試中...",
+          "testSuccess": "連線測試成功",
+          "testFailed": "連線測試失敗：{{error}}",
+          "noBaseUrl": "請先設定 API 網址",
+          "noApiKey": "請輸入 API 金鑰"
+        },
+        "autoSwitchApi": {
+          "title": "API 自動切換",
+          "description": "目前金鑰每使用 N 次後，自動輪換到下一個 API 金鑰。",
+          "after": "每",
+          "uses": "次使用後切換"
         },
         "model": {
           "title": "模型",
@@ -789,7 +845,9 @@
       "keyboardImplementation": {
         "title": "鍵盤實作",
         "description": "選擇鍵盤快捷鍵的後端",
-        "bindingsReset": "鍵盤快捷鍵不相容，已重設為預設值"
+        "bindingsReset": "鍵盤快捷鍵不相容，已重設為預設值",
+        "optionTauri": "Tauri 全域快捷鍵",
+        "optionDirect": "直接鍵盤鉤子"
       },
       "paths": {
         "appData": "應用程式資料:",
@@ -901,7 +959,9 @@
     "cloudAsrFallback": {
       "no_api_key": "未填寫 API 密鑰，系統已自動切換為本地端服務進行轉寫。",
       "network_error": "連線雲端 ASR 失敗，系統已自動切換為本地端服務進行轉寫。"
-    }
+    },
+    "postProcessFailedTitle": "AI 後處理失敗",
+    "postProcessFailed": "AI 潤色步驟失敗，已改用原始轉錄結果。\n\n錯誤：{{error}}"
   },
   "appLanguage": {
     "title": "應用程式語言",
