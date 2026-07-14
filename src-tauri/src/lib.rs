@@ -665,12 +665,16 @@ pub fn run(cli_args: CliArgs) {
             commands::history::get_history_stats,
             commands::history::export_audio_file,
             commands::transcribe_file::transcribe_audio_file,
+            commands::transcribe_file::transcribe_audio_files,
             helpers::clamshell::is_laptop,
         ])
         .events(collect_events![
             managers::history::HistoryUpdatePayload,
             managers::transcription::StreamTextEvent,
             managers::transcription::StreamPhaseEvent,
+            commands::transcribe_file::FileProgressPayload,
+            commands::transcribe_file::FileDonePayload,
+            commands::transcribe_file::QueueStartPayload,
         ]);
 
     #[cfg(debug_assertions)] // <- Only export on non-release builds

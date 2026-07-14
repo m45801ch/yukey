@@ -1,9 +1,9 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { Upload, FileAudio, Trash2, Copy, Loader2 } from "lucide-react";
-import { commands } from "@/bindings";
+import { commands, events } from "@/bindings";
 import { toast } from "sonner";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -27,6 +27,7 @@ interface QueuedFile {
   status: FileStatus;
   text?: string;
   error?: string;
+  progress: number;
 }
 
 const ALLOWED_EXTENSIONS = [".wav", ".mp3"];
@@ -47,6 +48,7 @@ export const TranscribeFilePage: React.FC = () => {
   const { copyFormat } = useSettings();
   const [files, setFiles] = useState<QueuedFile[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const fileMapRef = useRef<Map<string, QueuedFile>>(new Map());
 
   const addEntries = useCallback((entries: { path: string; name: string }[]) => {
     const allowed = entries.filter((e) => isAllowedFile(e.name));
@@ -62,6 +64,7 @@ export const TranscribeFilePage: React.FC = () => {
           name: e.name,
           duration: 0,
           status: "queued" as FileStatus,
+          progress: 0,
         }));
       return [...prev, ...newFiles];
     });
@@ -84,6 +87,36 @@ export const TranscribeFilePage: React.FC = () => {
     });
     return () => { unlistenPromise.then((fn) => fn()); };
   }, [addEntries]);
+
+  useEffect(() => {
+    const unlistenProgress = events.fileProgressPayload.listen(({ payload }) => {
+      const { file_name, progress } = payload;
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.name === file_name && f.status === "transcribing"
+            ? { ...f, progress }
+            : f,
+        ),
+      );
+    });
+
+    const unlistenDone = events.fileDonePayload.listen(({ payload }) => {
+      if (!payload.success && payload.error) {
+        setFiles((prev) =>
+          prev.map((f) =>
+            f.name === payload.file_name && f.status === "transcribing"
+              ? { ...f, status: "error" as FileStatus, error: payload.error! }
+              : f,
+          ),
+        );
+      }
+    });
+
+    return () => {
+      unlistenProgress.then((fn) => fn());
+      unlistenDone.then((fn) => fn());
+    };
+  }, []);
 
   const handleOpenDialog = useCallback(async () => {
     const selected = await open({
@@ -112,50 +145,48 @@ export const TranscribeFilePage: React.FC = () => {
     const pending = files.filter((f) => f.status === "queued");
     if (pending.length === 0) return;
 
-    for (const item of pending) {
+    const pendingPaths = pending.map((f) => f.path);
+
+    setFiles((prev) =>
+      prev.map((f) =>
+        f.status === "queued"
+          ? { ...f, status: "transcribing" as FileStatus, progress: 0 }
+          : f,
+      ),
+    );
+
+    const result = await commands.transcribeAudioFiles(pendingPaths);
+
+    if (result.status === "ok") {
+      const resultMap = new Map<string, { text: string; duration_sec: number }>();
+      result.data.forEach((r, i) => {
+        resultMap.set(pendingPaths[i], r);
+      });
+
+      setFiles((prev) =>
+        prev.map((f) => {
+          if (f.status !== "transcribing") return f;
+          const data = resultMap.get(f.path);
+          if (data) {
+            return {
+              ...f,
+              status: "done" as FileStatus,
+              text: data.text,
+              duration: data.duration_sec,
+              progress: 100,
+            };
+          }
+          return f;
+        }),
+      );
+    } else {
       setFiles((prev) =>
         prev.map((f) =>
-          f.id === item.id ? { ...f, status: "transcribing" as FileStatus } : f,
+          f.status === "transcribing"
+            ? { ...f, status: "error" as FileStatus, error: result.error }
+            : f,
         ),
       );
-
-      try {
-        const result = await commands.transcribeAudioFile(item.path);
-        if (result.status === "ok") {
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === item.id
-                ? {
-                    ...f,
-                    status: "done" as FileStatus,
-                    text: result.data.text,
-                    duration: result.data.duration_sec,
-                  }
-                : f,
-            ),
-          );
-        } else {
-          setFiles((prev) =>
-            prev.map((f) =>
-              f.id === item.id
-                ? { ...f, status: "error" as FileStatus, error: result.error }
-                : f,
-            ),
-          );
-        }
-      } catch (err: unknown) {
-        setFiles((prev) =>
-          prev.map((f) =>
-            f.id === item.id
-              ? {
-                  ...f,
-                  status: "error" as FileStatus,
-                  error: String(err),
-                }
-              : f,
-          ),
-        );
-      }
     }
   }, [files]);
 
@@ -168,7 +199,10 @@ export const TranscribeFilePage: React.FC = () => {
   const isTranscribing = files.some((f) => f.status === "transcribing");
   const totalCount = files.length;
   const doneCount = files.filter((f) => f.status === "done").length;
-  const progress = totalCount > 0 ? ((doneCount + (isTranscribing ? 1 : 0)) / totalCount) * 100 : 0;
+  const transcribingFile = files.find((f) => f.status === "transcribing");
+  const overallProgress = totalCount > 0
+    ? ((doneCount * 100 + (transcribingFile?.progress ?? 0)) / totalCount)
+    : 0;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -212,7 +246,9 @@ export const TranscribeFilePage: React.FC = () => {
                     </span>
                   )}
                   {item.status === "transcribing" && (
-                    <Loader2 className="w-4 h-4 text-logo-primary animate-spin" />
+                    <span className="text-xs font-medium text-logo-primary tabular-nums">
+                      {Math.round(item.progress)}%
+                    </span>
                   )}
                   {item.status === "done" && item.text && (
                     <>
@@ -240,6 +276,15 @@ export const TranscribeFilePage: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {item.status === "transcribing" && (
+                <div className="h-1 w-full rounded-full bg-mid-gray/10 overflow-hidden">
+                  <div
+                    className="h-full rounded-full bg-logo-primary transition-all duration-150 ease-out"
+                    style={{ width: `${item.progress}%` }}
+                  />
+                </div>
+              )}
 
               {item.status === "done" && item.text && (
                 <div className="bg-mid-gray/5 rounded-lg p-3">
@@ -269,12 +314,12 @@ export const TranscribeFilePage: React.FC = () => {
         <div className="shrink-0 space-y-1">
           <div className="h-1.5 w-full rounded-full bg-mid-gray/10 overflow-hidden">
             <div
-              className="h-full rounded-full bg-logo-primary transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
+              className="h-full rounded-full bg-logo-primary transition-all duration-150 ease-out"
+              style={{ width: `${overallProgress}%` }}
             />
           </div>
-          <p className="text-xs text-text/40 text-right">
-            {doneCount} / {totalCount}
+          <p className="text-xs text-text/40 text-right tabular-nums">
+            {Math.round(overallProgress)}%
           </p>
         </div>
       )}
