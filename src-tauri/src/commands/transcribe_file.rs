@@ -1,12 +1,11 @@
 use crate::audio_toolkit::audio::decode_mp3;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings::get_settings;
-use log::info;
+use log::{info, warn};
 use rubato::{FftFixedIn, Resampler};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use tauri::{Emitter, State};
 
@@ -185,7 +184,6 @@ pub fn transcribe_queue(
             continue;
         }
 
-        let model_load_start = std::time::Instant::now();
         if !transcription_manager.is_model_loaded() {
             let settings = get_settings(&app);
             let model_id = settings.selected_model.clone();
@@ -206,7 +204,6 @@ pub fn transcribe_queue(
                 continue;
             }
         }
-        let model_load_ms = model_load_start.elapsed().as_millis() as u64;
 
         let _ = app.emit(
             "file-transcription-start",
@@ -218,72 +215,94 @@ pub fn transcribe_queue(
             },
         );
 
-        let progress_flag = Arc::new(AtomicBool::new(true));
-        let flag_clone = progress_flag.clone();
-        let app_clone = app.clone();
-        let fname = file_name.clone();
+        // Chunk audio into 60-second segments for real progress reporting
+        const CHUNK_SEC: usize = 60;
+        let sample_rate = 16000usize;
+        let chunk_samples = CHUNK_SEC * sample_rate;
+        let total_chunks = (samples.len() + chunk_samples - 1) / chunk_samples;
 
-        let audio_duration_ms = duration_ms;
-        let base_overhead_ms = model_load_ms;
-        let estimate_total_ms = (audio_duration_ms as f64 * 0.6) as u64 + base_overhead_ms;
-        let start = std::time::Instant::now();
+        info!(
+            "Transcribing '{}': {} samples, {} seconds, {} chunks",
+            file_name,
+            samples.len(),
+            duration_ms / 1000,
+            total_chunks
+        );
 
-        let progress_handle = std::thread::spawn(move || {
-            while flag_clone.load(Ordering::Relaxed) {
-                let elapsed = start.elapsed().as_millis() as u64;
-                let pct = if estimate_total_ms > 0 {
-                    ((elapsed as f64 / estimate_total_ms as f64) * 100.0).min(95.0)
-                } else {
-                    0.0
-                };
-                let _ = app_clone.emit(
-                    "file-transcription-progress",
-                    FileProgressPayload {
-                        file_name: fname.clone(),
-                        progress: pct,
-                        file_index: i,
-                        total_files: total,
-                    },
-                );
-                std::thread::sleep(std::time::Duration::from_millis(150));
+        let mut all_text = Vec::new();
+        let mut transcribe_error: Option<String> = None;
+
+        for chunk_idx in 0..total_chunks {
+            let start = chunk_idx * chunk_samples;
+            let end = std::cmp::min(start + chunk_samples, samples.len());
+            let chunk = &samples[start..end];
+
+            let pct = (chunk_idx as f64 / total_chunks as f64) * 100.0;
+            let _ = app.emit(
+                "file-transcription-progress",
+                FileProgressPayload {
+                    file_name: file_name.clone(),
+                    progress: pct,
+                    file_index: i,
+                    total_files: total,
+                },
+            );
+
+            match transcription_manager.transcribe(chunk.to_vec(), "file") {
+                Ok(text) => {
+                    if !text.trim().is_empty() {
+                        all_text.push(text);
+                    }
+                }
+                Err(e) => {
+                    let msg = format!("Chunk {} failed: {}", chunk_idx + 1, e);
+                    warn!("{}", msg);
+                    transcribe_error = Some(msg);
+                    break;
+                }
             }
-        });
+        }
 
-        let result = transcription_manager
-            .transcribe(samples, "file")
-            .map(|text| FileTranscriptionResult {
-                file_name: file_name.clone(),
+        if let Some(err) = transcribe_error {
+            let _ = app.emit(
+                "file-transcription-done",
+                FileDonePayload {
+                    file_name,
+                    file_index: i,
+                    total_files: total,
+                    success: false,
+                    error: Some(err.clone()),
+                },
+            );
+            results.push(Err(err));
+        } else {
+            let text = all_text.join("\n");
+            let _ = app.emit(
+                "file-transcription-progress",
+                FileProgressPayload {
+                    file_name: file_name.clone(),
+                    progress: 100.0,
+                    file_index: i,
+                    total_files: total,
+                },
+            );
+            let _ = app.emit(
+                "file-transcription-done",
+                FileDonePayload {
+                    file_name: file_name.clone(),
+                    file_index: i,
+                    total_files: total,
+                    success: true,
+                    error: None,
+                },
+            );
+            results.push(Ok(FileTranscriptionResult {
+                file_name,
                 text,
                 duration_sec: duration_ms / 1000,
                 engine: "local".to_string(),
-            })
-            .map_err(|e| format!("Transcription failed: {}", e));
-
-        progress_flag.store(false, Ordering::Relaxed);
-        let _ = progress_handle.join();
-
-        let _ = app.emit(
-            "file-transcription-progress",
-            FileProgressPayload {
-                file_name: file_name.clone(),
-                progress: 100.0,
-                file_index: i,
-                total_files: total,
-            },
-        );
-
-        let _ = app.emit(
-            "file-transcription-done",
-            FileDonePayload {
-                file_name,
-                file_index: i,
-                total_files: total,
-                success: result.is_ok(),
-                error: result.as_ref().err().cloned(),
-            },
-        );
-
-        results.push(result);
+            }));
+        }
     }
 
     results
