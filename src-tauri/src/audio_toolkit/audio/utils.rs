@@ -48,3 +48,101 @@ pub fn save_wav_file<P: AsRef<Path>>(file_path: P, samples: &[f32]) -> Result<()
     debug!("Saved WAV file: {:?}", file_path.as_ref());
     Ok(())
 }
+
+pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
+    use rubato::{FftFixedIn, Resampler};
+    use symphonia::core::{
+        audio::SampleBuffer,
+        codecs::DecoderOptions,
+        formats::FormatOptions,
+        io::MediaSourceStream,
+        meta::MetadataOptions,
+        probe::Hint,
+    };
+
+    let file = std::fs::File::open(path).map_err(|e| format!("Cannot open file: {}", e))?;
+    let mss = MediaSourceStream::new(Box::new(file), Default::default());
+
+    let mut hint = Hint::new();
+    hint.with_extension("mp3");
+
+    let probed = symphonia::default::get_probe()
+        .format(
+            &hint,
+            mss,
+            &FormatOptions::default(),
+            &MetadataOptions::default(),
+        )
+        .map_err(|e| format!("Cannot probe file: {}", e))?;
+
+    let mut format = probed.format;
+    let track = format
+        .tracks()
+        .first()
+        .ok_or("No audio track found")?
+        .clone();
+    let track_id = track.id;
+
+    let codec_params = track.codec_params;
+    let src_sample_rate = codec_params.sample_rate.unwrap_or(16000) as usize;
+    let duration_ms = codec_params
+        .n_frames
+        .map(|n| {
+            let rate = codec_params.sample_rate.unwrap_or(16000) as f64;
+            (n as f64 / rate * 1000.0) as u64
+        })
+        .unwrap_or(0);
+
+    let mut decoder = symphonia::default::get_codecs()
+        .make(&codec_params, &DecoderOptions::default())
+        .map_err(|e| format!("Cannot create decoder: {}", e))?;
+
+    let mut all_samples: Vec<f32> = Vec::new();
+
+    loop {
+        let packet = match format.next_packet() {
+            Ok(pkt) => pkt,
+            Err(symphonia::core::errors::Error::IoError(ref e))
+                if e.kind() == std::io::ErrorKind::UnexpectedEof =>
+            {
+                break
+            }
+            Err(_) => break,
+        };
+        if packet.track_id() != track_id {
+            continue;
+        }
+        let decoded = decoder
+            .decode(&packet)
+            .map_err(|e| format!("Decode error: {}", e))?;
+
+        let num_channels = decoded.spec().channels.count() as usize;
+        let mut buf = SampleBuffer::<f32>::new(decoded.capacity() as u64, *decoded.spec());
+        buf.copy_interleaved_ref(decoded);
+
+        if num_channels == 1 {
+            all_samples.extend_from_slice(buf.samples());
+        } else {
+            for chunk in buf.samples().chunks(num_channels) {
+                let mono: f32 = chunk.iter().sum::<f32>() / num_channels as f32;
+                all_samples.push(mono);
+            }
+        }
+    }
+
+    if (src_sample_rate as f64 - 16000.0).abs() > 0.1 {
+        let mut resampler = FftFixedIn::<f32>::new(src_sample_rate, 16000, 1024, 1, 1)
+            .map_err(|e| format!("Resampler error: {}", e))?;
+        let mut resampled = Vec::new();
+        let in_buf: Vec<&[f32]> = vec![&all_samples];
+        let out = resampler
+            .process(&in_buf, None)
+            .map_err(|e| format!("Resample error: {}", e))?;
+        for buf in out {
+            resampled.extend_from_slice(&buf);
+        }
+        Ok((resampled, duration_ms))
+    } else {
+        Ok((all_samples, duration_ms))
+    }
+}
