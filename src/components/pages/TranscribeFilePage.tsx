@@ -2,8 +2,9 @@ import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
+import { listen } from "@tauri-apps/api/event";
 import { Upload, FileAudio, Trash2, Copy, Loader2 } from "lucide-react";
-import { commands, events } from "@/bindings";
+import { commands } from "@/bindings";
 import { toast } from "sonner";
 import { useSettings } from "@/hooks/useSettings";
 
@@ -89,7 +90,12 @@ export const TranscribeFilePage: React.FC = () => {
   }, [addEntries]);
 
   useEffect(() => {
-    const unlistenProgress = events.fileProgressPayload.listen(({ payload }) => {
+    const unlistenProgress = listen<{
+      file_name: string;
+      progress: number;
+      file_index: number;
+      total_files: number;
+    }>("file-transcription-progress", ({ payload }) => {
       const { file_name, progress } = payload;
       setFiles((prev) =>
         prev.map((f) =>
@@ -100,7 +106,11 @@ export const TranscribeFilePage: React.FC = () => {
       );
     });
 
-    const unlistenDone = events.fileDonePayload.listen(({ payload }) => {
+    const unlistenDone = listen<{
+      file_name: string;
+      success: boolean;
+      error: string | null;
+    }>("file-transcription-done", ({ payload }) => {
       if (!payload.success && payload.error) {
         setFiles((prev) =>
           prev.map((f) =>

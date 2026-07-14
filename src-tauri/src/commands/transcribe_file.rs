@@ -310,23 +310,31 @@ pub fn transcribe_queue(
 
 #[tauri::command]
 #[specta::specta]
-pub fn transcribe_audio_file(
+pub async fn transcribe_audio_file(
     app: tauri::AppHandle,
     file_path: String,
     transcription_manager: State<'_, Arc<TranscriptionManager>>,
 ) -> Result<FileTranscriptionResult, String> {
-    let results = transcribe_queue(app, vec![file_path], transcription_manager.inner().clone());
+    let tm = transcription_manager.inner().clone();
+    let results =
+        tokio::task::spawn_blocking(move || transcribe_queue(app, vec![file_path], tm))
+            .await
+            .map_err(|e| format!("Task failed: {}", e))?;
     results.into_iter().next().unwrap_or(Err("No files".into()))
 }
 
 #[tauri::command]
 #[specta::specta]
-pub fn transcribe_audio_files(
+pub async fn transcribe_audio_files(
     app: tauri::AppHandle,
     file_paths: Vec<String>,
     transcription_manager: State<'_, Arc<TranscriptionManager>>,
 ) -> Result<Vec<FileTranscriptionResult>, String> {
-    let results = transcribe_queue(app, file_paths, transcription_manager.inner().clone());
+    let tm = transcription_manager.inner().clone();
+    let results =
+        tokio::task::spawn_blocking(move || transcribe_queue(app, file_paths, tm))
+            .await
+            .map_err(|e| format!("Task failed: {}", e))?;
     let mut ok_results = Vec::with_capacity(results.len());
     for r in results {
         ok_results.push(r?);
