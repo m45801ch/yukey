@@ -166,6 +166,9 @@ export const TranscribeFilePage: React.FC = () => {
 
   const pendingCount = files.filter((f) => f.status === "queued").length;
   const isTranscribing = files.some((f) => f.status === "transcribing");
+  const totalCount = files.length;
+  const doneCount = files.filter((f) => f.status === "done").length;
+  const progress = totalCount > 0 ? ((doneCount + (isTranscribing ? 1 : 0)) / totalCount) * 100 : 0;
 
   return (
     <div className="flex flex-col gap-4 h-full">
@@ -259,6 +262,20 @@ export const TranscribeFilePage: React.FC = () => {
       {files.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-sm text-text/40">{t("transcribeFile.noFiles")}</p>
+        </div>
+      )}
+
+      {isTranscribing && (
+        <div className="shrink-0 space-y-1">
+          <div className="h-1.5 w-full rounded-full bg-mid-gray/10 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-logo-primary transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-xs text-text/40 text-right">
+            {doneCount} / {totalCount}
+          </p>
         </div>
       )}
 
