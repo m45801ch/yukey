@@ -1,5 +1,7 @@
 use crate::audio_toolkit::audio::decode_mp3;
 use crate::managers::transcription::TranscriptionManager;
+use crate::settings::get_settings;
+use log::info;
 use rubato::{FftFixedIn, Resampler};
 use serde::Serialize;
 use specta::Type;
@@ -58,6 +60,7 @@ fn read_wav_mono_16k(path: &Path) -> Result<(Vec<f32>, u64), String> {
 #[tauri::command]
 #[specta::specta]
 pub fn transcribe_audio_file(
+    app: tauri::AppHandle,
     file_path: String,
     transcription_manager: State<'_, Arc<TranscriptionManager>>,
 ) -> Result<FileTranscriptionResult, String> {
@@ -81,6 +84,15 @@ pub fn transcribe_audio_file(
 
     if samples.is_empty() {
         return Err("No audio samples found".into());
+    }
+
+    if !transcription_manager.is_model_loaded() {
+        let settings = get_settings(&app);
+        let model_id = settings.selected_model.clone();
+        info!("Auto-loading model '{}' for file transcription", model_id);
+        transcription_manager
+            .load_model(&model_id)
+            .map_err(|e| format!("Failed to load model '{}': {}", model_id, e))?;
     }
 
     let text = transcription_manager
