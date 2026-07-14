@@ -1,6 +1,6 @@
 use anyhow::Result;
 use hound::{WavReader, WavSpec, WavWriter};
-use log::debug;
+use log::{debug, info};
 use std::path::Path;
 
 /// Read a WAV file and return normalised f32 samples.
@@ -60,10 +60,10 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         probe::Hint,
     };
 
-    debug!("decode_mp3: opening {:?}", path);
+    info!("decode_mp3: opening {:?}", path);
     let file = std::fs::File::open(path).map_err(|e| {
         let msg = format!("Cannot open file {:?}: {}", path, e);
-        debug!("{}", msg);
+        info!("{}", msg);
         msg
     })?;
     let mss = MediaSourceStream::new(Box::new(file), Default::default());
@@ -98,7 +98,7 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         })
         .unwrap_or(0);
 
-    debug!(
+    info!(
         "decode_mp3: track_id={}, src_sample_rate={}, n_frames={:?}, duration_ms={}",
         track_id,
         src_sample_rate,
@@ -143,20 +143,23 @@ pub fn decode_mp3(path: &Path) -> Result<(Vec<f32>, u64), String> {
         }
     }
 
-    debug!("decode_mp3: decoded {} mono samples", all_samples.len());
+    info!("decode_mp3: decoded {} mono samples", all_samples.len());
 
     if (src_sample_rate as f64 - 16000.0).abs() > 0.1 {
-        let mut resampler = FftFixedIn::<f32>::new(src_sample_rate, 16000, 1024, 1, 1)
+        let chunk = 1024;
+        let mut resampler = FftFixedIn::<f32>::new(src_sample_rate, 16000, chunk, 1, 1)
             .map_err(|e| format!("Resampler error: {}", e))?;
         let mut resampled = Vec::new();
-        let in_buf: Vec<&[f32]> = vec![&all_samples];
-        let out = resampler
-            .process(&in_buf, None)
-            .map_err(|e| format!("Resample error: {}", e))?;
-        for buf in out {
-            resampled.extend_from_slice(&buf);
+        for c in all_samples.chunks(chunk) {
+            let in_buf: Vec<&[f32]> = vec![c];
+            let out = resampler
+                .process(&in_buf, None)
+                .map_err(|e| format!("Resample error: {}", e))?;
+            for buf in out {
+                resampled.extend_from_slice(&buf);
+            }
         }
-        debug!("decode_mp3: resampled to {} samples", resampled.len());
+        info!("decode_mp3: resampled to {} samples", resampled.len());
         Ok((resampled, duration_ms))
     } else {
         Ok((all_samples, duration_ms))

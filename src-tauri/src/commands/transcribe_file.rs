@@ -1,7 +1,7 @@
 use crate::audio_toolkit::audio::decode_mp3;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings::get_settings;
-use log::{debug, info};
+use log::info;
 use rubato::{FftFixedIn, Resampler};
 use serde::Serialize;
 use specta::Type;
@@ -47,13 +47,19 @@ fn read_wav_mono_16k(path: &Path) -> Result<(Vec<f32>, u64), String> {
         return Ok((mono, duration_ms));
     }
 
+    let chunk = 1024;
     let mut resampler =
-        FftFixedIn::<f32>::new(sample_rate, 16000, 1024, 1, 1).map_err(|e| format!("Resampler error: {}", e))?;
-    let in_buf: Vec<&[f32]> = vec![&mono];
-    let out = resampler
-        .process(&in_buf, None)
-        .map_err(|e| format!("Resample error: {}", e))?;
-    let resampled: Vec<f32> = out.into_iter().flatten().collect();
+        FftFixedIn::<f32>::new(sample_rate, 16000, chunk, 1, 1).map_err(|e| format!("Resampler error: {}", e))?;
+    let mut resampled = Vec::new();
+    for c in mono.chunks(chunk) {
+        let in_buf: Vec<&[f32]> = vec![c];
+        let out = resampler
+            .process(&in_buf, None)
+            .map_err(|e| format!("Resample error: {}", e))?;
+        for buf in out {
+            resampled.extend_from_slice(&buf);
+        }
+    }
     Ok((resampled, duration_ms))
 }
 
@@ -76,7 +82,7 @@ pub fn transcribe_audio_file(
         .map(|e| e.to_lowercase())
         .unwrap_or_default();
 
-    debug!(
+    info!(
         "transcribe_audio_file: path={:?}, ext={:?}, file_exists={}",
         path,
         ext,
@@ -89,7 +95,7 @@ pub fn transcribe_audio_file(
         _ => return Err(format!("Unsupported file format: {}", ext)),
     };
 
-    debug!("Decoded {} samples, duration_ms={}", samples.len(), duration_ms);
+    info!("Decoded {} samples, duration_ms={}", samples.len(), duration_ms);
 
     if samples.is_empty() {
         return Err("No audio samples found".into());
