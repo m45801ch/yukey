@@ -45,57 +45,57 @@ export const DEFAULT_MODES: Record<
 > = {
   general: {
     name: "一般",
-    description: "適用於日常對話與記錄，修正明顯口誤並保持口語自然。",
+    description: "适用于日常对话与记录，修正明显口误并保持口语自然。",
     content: modeGeneral,
   },
   business: {
-    name: "商務",
-    description: "將隨意的口述整理為正式、措辭得體的商業郵件、訊息或工作報告。",
+    name: "商务",
+    description: "将随意的口述整理为正式、措辞得体的商业邮件、讯息或工作报告。",
     content: modeBusiness,
   },
   meeting: {
-    name: "會議",
-    description: "將會議轉寫內容整理為條理清晰、重點分明的會議紀錄。",
+    name: "会议",
+    description: "将会议转写内容整理为条理清晰、重点分明的会议记录。",
     content: modeMeeting,
   },
   verbatim: {
     name: "逐字稿",
-    description: "完整保留所有口語、贅字、語氣詞與停頓，僅修正錯別字。",
+    description: "完整保留所有口语、赘字、语气词与停顿，仅修正错别字。",
     content: modeVerbatim,
   },
   chat: {
     name: "聊天",
-    description: "適合輕鬆隨意的對話，保留口語情緒語氣，修正錯字並適當斷句。",
+    description: "适合轻松随意的对话，保留口语情绪语气，修正错字并适当断句。",
     content: modeChat,
   },
   email: {
     name: "Email",
-    description: "將口述內容整理為適合電子郵件發送的正式書信格式。",
+    description: "将口述内容整理为适合电子邮件发送的正式书信格式。",
     content: modeEmail,
   },
   line: {
     name: "LINE",
-    description: "適合即時通訊的簡潔口語風格，保留語氣與溫度。",
+    description: "适合即时通讯的简洁口语风格，保留语气与温度。",
     content: modeLine,
   },
   social: {
-    name: "社群貼文",
-    description: "將語音整理為適合社群媒體的活潑、有感貼文風格。",
+    name: "社群贴文",
+    description: "将语音整理为适合社群媒体的活泼、有感贴文风格。",
     content: modeSocial,
   },
   teaching: {
-    name: "教學",
-    description: "保留教學邏輯與層次，專有名詞精確，適合學習者閱讀。",
+    name: "教学",
+    description: "保留教学逻辑与层次，专有名词精确，适合学习者阅读。",
     content: modeTeaching,
   },
   notes: {
-    name: "筆記",
-    description: "精簡濃縮為條列式筆記，保留核心資訊，去除口語贅詞。",
+    name: "笔记",
+    description: "精简浓缩为条列式笔记，保留核心资讯，去除口语赘词。",
     content: modeNote,
   },
   official: {
     name: "公文",
-    description: "轉換為正式公文格式與用語，適合簽呈、函文等正式文書。",
+    description: "转换为正式公文格式与用语，适合签呈、函文等正式文书。",
     content: modeOfficial,
   },
 };
@@ -105,36 +105,36 @@ export const DEFAULT_DICTIONARIES: Record<
   { name: string; description: string; content: string }
 > = {
   ai: {
-    name: "AI 人工智慧",
+    name: "AI 人工智能",
     description:
-      "導入人工智慧、深度學習、大語言模型 (LLM) 等相關專業領域術語與英文縮寫。",
+      "导入人工智能、深度学习、大语言模型 (LLM) 等相关专业领域术语与英文缩写。",
     content: dictAi,
   },
   coding: {
-    name: "程式開發",
+    name: "程式开发",
     description:
-      "導入前端、後端、API、Git 版本控制、軟體部署與測試等資工專業詞彙。",
+      "导入前端、后端、API、Git 版本控制、软件部署与测试等计算机专业词汇。",
     content: dictCoding,
   },
   medical: {
-    name: "醫療保健",
-    description: "導入醫學檢驗、常見疾病、臨床診斷與醫院科別之醫療專業名詞。",
+    name: "医疗保健",
+    description: "导入医学检验、常见疾病、临床诊断与医院科别之医疗专业名词。",
     content: dictMedical,
   },
   legal: {
-    name: "法律合規",
-    description: "導入合約條款、智慧財產權、訴訟爭議解決與合規之法律專有名詞。",
+    name: "法律合规",
+    description: "导入合约条款、智慧财产权、诉讼争议解决与合规之法律专有名词。",
     content: dictLegal,
   },
   engineering: {
-    name: "工程專案",
+    name: "工程专案",
     description:
-      "導入產品研發、結構設計、工程藍圖、物料製造與專案管理專業術語。",
+      "导入产品研发、结构设计、工程蓝图、物料制造与专案管理专业术语。",
     content: dictEngineering,
   },
   education: {
-    name: "教育學習",
-    description: "導入課綱教案、教學方法、輔導諮商與學校行政之教育相關詞彙。",
+    name: "教育学习",
+    description: "导入课纲教案、教学方法、辅导咨商与学校行政之教育相关词汇。",
     content: dictEducation,
   },
 };

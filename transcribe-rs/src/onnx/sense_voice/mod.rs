@@ -237,6 +237,8 @@ impl SenseVoiceModel {
         if features.nrows() == 0 {
             return Ok(TranscriptionResult {
                 text: String::new(),
+                emotion: None,
+                event: None,
                 segments: None,
             });
         }
@@ -359,7 +361,7 @@ impl SenseVoiceModel {
         let tokens = &decoder_result.tokens;
         let timestamps = &decoder_result.timestamps;
 
-        let (start, _language, _emotion, _event) = if meta.is_funasr_nano {
+        let (start, _language, emotion, event) = if meta.is_funasr_nano {
             (0, None, None, None)
         } else {
             let lang = tokens
@@ -374,6 +376,13 @@ impl SenseVoiceModel {
                 .get(2)
                 .and_then(|&id| self.symbol_table.get(id))
                 .map(|s| s.to_string());
+            log::info!(
+                "SenseVoice tokens[:4]={:?} lang={:?} emotion={:?} event={:?}",
+                &tokens[..tokens.len().min(4)],
+                lang,
+                emo,
+                evt,
+            );
             (4usize, lang, emo, evt)
         };
 
@@ -415,7 +424,7 @@ impl SenseVoiceModel {
             None
         };
 
-        TranscriptionResult { text, segments }
+        TranscriptionResult { text, segments, emotion, event }
     }
 }
 

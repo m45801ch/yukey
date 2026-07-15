@@ -158,6 +158,8 @@ impl ParakeetModel {
 
         Ok(TranscriptionResult {
             text: timestamped_result.text,
+            emotion: None,
+            event: None,
             segments: Some(segments),
         })
     }

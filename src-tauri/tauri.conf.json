@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "yukey",
-  "version": "0.2.4",
-  "identifier": "com.yukey.app",
+  "version": "0.2.5",
+  "identifier": "yukey",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://127.0.0.1:5173",

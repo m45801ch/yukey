@@ -93,6 +93,8 @@ impl GigaAMModel {
         if samples.len() < self.mel_config.n_fft {
             return Ok(TranscriptionResult {
                 text: String::new(),
+                emotion: None,
+                event: None,
                 segments: None,
             });
         }
@@ -156,6 +158,8 @@ impl GigaAMModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

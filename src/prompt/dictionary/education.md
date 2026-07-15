@@ -1,37 +1,37 @@
 ---dictionary
-name: 教育學習
+name: 教育学习
 priority: 3
 allowed_overrides: [terminology]
 ---
 
-# 教育學習與教學管理專有名詞
+# 教育学习与教学管理专有名词
 
-## 教學規劃與設計 (Instructional Design & Planning)
+## 教学规划与设计 (Instructional Design & Planning)
 
-- **課綱 (Curriculum Guidelines)**: 指導教學大綱與核心內容的官方綱要
-- **教案 (Lesson Plan)**: 教師針對單堂課設計的教學流程與目標
-- **評量 (Assessment / Evaluation)**: 評估學生學習成效的測驗與方式 (形成性、總結性評量)
-- **核心素養 (Core Competency)**: 學生面對未來生活所應具備的知識、能力與態度
-- **學習歷程檔案 (Learning Portfolio)**: 記錄學生學習軌跡與成果的個人檔案
+- **课纲 (Curriculum Guidelines)**: 指导教学大纲与核心内容的官方纲要
+- **教案 (Lesson Plan)**: 教师針对单堂课设计的教学流程与目标
+- **评量 (Assessment / Evaluation)**: 评估学生学习成效的测验与方式 (形成性、总结性评量)
+- **核心素養 (Core Competency)**: 学生面对未来生活所应具备的知识、能力与态度
+- **学习历程档案 (Learning Portfolio)**: 记录学生学习軌跡与成果的个人档案
 
-## 教學法與模式 (Pedagogy & Teaching Models)
+## 教学法与模式 (Pedagogy & Teaching Models)
 
-- **翻轉教育 (Flipped Classroom)**: 課前自主學習，課堂進行討論與實作的教學模式
-- **遠距教學 / 線上教學 (Distance Learning)**: 利用網路進行跨空間的教學活動
-- **PBL**: Project-Based Learning (專案式學習) 或 Problem-Based Learning (問題導向學習)
-- **雙語教學 (Bilingual Education)**: 使用兩種語言進行學科教學
-- **差異化教學 (Differentiated Instruction)**: 針對不同能力與起點的學生設計多元教學
+- **翻转教育 (Flipped Classroom)**: 课前自主学习，课堂进行讨论与实作的教学模式
+- **远距教学 / 线上教学 (Distance Learning)**: 利用网路进行跨空間的教学活动
+- **PBL**: Project-Based Learning (专案式学习) 或 Problem-Based Learning (问题导向学习)
+- **双语教学 (Bilingual Education)**: 使用兩种语言进行学科教学
+- **差异化教学 (Differentiated Instruction)**: 針对不同能力与起点的学生设计多元教学
 
-## 班級與輔導管理 (Classroom & Guidance Management)
+## 班級与辅导管理 (Classroom & Guidance Management)
 
-- **班級經營 (Classroom Management)**: 維持秩序、營造良好課堂氛圍的方法
-- **個案輔導 (Case Counseling)**: 針對特定適應困難或發展問題學生進行的一對一輔導
-- **親師溝通 (Parent-Teacher Communication)**: 教師與家長的良性對話與協作
-- **特殊教育 (Special Education / SPED)**: 針對身心障礙或資賦優異學生的個別化教育
+- **班級经營 (Classroom Management)**: 維持秩序、營造良好课堂氛圍的方法
+- **个案辅导 (Case Counseling)**: 針对特定适应困難或发展问题学生进行的一对一辅导
+- **親师溝通 (Parent-Teacher Communication)**: 教师与家长的良性对话与协作
+- **特殊教育 (Special Education / SPED)**: 針对身心障礙或资賦优异学生的个别化教育
 
-## 學校行政與制度 (School Administration & Systems)
+## 学校行政与制度 (School Administration & Systems)
 
-- **必修 / 選修 (Compulsory / Elective)**: 規定必須修讀或可自由選擇的科目
-- **學分 (Credit / Academic Unit)**: 衡量課程份量與畢業要求的計算單位
-- **升學輔導 (Career Guidance / College Counseling)**: 輔導學生選擇下一階段學校與科系
-- **素養命題 (Competency-Based Assessment)**: 結合情境、不流於死記硬背的測驗題型設計
+- **必修 / 选修 (Compulsory / Elective)**: 规定必須修读或可自由选择的科目
+- **学分 (Credit / Academic Unit)**: 衡量课程份量与畢业要求的计算单位
+- **升学辅导 (Career Guidance / College Counseling)**: 辅导学生选择下一阶段学校与科系
+- **素養命题 (Competency-Based Assessment)**: 结合情境、不流于死记硬背的测验题型设计

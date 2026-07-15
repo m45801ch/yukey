@@ -39,7 +39,12 @@ pub fn merge_sequential_with_separator(
         }
     };
 
-    TranscriptionResult { text, segments }
+    TranscriptionResult {
+        text,
+        segments,
+        emotion: None,
+        event: None,
+    }
 }
 
 #[cfg(test)]
@@ -73,10 +78,14 @@ mod tests {
         let results = vec![
             TranscriptionResult {
                 text: "hello".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
             TranscriptionResult {
                 text: "world".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
         ];
@@ -90,14 +99,20 @@ mod tests {
         let results = vec![
             TranscriptionResult {
                 text: "hello".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
             TranscriptionResult {
                 text: "  ".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
             TranscriptionResult {
                 text: "world".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
         ];
@@ -110,6 +125,8 @@ mod tests {
         let results = vec![
             TranscriptionResult {
                 text: "hello".to_string(),
+                emotion: None,
+                event: None,
                 segments: Some(vec![TranscriptionSegment {
                     start: 0.0,
                     end: 1.0,
@@ -118,6 +135,8 @@ mod tests {
             },
             TranscriptionResult {
                 text: "world".to_string(),
+                emotion: None,
+                event: None,
                 segments: Some(vec![TranscriptionSegment {
                     start: 5.0,
                     end: 6.0,
@@ -137,10 +156,14 @@ mod tests {
         let results = vec![
             TranscriptionResult {
                 text: "  hello  ".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
             TranscriptionResult {
                 text: "  world  ".to_string(),
+                emotion: None,
+                event: None,
                 segments: None,
             },
         ];

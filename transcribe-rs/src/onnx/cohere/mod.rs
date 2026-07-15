@@ -120,6 +120,8 @@ impl CohereModel {
         if samples.is_empty() {
             return Ok(TranscriptionResult {
                 text: String::new(),
+                emotion: None,
+                event: None,
                 segments: None,
             });
         }
@@ -134,6 +136,8 @@ impl CohereModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

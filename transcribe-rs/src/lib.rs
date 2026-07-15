@@ -255,6 +255,10 @@ pub struct TranscriptionResult {
     pub text: String,
     /// Individual segments with timing information
     pub segments: Option<Vec<TranscriptionSegment>>,
+    /// Detected emotion (e.g. "sad", "happy"), only populated by SenseVoice
+    pub emotion: Option<String>,
+    /// Detected audio event (e.g. "laughter", "applause"), only populated by SenseVoice
+    pub event: Option<String>,
 }
 
 impl TranscriptionResult {

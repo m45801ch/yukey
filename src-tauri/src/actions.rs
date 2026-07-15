@@ -128,10 +128,19 @@ async fn post_process_transcription(
         return None;
     }
 
-    let api_key = settings
-        .post_process_api_keys
+    let keys = settings
+        .post_process_api_key_list
         .get(&provider.id)
         .cloned()
+        .unwrap_or_default();
+    let current_index = settings
+        .post_process_api_key_index
+        .get(&provider.id)
+        .copied()
+        .unwrap_or(0);
+    let api_key = keys
+        .get(current_index)
+        .map(|e| e.key.clone())
         .unwrap_or_default();
 
     if api_key.trim().is_empty() && provider.id != "custom" && provider.id != "apple_intelligence" {
@@ -198,9 +207,17 @@ async fn post_process_transcription(
     );
 
     let api_key = settings
-        .post_process_api_keys
+        .post_process_api_key_list
         .get(&provider.id)
-        .cloned()
+        .and_then(|keys| {
+            settings
+                .post_process_api_key_index
+                .get(&provider.id)
+                .copied()
+                .unwrap_or(0)
+                .checked_rem(keys.len())
+                .and_then(|i| keys.get(i).map(|e| e.key.clone()))
+        })
         .unwrap_or_default();
 
     // Disable reasoning for providers where post-processing rarely benefits from it.
@@ -242,21 +259,24 @@ async fn post_process_transcription(
                     &user_content,
                     token_limit,
                 ) {
-                    Ok(result) => {
-                        if result.trim().is_empty() {
-                            debug!("Apple Intelligence returned an empty response");
-                            None
-                        } else {
-                            let result = strip_invisible_chars(&result);
-                            debug!(
-                                "Apple Intelligence post-processing succeeded. Output length: {} chars",
-                                result.len()
-                            );
-                            Some(result)
+                        Ok(result) => {
+                            if result.trim().is_empty() {
+                                debug!("Apple Intelligence returned an empty response");
+                                let _ = app.emit("post-process-error", "Apple Intelligence returned an empty response".to_string());
+                                None
+                            } else {
+                                let result = strip_invisible_chars(&result);
+                                debug!(
+                                    "Apple Intelligence post-processing succeeded. Output length: {} chars",
+                                    result.len()
+                                );
+                                maybe_auto_switch_api_key(app, &provider.id, &model);
+                                Some(result)
+                            }
                         }
-                    }
                     Err(err) => {
                         error!("Apple Intelligence post-processing failed: {}", err);
+                        let _ = app.emit("post-process-error", format!("Apple Intelligence: {}", err));
                         None
                     }
                 };
@@ -307,9 +327,11 @@ async fn post_process_transcription(
                                 provider.id,
                                 result.len()
                             );
+                            maybe_auto_switch_api_key(app, &provider.id, &model);
                             return Some(result);
                         } else {
                             error!("Structured output response missing 'transcription' field");
+                            maybe_auto_switch_api_key(app, &provider.id, &model);
                             return Some(strip_invisible_chars(&content));
                         }
                     }
@@ -318,12 +340,14 @@ async fn post_process_transcription(
                             "Failed to parse structured output JSON: {}. Returning raw content.",
                             e
                         );
+                        maybe_auto_switch_api_key(app, &provider.id, &model);
                         return Some(strip_invisible_chars(&content));
                     }
                 }
             }
             Ok(None) => {
                 error!("LLM API response has no content");
+                let _ = app.emit("post-process-error", format!("{}: API returned empty response", provider.id));
                 return None;
             }
             Err(e) => {
@@ -357,10 +381,12 @@ async fn post_process_transcription(
                 provider.id,
                 content.len()
             );
+            maybe_auto_switch_api_key(app, &provider.id, &model);
             Some(content)
         }
         Ok(None) => {
             error!("LLM API response has no content");
+            let _ = app.emit("post-process-error", format!("{}: API returned empty response", provider.id));
             None
         }
         Err(e) => {
@@ -369,9 +395,93 @@ async fn post_process_transcription(
                 provider.id,
                 e
             );
+            let _ = app.emit("post-process-error", format!("{}: {}", provider.id, e));
             None
         }
     }
+}
+
+/// Increment usage count and auto-switch API key if threshold is reached.
+/// Model-level auto-switch takes priority over provider-level.
+fn maybe_auto_switch_api_key(app: &AppHandle, provider_id: &str, _model: &str) {
+    let mut settings = crate::settings::get_settings(app);
+
+    let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
+
+    // Reset daily counts if date changed
+    let last_reset = settings
+        .post_process_api_key_last_reset
+        .get(provider_id)
+        .cloned()
+        .unwrap_or_default();
+    let needs_reset = last_reset != today;
+
+    if needs_reset {
+        settings
+            .post_process_api_key_daily_usage
+            .insert(provider_id.to_string(), Vec::new());
+        settings
+            .post_process_api_key_last_reset
+            .insert(provider_id.to_string(), today.clone());
+    }
+
+    let threshold = if settings.post_process_auto_switch_model_enabled {
+        settings.post_process_auto_switch_model_threshold
+    } else {
+        return;
+    };
+
+    let keys = settings
+        .post_process_api_key_list
+        .get(provider_id)
+        .cloned()
+        .unwrap_or_default();
+    let key_count = keys.len();
+    if key_count == 0 {
+        crate::settings::write_settings(app, settings);
+        return;
+    }
+
+    let current_index = settings
+        .post_process_api_key_index
+        .get(provider_id)
+        .copied()
+        .unwrap_or(0);
+
+    // Ensure daily_usage vec matches key count
+    let mut usage = settings
+        .post_process_api_key_daily_usage
+        .remove(provider_id)
+        .unwrap_or_default();
+    if usage.len() != key_count {
+        usage.resize(key_count, 0);
+    }
+
+    // Increment current key's usage
+    if current_index < usage.len() {
+        usage[current_index] += 1;
+    }
+
+    // Check if threshold is reached
+    if usage[current_index] >= threshold {
+        // Advance to next key, wrap around
+        let next_index = (current_index + 1) % key_count;
+        settings
+            .post_process_api_key_index
+            .insert(provider_id.to_string(), next_index);
+        log::info!(
+            "Auto-switched from key {} to key {} for provider '{}' ({} uses)",
+            current_index + 1,
+            next_index + 1,
+            provider_id,
+            usage[current_index]
+        );
+    }
+
+    settings
+        .post_process_api_key_daily_usage
+        .insert(provider_id.to_string(), usage);
+    crate::settings::write_settings(app, settings);
 }
 
 async fn maybe_convert_chinese_variant(

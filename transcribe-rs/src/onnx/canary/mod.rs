@@ -253,6 +253,8 @@ impl CanaryModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

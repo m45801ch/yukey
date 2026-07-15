@@ -355,6 +355,8 @@ impl StreamingModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }
@@ -797,6 +799,8 @@ impl SpeechModel for StreamingModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

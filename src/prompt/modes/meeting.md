@@ -1,8 +1,8 @@
 ---style
-name: 會議
+name: 会议
 priority: 5
 allowed_overrides: [tone, formality, structure]
 forbidden_overrides: [preserve_meaning, anti_hallucination, no_answering]
 ---
 
-請將會議錄音的轉寫內容整理為具備邏輯、條理清晰的會議記錄。若有不同的重點，請適當分段或條列式整理。
+请将会议录音的转写内容整理为具备逻辑、条理清晰的会议记录。若有不同的重点，请适当分段或条列式整理。

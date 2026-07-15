@@ -3,7 +3,6 @@ use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
 use std::collections::HashMap;
-use std::fmt;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
@@ -91,6 +90,38 @@ pub struct LLMPrompt {
     pub id: String,
     pub name: String,
     pub prompt: String,
+}
+
+#[derive(Serialize, Debug, Clone, Default, Type)]
+pub struct ApiKeyEntry {
+    pub key: String,
+    #[serde(default)]
+    pub note: String,
+}
+
+impl ApiKeyEntry {
+    pub fn new(key: String) -> Self {
+        Self { key, note: String::new() }
+    }
+}
+
+// Accept both old string format and new object format for backward compat
+impl<'de> Deserialize<'de> for ApiKeyEntry {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        #[derive(Deserialize)]
+        #[serde(untagged)]
+        enum OneOf {
+            Obj { key: String, note: Option<String> },
+            Str(String),
+        }
+        match OneOf::deserialize(deserializer)? {
+            OneOf::Obj { key, note } => Ok(ApiKeyEntry { key, note: note.unwrap_or_default() }),
+            OneOf::Str(s) => Ok(ApiKeyEntry::new(s)),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
@@ -291,34 +322,6 @@ pub enum OrtAcceleratorSetting {
     Rocm,
 }
 
-#[derive(Clone, Serialize, Deserialize, Type)]
-#[serde(transparent)]
-pub(crate) struct SecretMap(HashMap<String, String>);
-
-impl fmt::Debug for SecretMap {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let redacted: HashMap<&String, &str> = self
-            .0
-            .iter()
-            .map(|(k, v)| (k, if v.is_empty() { "" } else { "[REDACTED]" }))
-            .collect();
-        redacted.fmt(f)
-    }
-}
-
-impl std::ops::Deref for SecretMap {
-    type Target = HashMap<String, String>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for SecretMap {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
 /* still handy for composing the initial JSON in the store ------------- */
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct AppSettings {
@@ -400,10 +403,20 @@ pub struct AppSettings {
     pub post_process_provider_id: String,
     #[serde(default = "default_post_process_providers")]
     pub post_process_providers: Vec<PostProcessProvider>,
-    #[serde(default = "default_post_process_api_keys")]
-    pub post_process_api_keys: SecretMap,
+    #[serde(default)]
+    pub post_process_api_key_list: HashMap<String, Vec<ApiKeyEntry>>,
+    #[serde(default)]
+    pub post_process_api_key_index: HashMap<String, usize>,
+    #[serde(default)]
+    pub post_process_api_key_daily_usage: HashMap<String, Vec<u32>>,
+    #[serde(default)]
+    pub post_process_api_key_last_reset: HashMap<String, String>,
     #[serde(default = "default_post_process_models")]
     pub post_process_models: HashMap<String, String>,
+    #[serde(default)]
+    pub post_process_auto_switch_model_enabled: bool,
+    #[serde(default = "default_auto_switch_model_threshold")]
+    pub post_process_auto_switch_model_threshold: u32,
     #[serde(default = "default_post_process_prompts")]
     pub post_process_prompts: Vec<LLMPrompt>,
     #[serde(default)]
@@ -487,7 +500,7 @@ fn default_model() -> String {
     "".to_string()
 }
 
-const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 5;
+const CURRENT_SETTINGS_SCHEMA_VERSION: u32 = 7;
 
 fn default_settings_schema_version() -> u32 {
     CURRENT_SETTINGS_SCHEMA_VERSION
@@ -709,14 +722,6 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
     providers
 }
 
-fn default_post_process_api_keys() -> SecretMap {
-    let mut map = HashMap::new();
-    for provider in default_post_process_providers() {
-        map.insert(provider.id, String::new());
-    }
-    SecretMap(map)
-}
-
 fn default_model_for_provider(provider_id: &str) -> String {
     if provider_id == APPLE_INTELLIGENCE_PROVIDER_ID {
         return APPLE_INTELLIGENCE_DEFAULT_MODEL_ID.to_string();
@@ -733,6 +738,10 @@ fn default_post_process_models() -> HashMap<String, String> {
         );
     }
     map
+}
+
+fn default_auto_switch_model_threshold() -> u32 {
+    10
 }
 
 fn default_post_process_prompts() -> Vec<LLMPrompt> {
@@ -753,7 +762,9 @@ fn default_typing_tool() -> TypingTool {
 
 fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
     let mut changed = false;
-    for provider in default_post_process_providers() {
+    let defaults = default_post_process_providers();
+
+    for provider in &defaults {
         // Use match to do a single lookup - either sync existing or add new
         match settings
             .post_process_providers
@@ -780,10 +791,10 @@ fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
             }
         }
 
-        if !settings.post_process_api_keys.contains_key(&provider.id) {
+        if !settings.post_process_api_key_list.contains_key(&provider.id) {
             settings
-                .post_process_api_keys
-                .insert(provider.id.clone(), String::new());
+                .post_process_api_key_list
+                .insert(provider.id.clone(), vec![ApiKeyEntry::new(String::new())]);
             changed = true;
         }
 
@@ -802,6 +813,36 @@ fn ensure_post_process_defaults(settings: &mut AppSettings) -> bool {
                 changed = true;
             }
         }
+    }
+
+    // Reorder providers to match the default list order so that
+    // newly-added providers don't end up at the bottom.
+    let mut reordered: Vec<PostProcessProvider> = Vec::new();
+    for default_provider in &defaults {
+        if let Some(existing) = settings
+            .post_process_providers
+            .iter()
+            .find(|p| p.id == default_provider.id)
+        {
+            reordered.push(existing.clone());
+        }
+    }
+    // Append any user-added providers not in the defaults
+    for provider in &settings.post_process_providers {
+        if !reordered.iter().any(|p| p.id == provider.id) {
+            reordered.push(provider.clone());
+        }
+    }
+    // Compare by ID to detect order changes without requiring PartialEq on PostProcessProvider
+    let reordered_ids: Vec<&str> = reordered.iter().map(|p| p.id.as_str()).collect();
+    let current_ids: Vec<&str> = settings
+        .post_process_providers
+        .iter()
+        .map(|p| p.id.as_str())
+        .collect();
+    if reordered_ids != current_ids {
+        settings.post_process_providers = reordered;
+        changed = true;
     }
 
     changed
@@ -929,8 +970,13 @@ pub fn get_default_settings() -> AppSettings {
         post_process_enabled: default_post_process_enabled(),
         post_process_provider_id: default_post_process_provider_id(),
         post_process_providers: default_post_process_providers(),
-        post_process_api_keys: default_post_process_api_keys(),
+        post_process_api_key_list: HashMap::new(),
+        post_process_api_key_index: HashMap::new(),
+        post_process_api_key_daily_usage: HashMap::new(),
+        post_process_api_key_last_reset: HashMap::new(),
         post_process_models: default_post_process_models(),
+        post_process_auto_switch_model_enabled: false,
+        post_process_auto_switch_model_threshold: default_auto_switch_model_threshold(),
         post_process_prompts: default_post_process_prompts(),
         post_process_selected_prompt_id: None,
         mute_while_recording: false,
@@ -1242,6 +1288,54 @@ fn apply_settings_migrations(
             }
         }
         settings.settings_schema_version = CURRENT_SETTINGS_SCHEMA_VERSION;
+        updated = true;
+    }
+
+    if stored_schema_version < 6 {
+        // Migrate from old single/dual SecretMap key format to list format.
+        // Old: post_process_api_keys = {"google": "sk-xxx"}, post_process_secondary_api_keys = {"google": "sk-yyy"}, post_process_use_secondary_key = {"google": true}
+        // New: post_process_api_key_list = {"google": ["sk-xxx", "sk-yyy"]}, post_process_api_key_index = {"google": 1}
+        if let Some(old_keys) = settings_value
+            .get("post_process_api_keys")
+            .and_then(|v| v.as_object())
+        {
+            for (provider_id, key_val) in old_keys {
+                let mut list: Vec<ApiKeyEntry> = Vec::new();
+                if let Some(key_str) = key_val.as_str() {
+                    if !key_str.is_empty() {
+                        list.push(ApiKeyEntry::new(key_str.to_string()));
+                    }
+                }
+                if let Some(secondary) = settings_value
+                    .get("post_process_secondary_api_keys")
+                    .and_then(|v| v.as_object())
+                    .and_then(|m| m.get(provider_id))
+                    .and_then(|v| v.as_str())
+                {
+                    if !secondary.is_empty() {
+                        list.push(ApiKeyEntry::new(secondary.to_string()));
+                    }
+                }
+                if !list.is_empty() {
+                    settings
+                        .post_process_api_key_list
+                        .insert(provider_id.clone(), list);
+                }
+            }
+        }
+        if let Some(use_secondary) = settings_value
+            .get("post_process_use_secondary_key")
+            .and_then(|v| v.as_object())
+        {
+            for (provider_id, val) in use_secondary {
+                if val.as_bool().unwrap_or(false) {
+                    settings
+                        .post_process_api_key_index
+                        .insert(provider_id.clone(), 1);
+                }
+            }
+        }
+        settings.settings_schema_version = 6;
         updated = true;
     }
 

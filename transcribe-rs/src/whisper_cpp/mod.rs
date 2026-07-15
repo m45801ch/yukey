@@ -264,6 +264,8 @@ impl WhisperEngine {
 
         Ok(TranscriptionResult {
             text: full_text.trim().to_string(),
+            emotion: None,
+            event: None,
             segments: Some(segments),
         })
     }

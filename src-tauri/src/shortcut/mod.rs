@@ -1072,11 +1072,146 @@ fn validate_provider_exists(
 pub fn change_post_process_api_key_setting(
     app: AppHandle,
     provider_id: String,
+    index: usize,
     api_key: String,
 ) -> Result<(), String> {
     let mut settings = settings::get_settings(&app);
     validate_provider_exists(&settings, &provider_id)?;
-    settings.post_process_api_keys.insert(provider_id, api_key);
+    let mut keys = settings
+        .post_process_api_key_list
+        .remove(&provider_id)
+        .unwrap_or_default();
+    if index < keys.len() {
+        keys[index].key = api_key;
+    } else {
+        return Err(format!("Key index {} out of range", index));
+    }
+    settings
+        .post_process_api_key_list
+        .insert(provider_id, keys);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_post_process_api_key_note_setting(
+    app: AppHandle,
+    provider_id: String,
+    index: usize,
+    note: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    validate_provider_exists(&settings, &provider_id)?;
+    let mut keys = settings
+        .post_process_api_key_list
+        .remove(&provider_id)
+        .unwrap_or_default();
+    if index < keys.len() {
+        keys[index].note = note;
+    } else {
+        return Err(format!("Key index {} out of range", index));
+    }
+    settings
+        .post_process_api_key_list
+        .insert(provider_id, keys);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn add_post_process_api_key_setting(
+    app: AppHandle,
+    provider_id: String,
+    api_key: String,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    validate_provider_exists(&settings, &provider_id)?;
+    let mut keys = settings
+        .post_process_api_key_list
+        .remove(&provider_id)
+        .unwrap_or_default();
+    keys.push(settings::ApiKeyEntry::new(api_key));
+    settings
+        .post_process_api_key_list
+        .insert(provider_id, keys);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn remove_post_process_api_key_setting(
+    app: AppHandle,
+    provider_id: String,
+    index: usize,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    validate_provider_exists(&settings, &provider_id)?;
+    let mut keys = settings
+        .post_process_api_key_list
+        .remove(&provider_id)
+        .unwrap_or_default();
+    if index < keys.len() {
+        keys.remove(index);
+    } else {
+        return Err(format!("Key index {} out of range", index));
+    }
+    if keys.is_empty() {
+        // Keep at least one empty slot
+        keys.push(settings::ApiKeyEntry::new(String::new()));
+    }
+    settings
+        .post_process_api_key_list
+        .insert(provider_id, keys);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_post_process_api_key_index_setting(
+    app: AppHandle,
+    provider_id: String,
+    index: usize,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    let keys = settings
+        .post_process_api_key_list
+        .get(&provider_id)
+        .cloned()
+        .unwrap_or_default();
+    if index >= keys.len() {
+        return Err(format!("Key index {} out of range (max {})", index, keys.len().saturating_sub(1)));
+    }
+    settings
+        .post_process_api_key_index
+        .insert(provider_id, index);
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_post_process_auto_switch_model_enabled_setting(
+    app: AppHandle,
+    enabled: bool,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.post_process_auto_switch_model_enabled = enabled;
+    settings::write_settings(&app, settings);
+    Ok(())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn change_post_process_auto_switch_model_threshold_setting(
+    app: AppHandle,
+    threshold: u32,
+) -> Result<(), String> {
+    let mut settings = settings::get_settings(&app);
+    settings.post_process_auto_switch_model_threshold = threshold;
     settings::write_settings(&app, settings);
     Ok(())
 }
@@ -1208,12 +1343,18 @@ pub async fn fetch_post_process_models(
         }
     }
 
-    // Get API key
-    let api_key = settings
-        .post_process_api_keys
+    // Get active API key
+    let keys = settings
+        .post_process_api_key_list
         .get(&provider_id)
         .cloned()
         .unwrap_or_default();
+    let current_index = settings
+        .post_process_api_key_index
+        .get(&provider_id)
+        .copied()
+        .unwrap_or(0);
+    let api_key = keys.get(current_index).cloned().unwrap_or_default().key;
 
     // Skip fetching if no API key for providers that typically need one
     if api_key.trim().is_empty() && provider.id != "custom" {

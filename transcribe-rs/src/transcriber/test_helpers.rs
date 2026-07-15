@@ -27,6 +27,8 @@ impl SpeechModel for MockModel {
     ) -> Result<TranscriptionResult, TranscribeError> {
         Ok(TranscriptionResult {
             text: format!("chunk_{}", samples.len()),
+            emotion: None,
+            event: None,
             segments: Some(vec![TranscriptionSegment {
                 start: 0.0,
                 end: samples.len() as f32 / SAMPLE_RATE,
@@ -75,6 +77,8 @@ impl SpeechModel for FailOnNthModel {
         }
         Ok(TranscriptionResult {
             text: format!("chunk_{}", self.call_count),
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

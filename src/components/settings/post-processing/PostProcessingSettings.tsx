@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { commands } from "@/bindings";
 
@@ -32,13 +32,13 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
     setTesting(true);
     try {
       const baseUrl = state.selectedProvider?.base_url ?? "";
-      const apiKey = state.apiKey;
+      const apiKey = state.currentApiKey;
       if (!baseUrl) {
-        toast.error("請先設定 API 網址");
+        toast.error(t("settings.postProcessing.api.apiKey.noBaseUrl"));
         return;
       }
       if (!apiKey) {
-        toast.error("請先輸入 API Key");
+        toast.error(t("settings.postProcessing.api.apiKey.noApiKey"));
         return;
       }
       const result = await commands.testPostProcessConnection(
@@ -47,16 +47,16 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
         apiKey,
       );
       if (result.status === "ok") {
-        toast.success("連線測試成功");
+        toast.success(t("settings.postProcessing.api.apiKey.testSuccess"));
       } else {
-        toast.error(`連線測試失敗：${result.error}`);
+        toast.error(t("settings.postProcessing.api.apiKey.testFailed", { error: result.error }));
       }
     } catch (e) {
-      toast.error(`連線測試失敗：${e}`);
+      toast.error(t("settings.postProcessing.api.apiKey.testFailed", { error: String(e) }));
     } finally {
       setTesting(false);
     }
-  }, [state.selectedProvider, state.selectedProviderId, state.apiKey]);
+  }, [state.selectedProvider, state.selectedProviderId, state.currentApiKey, t]);
 
   return (
     <>
@@ -113,24 +113,107 @@ const PostProcessingSettingsApiComponent: React.FC = () => {
             layout="horizontal"
             grouped={true}
           >
-            <div className="flex items-center gap-2">
-              <ApiKeyField
-                value={state.apiKey}
-                onBlur={state.handleApiKeyChange}
-                placeholder={t(
-                  "settings.postProcessing.api.apiKey.placeholder",
-                )}
-                disabled={state.isApiKeyUpdating}
-                className="min-w-[320px]"
-              />
-              <Button
-                onClick={handleTestConnection}
-                disabled={testing || !state.apiKey || !state.selectedProvider?.base_url}
-                variant="secondary"
-                size="sm"
-              >
-                {testing ? "測試中..." : "測試連線"}
-              </Button>
+            <div className="flex flex-col gap-2">
+              {state.apiKeyList.map((entry, index) => (
+                <div key={index} className="flex items-center gap-2 flex-wrap">
+                  <input
+                    type="radio"
+                    id={`apiKey-${index}`}
+                    name="apiKeySelect"
+                    checked={state.apiKeyIndex === index}
+                    onChange={() => state.handleApiKeyIndexChange(index)}
+                    className="cursor-pointer shrink-0"
+                  />
+                  <label htmlFor={`apiKey-${index}`} className="text-xs text-mid-gray whitespace-nowrap shrink-0">
+                    Key {index + 1}
+                  </label>
+                  <ApiKeyField
+                    value={entry.key}
+                    onBlur={(value) => state.handleApiKeyChange(index, value)}
+                    placeholder={t("settings.postProcessing.api.apiKey.placeholder")}
+                    disabled={state.isApiKeyUpdating(index)}
+                    className="min-w-0 flex-1"
+                  />
+                  <input
+                    type="text"
+                    defaultValue={entry.note}
+                    onBlur={(e) => state.handleApiKeyNoteChange(index, e.target.value)}
+                    placeholder={t("settings.postProcessing.api.apiKey.notePlaceholder")}
+                    disabled={state.isApiKeyNoteUpdating(index)}
+                    className="min-w-0 flex-1 h-7 px-1.5 text-xs bg-white/5 border border-white/20 rounded focus:outline-none focus:border-logo-primary focus:ring-1 focus:ring-logo-primary/30 transition-colors placeholder:text-mid-gray/40"
+                  />
+                  <span className="text-[10px] text-mid-gray/60 whitespace-nowrap shrink-0">
+                    {t("settings.postProcessing.api.apiKey.dailyUsage", { count: state.dailyUsage[index] ?? 0 })}
+                  </span>
+                  <button
+                    onClick={() => state.handleRemoveApiKey(index)}
+                    className="p-1.5 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded disabled:opacity-30 disabled:hover:bg-transparent transition-colors shrink-0"
+                    disabled={state.apiKeyList.length <= 1}
+                    title={t("settings.postProcessing.api.apiKey.removeKey")}
+                    aria-label={t("settings.postProcessing.api.apiKey.removeKey")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              <div className="flex justify-end gap-2 mt-1">
+                <Button
+                  onClick={() => state.handleAddApiKey("")}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {t("settings.postProcessing.api.apiKey.addApiKey")}
+                </Button>
+                <Button
+                  onClick={handleTestConnection}
+                  disabled={testing || !state.currentApiKey || !state.selectedProvider?.base_url}
+                  variant="secondary"
+                  size="sm"
+                >
+                  {testing && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
+                  {testing
+                    ? t("settings.postProcessing.api.apiKey.testing")
+                    : t("settings.postProcessing.api.apiKey.testConnection")}
+                </Button>
+              </div>
+            </div>
+          </SettingContainer>
+
+          <SettingContainer
+            title={t("settings.postProcessing.api.autoSwitchApi.title")}
+            description={t("settings.postProcessing.api.autoSwitchApi.description")}
+            descriptionMode="tooltip"
+            layout="horizontal"
+            grouped={true}
+          >
+            <div className="flex items-center gap-3 ml-auto">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={state.autoSwitchModelEnabled}
+                  disabled={state.isAutoSwitchModelEnabledUpdating}
+                  onChange={(e) => state.handleAutoSwitchModelEnabledChange(e.target.checked)}
+                />
+                <div className="capsule-toggle-3d peer peer-disabled:opacity-50"></div>
+              </label>
+              <div className="flex items-center gap-1.5 text-xs text-mid-gray">
+                <span>{t("settings.postProcessing.api.autoSwitchApi.after")}</span>
+                <input
+                  type="number"
+                  min={1}
+                  value={state.autoSwitchModelThreshold}
+                  onChange={(e) => {
+                    const v = parseInt(e.target.value, 10);
+                    if (!isNaN(v) && v >= 1) {
+                      state.handleAutoSwitchModelThresholdChange(v);
+                    }
+                  }}
+                  disabled={state.isAutoSwitchModelThresholdUpdating}
+                  className="w-16 h-7 px-1.5 text-xs text-center bg-white/5 border border-white/30 rounded focus:outline-none focus:border-logo-primary focus:ring-1 focus:ring-logo-primary/30 transition-colors"
+                />
+                <span>{t("settings.postProcessing.api.autoSwitchApi.uses")}</span>
+              </div>
             </div>
           </SettingContainer>
         </>

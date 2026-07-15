@@ -56,3 +56,11 @@ src-tauri/resources/models/*.gguf
 
 # Cloned repos
 whisper.cpp/
+
+# Superpowers development artifacts
+.superpowers/
+docs/superpowers/
+
+# Helper scripts
+_add_*.py
+_check_*.py

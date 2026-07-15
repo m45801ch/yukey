@@ -1,6 +1,6 @@
 [package]
 name = "yukey"
-version = "0.2.4"
+version = "0.2.5"
 description = "yukey"
 authors = ["cjpais"]
 edition = "2021"
@@ -128,6 +128,8 @@ winreg = "0.55"
 # signtool verify entirely. CI pins -DGGML_NATIVE=OFF (see build.yml) so the
 # static build targets a portable ARM baseline, not the build runner's CPU.
 [target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
+# NOTE: requires Vulkan SDK installed or VULKAN_SDK env var set.
+#       Fall back to CPU-only by changing "vulkan" to an empty features list.
 transcribe-cpp = { version = "0.1.0", default-features = false, features = ["vulkan"] }
 
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies]

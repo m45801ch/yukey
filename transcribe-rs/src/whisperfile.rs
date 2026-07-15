@@ -127,6 +127,8 @@ impl From<WhisperfileOutput> for TranscriptionResult {
         TranscriptionResult {
             text: output.text.trim().to_string(),
             segments,
+            emotion: None,
+            event: None,
         }
     }
 }

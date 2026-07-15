@@ -1,18 +1,70 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useSettings } from "@/hooks/useSettings";
-import { commands } from "@/bindings";
 import { Input } from "../ui/Input";
 import { Button } from "../ui/Button";
-import { Trash2, AlertCircle } from "lucide-react";
+import { Trash2 } from "lucide-react";
+import { Tooltip } from "../ui/Tooltip";
+import type { CorrectionRule } from "@/utils/correctionRules";
+import {
+  loadCorrectionRules,
+  saveCorrectionRules,
+  syncSystemPromptWithCorrections,
+} from "@/utils/correctionRules";
 
-interface CorrectionRule {
-  id: string;
-  pattern: string;
-  replacement: string;
-  enabled: boolean;
-}
+const InfoTooltip: React.FC<{ text: string }> = ({ text }) => {
+  const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!show) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setShow(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [show]);
+
+  return (
+    <div
+      ref={ref}
+      className="relative inline-flex items-center"
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+      onClick={() => setShow((prev) => !prev)}
+    >
+      <svg
+        className="w-4 h-4 text-mid-gray cursor-help hover:text-logo-primary transition-colors duration-200 select-none"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setShow((prev) => !prev);
+          }
+        }}
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      {show && (
+        <Tooltip targetRef={ref} position="top">
+          <p className="text-sm text-center leading-relaxed">{text}</p>
+        </Tooltip>
+      )}
+    </div>
+  );
+};
 
 export const VocabPage: React.FC = () => {
   const { t } = useTranslation();
@@ -28,22 +80,12 @@ export const VocabPage: React.FC = () => {
 
   // 初始化與加載本地模擬的糾錯規則
   useEffect(() => {
-    const savedRules = localStorage.getItem("yukey_correction_rules");
-    if (savedRules) {
-      try {
-        setRules(JSON.parse(savedRules));
-      } catch (e) {
-        console.error("Failed to parse local correction rules", e);
-      }
-    }
+    setRules(loadCorrectionRules());
   }, []);
 
   const saveRules = (updatedRules: CorrectionRule[]) => {
     setRules(updatedRules);
-    localStorage.setItem(
-      "yukey_correction_rules",
-      JSON.stringify(updatedRules),
-    );
+    saveCorrectionRules(updatedRules);
   };
 
   // 添加熱詞
@@ -63,7 +105,7 @@ export const VocabPage: React.FC = () => {
       updateSetting("custom_words", updated);
 
       // 更新對照 System Prompt 用的糾錯字/自訂詞彙
-      syncSystemPromptWithCorrections(rules, updated);
+      syncSystemPromptWithCorrections(rules, updated, getSetting);
 
       setNewWord("");
       toast.success(t("pages.vocab.toastWordAdded"));
@@ -74,7 +116,7 @@ export const VocabPage: React.FC = () => {
   const handleRemoveWord = (wordToRemove: string) => {
     const updated = customWords.filter((word) => word !== wordToRemove);
     updateSetting("custom_words", updated);
-    syncSystemPromptWithCorrections(rules, updated);
+    syncSystemPromptWithCorrections(rules, updated, getSetting);
   };
 
   // 新增糾錯規則
@@ -85,8 +127,8 @@ export const VocabPage: React.FC = () => {
       toast.error(t("pages.vocab.toastFieldEmpty"));
       return;
     }
-    if (rules.some((r) => r.pattern === pattern)) {
-      toast.error(t("pages.vocab.toastRuleExists", { pattern }));
+    if (rules.some((r) => r.pattern === pattern && r.replacement === replacement)) {
+      toast.error(t("pages.vocab.toastRuleExists", { pattern, replacement }));
       return;
     }
     const newRule: CorrectionRule = {
@@ -97,7 +139,7 @@ export const VocabPage: React.FC = () => {
     };
     const updatedRules = [newRule, ...rules];
     saveRules(updatedRules);
-    syncSystemPromptWithCorrections(updatedRules, customWords);
+    syncSystemPromptWithCorrections(updatedRules, customWords, getSetting);
     setRulePattern("");
     setRuleReplacement("");
     toast.success(t("pages.vocab.toastRuleAdded"));
@@ -107,105 +149,22 @@ export const VocabPage: React.FC = () => {
   const handleRemoveRule = (id: string) => {
     const updatedRules = rules.filter((r) => r.id !== id);
     saveRules(updatedRules);
-    syncSystemPromptWithCorrections(updatedRules, customWords);
+    syncSystemPromptWithCorrections(updatedRules, customWords, getSetting);
     toast.success(t("pages.vocab.toastRuleRemoved"));
-  };
-
-  // 同步糾錯規則至原 System Prompt（透過前端注入，當後處理執行時即可遵循）
-  const syncSystemPromptWithCorrections = (
-    currentRules: CorrectionRule[],
-    currentWords: string[],
-  ) => {
-    const activeRules = currentRules.filter((r) => r.enabled);
-
-    // 構造 Prompt 說明
-    let correctionPrompt = "";
-    if (activeRules.length > 0) {
-      correctionPrompt +=
-        "\n\n# 語音識別糾錯對照表 (請務必將左方的錯字或發音模糊字，更正為右方的正確字)：\n";
-      activeRules.forEach((r) => {
-        correctionPrompt += `- "${r.pattern}" -> "${r.replacement}"\n`;
-      });
-    }
-
-    // 保存到本地快取中，當 Style 卡片切換 System Prompt 時，會自動拼接此 correctionPrompt 在末尾
-    localStorage.setItem("yukey_prompt_corrections_suffix", correctionPrompt);
-
-    // 同步更新當前啟用中的 System Prompt (讀取 settings 裡面已有的 prompt，先清掉舊對照，然後拼上新的)
-    const selectedPromptId = getSetting("post_process_selected_prompt_id");
-    const prompts = getSetting("post_process_prompts") || [];
-    const selectedPrompt = prompts.find((p) => p.id === selectedPromptId);
-
-    if (selectedPrompt) {
-      // 清理原先可能殘留的糾錯與熱詞區塊，保留 ${output}
-      let cleanPrompt =
-        selectedPrompt.prompt.split("\n\n# 語音識別糾錯對照表")[0];
-      cleanPrompt = cleanPrompt.split("\n# 本地熱詞")[0];
-      // 若切完後 ${output} 不見了，從原始字串找回並接回
-      if (
-        selectedPrompt.prompt.includes("${output}") &&
-        !cleanPrompt.includes("${output}")
-      ) {
-        const ti = selectedPrompt.prompt.lastIndexOf("Transcript:");
-        const oi = selectedPrompt.prompt.lastIndexOf("${output}");
-        if (ti !== -1 && oi !== -1) {
-          cleanPrompt =
-            cleanPrompt.trimEnd() +
-            "\n\n" +
-            selectedPrompt.prompt.slice(ti, oi + 9);
-        }
-      }
-
-      const newPromptText = correctionPrompt
-        ? (() => {
-            const clean = correctionPrompt.trimStart();
-            const idx = cleanPrompt.lastIndexOf("Transcript:");
-            return idx !== -1
-              ? cleanPrompt.slice(0, idx) +
-                  clean +
-                  "\n\n" +
-                  cleanPrompt.slice(idx)
-              : cleanPrompt.replace("${output}", clean + "\n\n${output}");
-          })()
-        : cleanPrompt;
-
-      // 更新原後端所選提示詞內容
-      commands
-        .updatePostProcessPrompt(
-          selectedPrompt.id,
-          selectedPrompt.name,
-          newPromptText,
-        )
-        .then(() => {
-          updateSetting("post_process_selected_prompt_id", selectedPrompt.id);
-        });
-    }
   };
 
   return (
     <div className="w-full space-y-6 pb-8 select-none text-text">
-      {/* 頂部引導說明 */}
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-logo-primary/20 bg-logo-primary/5 text-start">
-        <AlertCircle className="w-5 h-5 text-logo-primary shrink-0 mt-0.5" />
-        <div className="text-xs space-y-1">
-          <p className="font-semibold text-logo-primary">{t("pages.vocab.infoTitle")}</p>
-          <p className="text-mid-gray">
-            {t("pages.vocab.infoHotwords")}
-          </p>
-          <p className="text-mid-gray">
-            {t("pages.vocab.infoRules")}
-          </p>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 左側：自訂熱詞 */}
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
-            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
-              {t("pages.vocab.hotwordsTitle")}
-            </h3>
-            <p className="text-xs text-mid-gray/80">{t("pages.vocab.hotwordsDescription")}</p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
+                {t("pages.vocab.hotwordsTitle")}
+              </h3>
+              <InfoTooltip text={t("pages.vocab.infoHotwords")} />
+            </div>
             <div className="flex gap-2">
               <Input
                 type="text"
@@ -258,12 +217,12 @@ export const VocabPage: React.FC = () => {
         {/* 右側：糾錯規則對照表 */}
         <div className="p-5 rounded-xl border border-mid-gray/20 bg-background-ui/5 flex flex-col justify-between space-y-4">
           <div className="space-y-2 text-start">
-            <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
-              {t("pages.vocab.rulesTitle")}
-            </h3>
-            <p className="text-xs text-mid-gray/80">
-              {t("pages.vocab.rulesDescription")}
-            </p>
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold text-mid-gray uppercase tracking-wider">
+                {t("pages.vocab.rulesTitle")}
+              </h3>
+              <InfoTooltip text={t("pages.vocab.infoRules")} />
+            </div>
             <div className="flex gap-2 items-center">
               <Input
                 type="text"

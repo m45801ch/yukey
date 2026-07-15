@@ -1,66 +1,66 @@
 ---dictionary
-name: 程式開發
+name: 程式开发
 priority: 3
 allowed_overrides: [terminology]
 ---
 
-# 程式開發與資訊工程專有名詞
+# 程式开发与资讯工程专有名词
 
-## 開發角色與框架 (Roles & Frameworks)
+## 开发角色与框架 (Roles & Frameworks)
 
-- **Frontend**: 前端開發 (React, Vue, Angular, Svelte, Next.js, Nuxt.js, Tailwind CSS)
-- **Backend**: 後端開發 (Node.js, Express, NestJS, Go, Python, Django, FastAPI, Java, Spring Boot, Rust)
-- **Tauri**: 跨平台桌面應用框架 (Rust backend + Web frontend)
-- **Electron**: 基於 Chromium 與 Node.js 的桌面應用框架
+- **Frontend**: 前端开发 (React, Vue, Angular, Svelte, Next.js, Nuxt.js, Tailwind CSS)
+- **Backend**: 后端开发 (Node.js, Express, NestJS, Go, Python, Django, FastAPI, Java, Spring Boot, Rust)
+- **Tauri**: 跨平台桌面应用框架 (Rust backend + Web frontend)
+- **Electron**: 基于 Chromium 与 Node.js 的桌面应用框架
 - **Vite**: 現代化前端建置工具
 
-## 版本控制與協作 (Git & Collaboration)
+## 版本控制与协作 (Git & Collaboration)
 
-- **Git**: 分散式版本控制系統
-- **Repository (Repo)**: 程式碼倉庫
+- **Git**: 分散式版本控制系统
+- **Repository (Repo)**: 程式码倉库
 - **Commit / Push / Pull**: 提交 / 推送 / 拉取
 - **Branch / Merge**: 分支 / 合併
-- **PR (Pull Request) / MR (Merge Request)**: 合併請求
+- **PR (Pull Request) / MR (Merge Request)**: 合併请求
 - **Conflict**: 衝突 (Merge Conflict)
-- **Rebase / Cherry-pick**: 衍合 / 挑選合併
+- **Rebase / Cherry-pick**: 衍合 / 挑选合併
 
-## 資料庫與架構 (Databases & Architecture)
+## 资料库与架构 (Databases & Architecture)
 
-- **SQL / NoSQL**: 關聯式與非關聯式資料庫
-- **Database (DB)**: 資料庫 (MySQL, PostgreSQL, MongoDB, Redis, SQLite)
-- **ORM**: Object-Relational Mapping (對象關係映射，如 Prisma, Sequelize, Hibernate)
-- **API**: Application Programming Interface (應用程式介面)
-- **RESTful API**: 表述性狀態轉移 API
-- **GraphQL**: 查詢語言型 API 架構
-- **Microservices**: 微服務架構
-- **MVC**: Model-View-Controller 設計模式
+- **SQL / NoSQL**: 关聯式与非关聯式资料库
+- **Database (DB)**: 资料库 (MySQL, PostgreSQL, MongoDB, Redis, SQLite)
+- **ORM**: Object-Relational Mapping (对象关係映射，如 Prisma, Sequelize, Hibernate)
+- **API**: Application Programming Interface (应用程式介面)
+- **RESTful API**: 表述性状态转移 API
+- **GraphQL**: 查询语言型 API 架构
+- **Microservices**: 微服务架构
+- **MVC**: Model-View-Controller 设计模式
 
-## 程式語言基礎 (Programming Jargons)
+## 程式语言基础 (Programming Jargons)
 
-- **Variable / Constant**: 變數 / 常數
+- **Variable / Constant**: 變数 / 常数
 - **Function / Method**: 函式 / 方法
 - **Array / List / Map**: 陣列 / 列表 / 映射表
-- **Loop / Condition**: 迴圈 / 條件判斷
-- **Class / Object / Interface**: 類別 / 物件 / 介面
+- **Loop / Condition**: 迴圈 / 条件判断
+- **Class / Object / Interface**: 类别 / 物件 / 介面
 - **Inheritance / Polymorphism**: 繼承 / 多型
-- **Asynchronous (Async/Await)**: 非同步 / 異步
-- **Promise / Callback**: 期約 / 回呼函式
+- **Asynchronous (Async/Await)**: 非同步 / 异步
+- **Promise / Callback**: 期约 / 回呼函式
 
-## 運維、部署與 CI/CD (DevOps & Deployment)
+## 运維、部署与 CI/CD (DevOps & Deployment)
 
-- **CI/CD**: Continuous Integration / Continuous Deployment (持續整合與持續部署)
+- **CI/CD**: Continuous Integration / Continuous Deployment (持續整合与持續部署)
 - **Docker**: 容器化平台
-- **Kubernetes (K8s)**: 容器協調與管理系統
-- **Cloud Service**: 雲端服務 (AWS, Google Cloud GCP, Azure)
-- **Serverless**: 無伺服器架構
+- **Kubernetes (K8s)**: 容器协调与管理系统
+- **Cloud Service**: 雲端服务 (AWS, Google Cloud GCP, Azure)
+- **Serverless**: 無伺服器架构
 - **Vercel / Netlify**: 前端託管平台
 
-## 測試、除錯與優化 (Testing, Debugging & Optimization)
+## 测试、除错与优化 (Testing, Debugging & Optimization)
 
-- **Bug / Debug**: 程式錯誤 / 除錯
-- **Refactoring**: 程式碼重構
-- **Unit Test**: 單元測試
-- **E2E Test**: 端到端測試 (Playwright, Cypress)
-- **Lint / Prettier**: 程式碼靜態分析與格式化 (ESLint)
-- **Memory Leak**: 記憶體洩漏 / 內存溢出
-- **Performance Tuning**: 性能調優 / 優化
+- **Bug / Debug**: 程式错误 / 除错
+- **Refactoring**: 程式码重构
+- **Unit Test**: 单元测试
+- **E2E Test**: 端到端测试 (Playwright, Cypress)
+- **Lint / Prettier**: 程式码靜态分析与格式化 (ESLint)
+- **Memory Leak**: 记忆体洩漏 / 内存溢出
+- **Performance Tuning**: 性能调优 / 优化

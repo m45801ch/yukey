@@ -172,6 +172,8 @@ impl ParaformerModel {
         if features.nrows() == 0 {
             return Ok(TranscriptionResult {
                 text: String::new(),
+                emotion: None,
+                event: None,
                 segments: None,
             });
         }
@@ -235,6 +237,8 @@ impl ParaformerModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

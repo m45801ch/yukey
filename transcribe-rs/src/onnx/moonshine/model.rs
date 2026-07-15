@@ -124,6 +124,8 @@ impl MoonshineModel {
 
         Ok(TranscriptionResult {
             text,
+            emotion: None,
+            event: None,
             segments: None,
         })
     }

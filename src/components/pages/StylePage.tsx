@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { useSettings } from "@/hooks/useSettings";
 import { commands } from "@/bindings";
-import { Plus, Edit2, Trash2, RotateCcw, Check, ChevronDown, ChevronUp, X } from "lucide-react";
+import { Plus, Edit2, Trash2, RotateCcw, Check, X } from "lucide-react";
 import { Textarea } from "../ui/Textarea";
 import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
@@ -39,7 +39,6 @@ export const StylePage: React.FC = () => {
   const [editorDescription, setEditorDescription] = useState("");
   const [editorContent, setEditorContent] = useState("");
 
-  const [expandedDict, setExpandedDict] = useState<string | null>(null);
   const [newEntryTerm, setNewEntryTerm] = useState("");
   const [newEntryExplanation, setNewEntryExplanation] = useState("");
 
@@ -111,12 +110,6 @@ export const StylePage: React.FC = () => {
     }
   }, [settings.customRules]);
 
-  // 切換展開的詞庫時清空輸入表單
-  useEffect(() => {
-    setNewEntryTerm("");
-    setNewEntryExplanation("");
-  }, [expandedDict]);
-
   const openEditor = (
     type: "main" | "mode" | "dict",
     key: string | null = null,
@@ -140,6 +133,8 @@ export const StylePage: React.FC = () => {
         setEditorName(dicts[key]?.name || "");
         setEditorDescription(dicts[key]?.description || "");
         setEditorContent(dicts[key]?.content || "");
+        setNewEntryTerm("");
+        setNewEntryExplanation("");
       }
     } else {
       setEditorName("");
@@ -723,83 +718,7 @@ export const StylePage: React.FC = () => {
                             </button>
                           )
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setExpandedDict(expandedDict === key ? null : key);
-                          }}
-                          className="p-1 rounded hover:bg-logo-primary/10 text-mid-gray hover:text-logo-primary"
-                          title={expandedDict === key ? t("pages.style.dicts.collapse") : t("pages.style.dicts.expand")}
-                        >
-                          {expandedDict === key ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                        </button>
                       </div>
-
-                      {expandedDict === key && (
-                        <div className="mt-3 pt-3 border-t border-mid-gray/10 space-y-3" onClick={(e) => e.stopPropagation()}>
-                          {/* Dictionary Content (read-only) */}
-                          <div>
-                            <h4 className="text-xs font-semibold text-mid-gray mb-1">{t("pages.style.dicts.title")}</h4>
-                            <pre className="text-xs text-mid-gray bg-mid-gray/5 p-2 rounded max-h-40 overflow-y-auto whitespace-pre-wrap leading-relaxed">
-                              {extractDictMetadata(dict.content).body}
-                            </pre>
-                          </div>
-
-                          {/* Custom Entries Section */}
-                          <div>
-                            <h4 className="text-xs font-semibold text-mid-gray mb-1">{t("pages.style.dicts.customEntries")}</h4>
-
-                            {/* Existing entries */}
-                            <div className="space-y-1 mb-2">
-                              {(settings.dictionaryCustomEntries[key] || []).length === 0 ? (
-                                <p className="text-xs text-mid-gray/60 italic">{t("pages.style.dicts.noEntries")}</p>
-                              ) : (
-                                (settings.dictionaryCustomEntries[key] || []).map((entry, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 text-xs bg-mid-gray/5 px-2 py-1 rounded">
-                                    <span className="font-semibold text-text">{entry.term}</span>
-                                    <span className="text-mid-gray">→</span>
-                                    <span className="text-text">{entry.explanation}</span>
-                                    <button
-                                      onClick={() => handleDeleteEntry(key, idx)}
-                                      className="ml-auto text-mid-gray hover:text-red-500"
-                                      title={t("pages.style.dicts.deleteEntry")}
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
-                                  </div>
-                                ))
-                              )}
-                            </div>
-
-                            {/* Add new entry form */}
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={newEntryTerm}
-                                onChange={(e) => setNewEntryTerm(e.target.value)}
-                                placeholder={t("pages.style.dicts.termLabel")}
-                                className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
-                                onKeyDown={(e) => e.key === "Enter" && handleAddEntry(key)}
-                              />
-                              <input
-                                type="text"
-                                value={newEntryExplanation}
-                                onChange={(e) => setNewEntryExplanation(e.target.value)}
-                                placeholder={t("pages.style.dicts.explanationLabel")}
-                                className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
-                                onKeyDown={(e) => e.key === "Enter" && handleAddEntry(key)}
-                              />
-                              <button
-                                onClick={() => handleAddEntry(key)}
-                                disabled={!newEntryTerm.trim() || !newEntryExplanation.trim()}
-                                className="text-xs px-2 py-1 rounded bg-logo-primary text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                              >
-                                {t("pages.style.dicts.addEntry")}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 },
@@ -915,6 +834,59 @@ export const StylePage: React.FC = () => {
                 disabled={isDefaultItem(editingKey)} // 內建/預設項目內容不可修改
               />
             </div>
+
+            {editingType === "dict" && isDefaultItem(editingKey) && (
+              <div className="space-y-3 pt-2 border-t border-mid-gray/10">
+                <h4 className="text-xs font-semibold text-mid-gray">{t("pages.style.dicts.customEntries")}</h4>
+
+                <div className="space-y-1">
+                  {(settings.dictionaryCustomEntries[editingKey!] || []).length === 0 ? (
+                    <p className="text-xs text-mid-gray/60 italic">{t("pages.style.dicts.noEntries")}</p>
+                  ) : (
+                    (settings.dictionaryCustomEntries[editingKey!] || []).map((entry, idx) => (
+                      <div key={idx} className="flex items-center gap-2 text-xs bg-mid-gray/5 px-2 py-1 rounded">
+                        <span className="font-semibold text-text">{entry.term}</span>
+                        <span className="text-mid-gray">→</span>
+                        <span className="text-text">{entry.explanation}</span>
+                        <button
+                          onClick={() => handleDeleteEntry(editingKey!, idx)}
+                          className="ml-auto text-mid-gray hover:text-red-500"
+                          title={t("pages.style.dicts.deleteEntry")}
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={newEntryTerm}
+                    onChange={(e) => setNewEntryTerm(e.target.value)}
+                    placeholder={t("pages.style.dicts.termLabel")}
+                    className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
+                    onKeyDown={(e) => e.key === "Enter" && handleAddEntry(editingKey!)}
+                  />
+                  <input
+                    type="text"
+                    value={newEntryExplanation}
+                    onChange={(e) => setNewEntryExplanation(e.target.value)}
+                    placeholder={t("pages.style.dicts.explanationLabel")}
+                    className="flex-1 text-xs px-2 py-1 rounded border border-mid-gray/20 bg-transparent text-text outline-none focus:border-logo-primary"
+                    onKeyDown={(e) => e.key === "Enter" && handleAddEntry(editingKey!)}
+                  />
+                  <button
+                    onClick={() => handleAddEntry(editingKey!)}
+                    disabled={!newEntryTerm.trim() || !newEntryExplanation.trim()}
+                    className="text-xs px-2 py-1 rounded bg-logo-primary text-white disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                  >
+                    {t("pages.style.dicts.addEntry")}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-2">
               {isDefaultItem(editingKey) ? (

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import { useSettings } from "../../../hooks/useSettings";
-import { commands, type PostProcessProvider } from "@/bindings";
+import { commands } from "@/bindings";
+import type { PostProcessProvider, ApiKeyEntry } from "@/bindings";
 import type { ModelOption } from "./types";
 import type { DropdownOption } from "../../ui/Dropdown";
 
@@ -14,9 +15,23 @@ type PostProcessProviderState = {
   baseUrl: string;
   handleBaseUrlChange: (value: string) => void;
   isBaseUrlUpdating: boolean;
-  apiKey: string;
-  handleApiKeyChange: (value: string) => void;
-  isApiKeyUpdating: boolean;
+  apiKeyList: ApiKeyEntry[];
+  apiKeyIndex: number;
+  currentApiKey: string;
+  dailyUsage: number[];
+  handleApiKeyChange: (index: number, value: string) => void;
+  handleApiKeyNoteChange: (index: number, note: string) => void;
+  isApiKeyUpdating: (index: number) => boolean;
+  isApiKeyNoteUpdating: (index: number) => boolean;
+  handleAddApiKey: (apiKey: string) => void;
+  handleRemoveApiKey: (index: number) => void;
+  handleApiKeyIndexChange: (index: number) => void;
+  autoSwitchModelEnabled: boolean;
+  autoSwitchModelThreshold: number;
+  isAutoSwitchModelEnabledUpdating: boolean;
+  isAutoSwitchModelThresholdUpdating: boolean;
+  handleAutoSwitchModelEnabledChange: (enabled: boolean) => void;
+  handleAutoSwitchModelThresholdChange: (threshold: number) => void;
   model: string;
   handleModelChange: (value: string) => void;
   modelOptions: ModelOption[];
@@ -37,6 +52,12 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
     setPostProcessProvider,
     updatePostProcessBaseUrl,
     updatePostProcessApiKey,
+    updatePostProcessApiKeyNote,
+    addPostProcessApiKey,
+    removePostProcessApiKey,
+    changePostProcessApiKeyIndex,
+    updatePostProcessAutoSwitchModelEnabled,
+    updatePostProcessAutoSwitchModelThreshold,
     updatePostProcessModel,
     fetchPostProcessModels,
     postProcessModelOptions,
@@ -62,8 +83,13 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
 
   // Use settings directly as single source of truth
   const baseUrl = selectedProvider?.base_url ?? "";
-  const apiKey = settings?.post_process_api_keys?.[selectedProviderId] ?? "";
+  const apiKeyList = settings?.post_process_api_key_list?.[selectedProviderId] ?? [];
+  const apiKeyIndex = settings?.post_process_api_key_index?.[selectedProviderId] ?? 0;
+  const dailyUsage = settings?.post_process_api_key_daily_usage?.[selectedProviderId] ?? [];
+  const currentApiKey = apiKeyList[apiKeyIndex]?.key ?? "";
   const model = settings?.post_process_models?.[selectedProviderId] ?? "";
+  const autoSwitchModelEnabled = settings?.post_process_auto_switch_model_enabled ?? false;
+  const autoSwitchModelThreshold = settings?.post_process_auto_switch_model_threshold ?? 10;
 
   const providerOptions = useMemo<DropdownOption[]>(() => {
     return providers.map((provider) => ({
@@ -98,7 +124,7 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
       // to avoid unnecessary backend errors.
       if (providerId !== APPLE_PROVIDER_ID) {
         const provider = providers.find((p) => p.id === providerId);
-        const apiKey = settings?.post_process_api_keys?.[providerId] ?? "";
+        const apiKey = settings?.post_process_api_key_list?.[providerId]?.[0]?.key ?? "";
         const hasBaseUrl = (provider?.base_url ?? "").trim() !== "";
         const hasApiKey = apiKey.trim() !== "";
 
@@ -130,13 +156,75 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
   );
 
   const handleApiKeyChange = useCallback(
-    (value: string) => {
+    (index: number, value: string) => {
       const trimmed = value.trim();
-      if (trimmed !== apiKey) {
-        void updatePostProcessApiKey(selectedProviderId, trimmed);
+      if (trimmed !== apiKeyList[index]?.key) {
+        void updatePostProcessApiKey(selectedProviderId, index, trimmed);
       }
     },
-    [apiKey, selectedProviderId, updatePostProcessApiKey],
+    [apiKeyList, selectedProviderId, updatePostProcessApiKey],
+  );
+
+  const handleApiKeyNoteChange = useCallback(
+    (index: number, note: string) => {
+      if (note !== apiKeyList[index]?.note) {
+        void updatePostProcessApiKeyNote(selectedProviderId, index, note);
+      }
+    },
+    [apiKeyList, selectedProviderId, updatePostProcessApiKeyNote],
+  );
+
+  const handleAddApiKey = useCallback(
+    (apiKey: string) => {
+      void addPostProcessApiKey(selectedProviderId, apiKey.trim());
+    },
+    [selectedProviderId, addPostProcessApiKey],
+  );
+
+  const handleRemoveApiKey = useCallback(
+    (index: number) => {
+      void removePostProcessApiKey(selectedProviderId, index);
+    },
+    [selectedProviderId, removePostProcessApiKey],
+  );
+
+  const handleApiKeyIndexChange = useCallback(
+    (index: number) => {
+      void changePostProcessApiKeyIndex(selectedProviderId, index);
+    },
+    [selectedProviderId, changePostProcessApiKeyIndex],
+  );
+
+  const isApiKeyUpdatingCallback = useCallback(
+    (index: number) => {
+      return isUpdating(`post_process_api_key:${selectedProviderId}:${index}`);
+    },
+    [isUpdating, selectedProviderId],
+  );
+
+  const isApiKeyNoteUpdatingCallback = useCallback(
+    (index: number) => {
+      return isUpdating(`post_process_api_key_note:${selectedProviderId}:${index}`);
+    },
+    [isUpdating, selectedProviderId],
+  );
+
+  const handleAutoSwitchModelEnabledChange = useCallback(
+    (enabled: boolean) => {
+      if (enabled !== autoSwitchModelEnabled) {
+        void updatePostProcessAutoSwitchModelEnabled(enabled);
+      }
+    },
+    [autoSwitchModelEnabled, updatePostProcessAutoSwitchModelEnabled],
+  );
+
+  const handleAutoSwitchModelThresholdChange = useCallback(
+    (threshold: number) => {
+      if (threshold !== autoSwitchModelThreshold) {
+        void updatePostProcessAutoSwitchModelThreshold(threshold);
+      }
+    },
+    [autoSwitchModelThreshold, updatePostProcessAutoSwitchModelThreshold],
   );
 
   const handleModelChange = useCallback(
@@ -195,8 +283,11 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
   const isBaseUrlUpdating = isUpdating(
     `post_process_base_url:${selectedProviderId}`,
   );
-  const isApiKeyUpdating = isUpdating(
-    `post_process_api_key:${selectedProviderId}`,
+  const isAutoSwitchModelEnabledUpdating = isUpdating(
+    "post_process_auto_switch_model_enabled",
+  );
+  const isAutoSwitchModelThresholdUpdating = isUpdating(
+    "post_process_auto_switch_model_threshold",
   );
   const isModelUpdating = isUpdating(
     `post_process_model:${selectedProviderId}`,
@@ -219,9 +310,23 @@ export const usePostProcessProviderState = (): PostProcessProviderState => {
     baseUrl,
     handleBaseUrlChange,
     isBaseUrlUpdating,
-    apiKey,
+    apiKeyList,
+    apiKeyIndex,
+    currentApiKey,
+    dailyUsage,
     handleApiKeyChange,
-    isApiKeyUpdating,
+    handleApiKeyNoteChange,
+    isApiKeyUpdating: isApiKeyUpdatingCallback,
+    isApiKeyNoteUpdating: isApiKeyNoteUpdatingCallback,
+    handleAddApiKey,
+    handleRemoveApiKey,
+    handleApiKeyIndexChange,
+    autoSwitchModelEnabled,
+    autoSwitchModelThreshold,
+    isAutoSwitchModelEnabledUpdating,
+    isAutoSwitchModelThresholdUpdating,
+    handleAutoSwitchModelEnabledChange,
+    handleAutoSwitchModelThresholdChange,
     model,
     handleModelChange,
     modelOptions,

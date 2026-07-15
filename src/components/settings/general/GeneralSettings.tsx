@@ -8,13 +8,13 @@ import { SettingsGroup } from "../../ui/SettingsGroup";
 import { OutputDeviceSelector } from "../OutputDeviceSelector";
 import { PushToTalk } from "../PushToTalk";
 import { AudioFeedback } from "../AudioFeedback";
+import { SettingContainer } from "../../ui/SettingContainer";
 import { useSettings } from "../../../hooks/useSettings";
 import { VolumeSlider } from "../VolumeSlider";
 import { MuteWhileRecording } from "../MuteWhileRecording";
 import { ModelSettingsCard } from "./ModelSettingsCard";
 import { ShowOverlay } from "../ShowOverlay";
 import { ThemeSelector } from "../ThemeSelector";
-import { Select } from "../../ui/Select";
 
 export const GeneralSettings: React.FC = () => {
   const { t } = useTranslation();
@@ -40,21 +40,22 @@ export const GeneralSettings: React.FC = () => {
           descriptionMode="tooltip"
           grouped={true}
         />
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm font-medium">{t("settings.general.copyFormat")}</p>
-            <p className="text-xs text-mid-gray">{t("settings.general.copyFormatDesc")}</p>
-          </div>
-          <Select
+        <SettingContainer
+          title={t("settings.general.copyFormat")}
+          description={t("settings.general.copyFormatDesc")}
+          descriptionMode="tooltip"
+          grouped={true}
+          layout="horizontal"
+        >
+          <select
             value={copyFormat}
-            onChange={(value) => setCopyFormat(value as "plain" | "markdown")}
-            options={[
-              { value: "plain", label: t("settings.general.copyFormatPlain") },
-              { value: "markdown", label: t("settings.general.copyFormatMarkdown") },
-            ]}
-            isClearable={false}
-          />
-        </div>
+            onChange={(e) => setCopyFormat(e.target.value as "plain" | "markdown")}
+            className="px-2 py-1 text-sm font-semibold bg-mid-gray/10 border border-mid-gray/80 hover:bg-logo-primary/10 rounded-md cursor-pointer hover:border-logo-primary outline-none transition-colors"
+          >
+            <option value="plain">{t("settings.general.copyFormatPlain")}</option>
+            <option value="markdown">{t("settings.general.copyFormatMarkdown")}</option>
+          </select>
+        </SettingContainer>
       </SettingsGroup>
       <ModelSettingsCard />
       <SettingsGroup title={t("settings.sound.title")}>

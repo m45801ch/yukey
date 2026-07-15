@@ -12,7 +12,7 @@ export const LANGUAGES: Language[] = [
   { value: "zh-Hans", label: "Chinese (Simplified)" },
   { value: "zh-Hant", label: "Chinese (Traditional)" },
   { value: "yue", label: "Cantonese" },
-  { value: "nan", label: "Taiwanese Hokkien (台語)" },
+  { value: "nan", label: "Taiwanese Hokkien" },
   { value: "de", label: "German" },
   { value: "es", label: "Spanish" },
   { value: "ru", label: "Russian" },

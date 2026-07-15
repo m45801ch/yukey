@@ -196,6 +196,8 @@ where
 
                 return Ok(TranscriptionResult {
                     text: response.text,
+                    emotion: None,
+                    event: None,
                     segments: None,
                 });
             }
