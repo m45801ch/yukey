@@ -993,5 +993,83 @@
     "copy": "複製",
     "remove": "移除",
     "noFiles": "尚未选择档案"
+  },
+  "prompts": {
+    "main": {
+      "name": "OpenLess 核心提示词",
+      "description": "系统预设的核心身份定义与规则，确保语音修饰的极致准确性与原意保留。"
+    },
+    "modes": {
+      "general": {
+        "name": "一般",
+        "description": "适用于日常对话与记录，修正明显口误并保持口语自然。"
+      },
+      "business": {
+        "name": "商务",
+        "description": "将随意的口述整理为正式、措辞得体的商业邮件、讯息或工作报告。"
+      },
+      "meeting": {
+        "name": "会议",
+        "description": "将会议转写内容整理为条理清晰、重点分明的会议记录。"
+      },
+      "verbatim": {
+        "name": "逐字稿",
+        "description": "完整保留所有口语、赘字、语气词与停顿，仅修正错别字。"
+      },
+      "chat": {
+        "name": "聊天",
+        "description": "适合轻松随意的对话，保留口语情绪语气，修正错字并适当断句。"
+      },
+      "email": {
+        "name": "Email",
+        "description": "将口述内容整理为适合电子邮件发送的正式书信格式。"
+      },
+      "line": {
+        "name": "LINE",
+        "description": "适合即时通讯的简洁口语风格，保留语气与温度。"
+      },
+      "social": {
+        "name": "社群贴文",
+        "description": "将语音整理为适合社群媒体的活泼、有感贴文风格。"
+      },
+      "teaching": {
+        "name": "教学",
+        "description": "保留教学逻辑与层次，专有名词精确，适合学习者阅读。"
+      },
+      "notes": {
+        "name": "笔记",
+        "description": "精简浓缩为条列式笔记，保留核心资讯，去除口语赘词。"
+      },
+      "official": {
+        "name": "公文",
+        "description": "转换为正式公文格式与用语，适合签呈、函文等正式文书。"
+      }
+    },
+    "dicts": {
+      "ai": {
+        "name": "AI 人工智能",
+        "description": "导入人工智能、深度学习、大语言模型 (LLM) 等相关专业领域术语与英文缩写。"
+      },
+      "coding": {
+        "name": "程式开发",
+        "description": "导入前端、后端、API、Git 版本控制、软件部署与测试等计算机专业词汇。"
+      },
+      "medical": {
+        "name": "医疗保健",
+        "description": "导入医学检验、常见疾病、临床诊断与医院科别之医疗专业名词。"
+      },
+      "legal": {
+        "name": "法律合规",
+        "description": "导入合约条款、智慧财产权、诉讼争议解决与合规之法律专有名词。"
+      },
+      "engineering": {
+        "name": "工程专案",
+        "description": "导入产品研发、结构设计、工程蓝图、物料制造与专案管理专业术语。"
+      },
+      "education": {
+        "name": "教育学习",
+        "description": "导入课纲教案、教学方法、辅导咨商与学校行政之教育相关词汇。"
+      }
+    }
   }
 }

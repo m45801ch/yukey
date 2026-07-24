@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, type ReactNode } from "react";
 import { toast, Toaster } from "sonner";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
@@ -319,6 +319,25 @@ function App() {
     setOnboardingStep("done");
   };
 
+  // Rendered once around every step below (including onboarding) so
+  // toast.error() calls surface to the user. sonner renders via a portal, so
+  // its position in the tree doesn't affect layout. Without this, errors during
+  // onboarding (e.g. a model download failing) are silently swallowed.
+  const toaster = (
+    <Toaster
+      theme="system"
+      toastOptions={{
+        unstyled: true,
+        classNames: {
+          toast:
+            "bg-background border border-mid-gray/20 rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 text-sm",
+          title: "font-medium",
+          description: "text-mid-gray",
+        },
+      }}
+    />
+  );
+
   // Still checking onboarding status
   if (onboardingStep === null) {
     return (
@@ -331,32 +350,18 @@ function App() {
     );
   }
 
+  let content: ReactNode;
   if (onboardingStep === "accessibility") {
-    return <AccessibilityOnboarding onComplete={handleAccessibilityComplete} />;
-  }
-
-  if (onboardingStep === "model") {
-    return <Onboarding onModelSelected={handleModelSelected} />;
-  }
-
-  return (
-    <div
-      dir={direction}
-      className="h-screen flex flex-col select-none cursor-default"
-    >
-      <Toaster
-        theme="system"
-        toastOptions={{
-          unstyled: true,
-          classNames: {
-            toast:
-              "bg-background border border-mid-gray/20 rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 text-sm",
-            title: "font-medium",
-            description: "text-mid-gray",
-          },
-        }}
-      />
-      <WhatsNewGate />
+    content = <AccessibilityOnboarding onComplete={handleAccessibilityComplete} />;
+  } else if (onboardingStep === "model") {
+    content = <Onboarding onModelSelected={handleModelSelected} />;
+  } else {
+    content = (
+      <div
+        dir={direction}
+        className="h-screen flex flex-col select-none cursor-default"
+      >
+        <WhatsNewGate />
 
       {/* 全螢幕設定 Modal 覆蓋層 */}
       {isSettingsOpen && (
@@ -402,6 +407,14 @@ function App() {
       {/* Fixed footer at bottom */}
       <Footer />
     </div>
+    );
+  }
+
+  return (
+    <>
+      {toaster}
+      {content}
+    </>
   );
 }
 

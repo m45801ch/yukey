@@ -34,6 +34,14 @@ impl FrameResampler {
         }
     }
 
+    pub fn reset(&mut self) {
+        self.in_buf.clear();
+        self.pending.clear();
+        if let Some(ref mut resampler) = self.resampler {
+            resampler.reset();
+        }
+    }
+
     pub fn push(&mut self, mut src: &[f32], mut emit: impl FnMut(&[f32])) {
         if self.resampler.is_none() {
             self.emit_frames(src, &mut emit);

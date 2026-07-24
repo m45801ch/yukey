@@ -68,12 +68,13 @@ export const savePromptSettings = (settings: PromptPluginSettings) => {
 
 export const getAvailableMainPrompts = (
   settings: PromptPluginSettings,
-): Record<string, { name: string; description: string; content: string }> => {
+): Record<string, { name: string; description: string; content: string; nameKey?: string; descriptionKey?: string }> => {
   return {
     default: {
-      name: "OpenLess 核心提示詞",
-      description:
-        "系統預設的核心身份定義與規則，確保語音修飾的極致準確性與原意保留。",
+      nameKey: "prompts.main.name",
+      descriptionKey: "prompts.main.description",
+      name: "",
+      description: "",
       content: DEFAULT_MAIN_PROMPT,
     },
     ...settings.customMainPrompts,
@@ -81,11 +82,17 @@ export const getAvailableMainPrompts = (
 };
 
 export const getAvailableModes = (settings: PromptPluginSettings) => {
-  return { ...DEFAULT_MODES, ...settings.customModes };
+  return { ...DEFAULT_MODES, ...settings.customModes } as Record<
+    string,
+    { name?: string; description?: string; content: string; nameKey?: string; descriptionKey?: string }
+  >;
 };
 
 export const getAvailableDictionaries = (settings: PromptPluginSettings) => {
-  return { ...DEFAULT_DICTIONARIES, ...settings.customDictionaries };
+  return { ...DEFAULT_DICTIONARIES, ...settings.customDictionaries } as Record<
+    string,
+    { name?: string; description?: string; content: string; nameKey?: string; descriptionKey?: string }
+  >;
 };
 
 function parseYamlValue(value: string): any {

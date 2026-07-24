@@ -401,7 +401,7 @@ export const StylePage: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-sm">
-                              {main.name}
+                              {t(main.nameKey ?? "") || main.name}
                             </span>
                             <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
                               {t(isDefault ? "pages.style.mainPrompt.defaultBadge" : "pages.style.mainPrompt.customBadge")}
@@ -414,7 +414,7 @@ export const StylePage: React.FC = () => {
                           )}
                         </div>
                         <p className="text-xs text-mid-gray line-clamp-3 leading-relaxed">
-                          {main.description}
+                          {t(main.descriptionKey ?? "") || main.description}
                         </p>
                       </div>
 
@@ -492,7 +492,7 @@ export const StylePage: React.FC = () => {
                         <div className="flex justify-between items-start">
                           <div className="flex items-center gap-1.5">
                             <span className="font-bold text-sm">
-                              {mode.name}
+                              {t(mode.nameKey ?? "") || mode.name}
                             </span>
                             {!isCustom && (
                               <span className="text-[10px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
@@ -507,7 +507,7 @@ export const StylePage: React.FC = () => {
                           )}
                         </div>
                         <p className="text-xs text-mid-gray line-clamp-3 leading-relaxed">
-                          {mode.description}
+                          {t(mode.descriptionKey ?? "") || mode.description}
                         </p>
                       </div>
 
@@ -669,7 +669,7 @@ export const StylePage: React.FC = () => {
                               )}
                             </div>
                             <span className="font-bold text-sm">
-                              {dict.name}
+                              {t(dict.nameKey ?? "") || dict.name}
                             </span>
                             {!isCustom && (
                               <span className="text-[9px] px-1 py-0.2 bg-mid-gray/10 text-mid-gray rounded">
@@ -684,7 +684,7 @@ export const StylePage: React.FC = () => {
                           )}
                         </div>
                         <p className="text-xs text-mid-gray pl-6 leading-relaxed line-clamp-3">
-                          {dict.description}
+                          {t(dict.descriptionKey ?? "") || dict.description}
                         </p>
                       </div>
 

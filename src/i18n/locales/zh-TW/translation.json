@@ -995,5 +995,83 @@
   },
   "whatsNew": {
     "title": "yukey v{{version}} 新功能"
+  },
+  "prompts": {
+    "main": {
+      "name": "OpenLess 核心提示詞",
+      "description": "系統預設的核心身分定義與規則，確保語音修飾的極致準確性與原意保留。"
+    },
+    "modes": {
+      "general": {
+        "name": "一般",
+        "description": "適用於日常對話與記錄，修正明顯口誤並保持口語自然。"
+      },
+      "business": {
+        "name": "商務",
+        "description": "將隨意的口述整理為正式、措辭得體的商業郵件、訊息或工作報告。"
+      },
+      "meeting": {
+        "name": "會議",
+        "description": "將會議轉寫內容整理為條理清晰、重點分明的會議記錄。"
+      },
+      "verbatim": {
+        "name": "逐字稿",
+        "description": "完整保留所有口語、贅字、語氣詞與停頓，僅修正錯別字。"
+      },
+      "chat": {
+        "name": "聊天",
+        "description": "適合輕鬆隨意的對話，保留口語情緒語氣，修正錯字並適當斷句。"
+      },
+      "email": {
+        "name": "Email",
+        "description": "將口述內容整理為適合電子郵件發送的正式書信格式。"
+      },
+      "line": {
+        "name": "LINE",
+        "description": "適合即時通訊的簡潔口語風格，保留語氣與溫度。"
+      },
+      "social": {
+        "name": "社群貼文",
+        "description": "將語音整理為適合社群媒體的活潑、有感貼文風格。"
+      },
+      "teaching": {
+        "name": "教學",
+        "description": "保留教學邏輯與層次，專有名詞精確，適合學習者閱讀。"
+      },
+      "notes": {
+        "name": "筆記",
+        "description": "精簡濃縮為條列式筆記，保留核心資訊，去除口語贅詞。"
+      },
+      "official": {
+        "name": "公文",
+        "description": "轉換為正式公文格式與用語，適合簽呈、函文等正式文書。"
+      }
+    },
+    "dicts": {
+      "ai": {
+        "name": "AI 人工智慧",
+        "description": "匯入人工智慧、深度學習、大語言模型 (LLM) 等相關專業領域術語與英文縮寫。"
+      },
+      "coding": {
+        "name": "程式開發",
+        "description": "匯入前端、後端、API、Git 版本控制、軟體部署與測試等電腦專業詞彙。"
+      },
+      "medical": {
+        "name": "醫療保健",
+        "description": "匯入醫學檢驗、常見疾病、臨床診斷與醫院科別之醫療專業名詞。"
+      },
+      "legal": {
+        "name": "法律合規",
+        "description": "匯入合約條款、智慧財產權、訴訟爭議解決與合規之法律專有名詞。"
+      },
+      "engineering": {
+        "name": "工程專案",
+        "description": "匯入產品研發、結構設計、工程藍圖、物料製造與專案管理專業術語。"
+      },
+      "education": {
+        "name": "教育學習",
+        "description": "匯入課綱教案、教學方法、輔導諮商與學校行政之教育相關詞彙。"
+      }
+    }
   }
 }

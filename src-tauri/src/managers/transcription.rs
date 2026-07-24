@@ -179,7 +179,12 @@ pub struct LoadingGuard {
 
 impl Drop for LoadingGuard {
     fn drop(&mut self) {
-        let mut is_loading = self.is_loading.lock().unwrap();
+        // Recover from a poisoned mutex instead of panicking —
+        // a panic inside Drop calls abort().
+        let mut is_loading = match self.is_loading.lock() {
+            Ok(g) => g,
+            Err(e) => e.into_inner(),
+        };
         *is_loading = false;
         self.loading_condvar.notify_all();
     }
@@ -1234,10 +1239,18 @@ impl TranscriptionManager {
             );
         }
 
-        // Whether the loaded transcribe-cpp model accepts a decode prompt
-        // (whisper family). Gates the whisper-only run extension below, and
-        // whether fuzzy custom-word correction still runs afterwards.
+        // Whether the loaded transcribe-cpp model advertises
+        // Feature::InitialPrompt. Informational (logged below); the whisper
+        // run extension and the fuzzy-correction skip are gated on
+        // `model_is_whisper` instead, since non-whisper archs can advertise
+        // the feature while rejecting the whisper-kind extension.
         let mut model_takes_initial_prompt = false;
+        // Whether the loaded model is actually whisper-family (arch string).
+        // Non-whisper archs (e.g. Voxtral Small) can advertise
+        // Feature::InitialPrompt yet reject the whisper-kind run extension
+        // with INVALID_ARG, so the whisper extension must be gated on the
+        // arch, not on the feature (see #1601).
+        let mut model_is_whisper = false;
 
         // Perform transcription with the appropriate engine.
         // We use catch_unwind to prevent engine panics from poisoning the mutex,
@@ -1271,6 +1284,7 @@ impl TranscriptionManager {
                 let model = session.model();
                 let caps = model.capabilities();
                 model_takes_initial_prompt = model.supports(Feature::InitialPrompt);
+                model_is_whisper = model.arch() == "whisper";
                 model_supports_translate = caps.supports_translate;
                 model_languages = caps.languages;
                 debug!(
@@ -1292,7 +1306,7 @@ impl TranscriptionManager {
                         // with INVALID_ARG, so skip it there and let the fuzzy
                         // post-correction handle custom words instead.
                         let family =
-                            if settings.custom_words.is_empty() || !model_takes_initial_prompt {
+                            if settings.custom_words.is_empty() || !model_is_whisper {
                                 None
                             } else {
                                 Some(RunExtension::Whisper(WhisperRunOptions {
@@ -1475,7 +1489,7 @@ impl TranscriptionManager {
         // family). Non-whisper transcribe-cpp models can't take a prompt, so they
         // still get fuzzy correction here, same as the ONNX engines.
         let filtered_result =
-            post_process_transcription_text(result, &settings, model_takes_initial_prompt);
+            post_process_transcription_text(result, &settings, model_is_whisper);
 
         let et = std::time::Instant::now();
         let translation_note = if settings.translate_to_english {
@@ -1682,26 +1696,58 @@ fn transcribe_cpp_run_plan(
     }
 }
 
+fn panic_payload_message(payload: &(dyn std::any::Any + Send)) -> String {
+    if let Some(message) = payload.downcast_ref::<&str>() {
+        (*message).to_string()
+    } else if let Some(message) = payload.downcast_ref::<String>() {
+        message.clone()
+    } else {
+        "unknown panic".to_string()
+    }
+}
+
+/// Optional text cleanup must never discard a successful model result. The
+/// transform is pure and owns its input, so recovering the untouched text is
+/// safe even if a bug in custom-word or filler filtering unwinds.
+fn fail_open_text_transform<F>(raw: String, transform: F) -> String
+where
+    F: FnOnce(String) -> String,
+{
+    let fallback = raw.clone();
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| transform(raw))) {
+        Ok(processed) => processed,
+        Err(payload) => {
+            error!(
+                "Optional transcription text post-processing panicked: {}; using the raw transcription",
+                panic_payload_message(payload.as_ref())
+            );
+            fallback
+        }
+    }
+}
+
 fn post_process_transcription_text(
     raw: String,
     settings: &AppSettings,
     custom_words_already_prompted: bool,
 ) -> String {
-    let corrected = if !settings.custom_words.is_empty() && !custom_words_already_prompted {
-        apply_custom_words(
-            &raw,
-            &settings.custom_words,
-            settings.word_correction_threshold,
-        )
-    } else {
-        raw
-    };
+    fail_open_text_transform(raw, |raw| {
+        let corrected = if !settings.custom_words.is_empty() && !custom_words_already_prompted {
+            apply_custom_words(
+                &raw,
+                &settings.custom_words,
+                settings.word_correction_threshold,
+            )
+        } else {
+            raw
+        };
 
-    filter_transcription_output(
-        &corrected,
-        &settings.app_language,
-        &settings.custom_filler_words,
-    )
+        filter_transcription_output(
+            &corrected,
+            &settings.app_language,
+            &settings.custom_filler_words,
+        )
+    })
 }
 
 fn cpp_translation_task(
@@ -2067,8 +2113,14 @@ impl Drop for TranscriptionManager {
         // Signal the watcher thread to shutdown
         self.shutdown_signal.store(true, Ordering::Relaxed);
 
-        // Wait for the thread to finish gracefully
-        if let Some(handle) = self.watcher_handle.lock().unwrap().take() {
+        // Wait for the thread to finish gracefully.
+        // Use match instead of unwrap to avoid panicking if the mutex is
+        // poisoned — a panic inside Drop calls abort().
+        let mut guard = match self.watcher_handle.lock() {
+            Ok(g) => g,
+            Err(e) => e.into_inner(),
+        };
+        if let Some(handle) = guard.take() {
             if let Err(e) = handle.join() {
                 warn!("Failed to join idle watcher thread: {:?}", e);
             } else {

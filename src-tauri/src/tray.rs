@@ -3,13 +3,40 @@ use crate::managers::model::ModelManager;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings;
 use crate::tray_i18n::get_tray_translations;
-use log::{error, info, warn};
+use log::{debug, error, info, warn};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use tauri::image::Image;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::tray::TrayIcon;
 use tauri::{AppHandle, Manager, Theme};
 use tauri_plugin_clipboard_manager::ClipboardExt;
+
+pub struct CurrentTrayIconState {
+    current: AtomicU32,
+}
+
+impl Default for CurrentTrayIconState {
+    fn default() -> Self {
+        Self {
+            current: AtomicU32::new(0),
+        }
+    }
+}
+
+impl CurrentTrayIconState {
+    pub fn get(&self) -> TrayIconState {
+        match self.current.load(Ordering::Relaxed) {
+            0 => TrayIconState::Idle,
+            1 => TrayIconState::Recording,
+            _ => TrayIconState::Transcribing,
+        }
+    }
+
+    pub fn set(&self, state: TrayIconState) {
+        self.current.store(state as u32, Ordering::Relaxed);
+    }
+}
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TrayIconState {
@@ -31,6 +58,16 @@ pub fn get_current_theme(app: &AppHandle) -> AppTheme {
         // On Linux, always use the colored theme
         AppTheme::Colored
     } else {
+        // On Windows the tray icon sits on the taskbar, which follows the
+        // *system* theme (SystemUsesLightTheme), not the app theme. With the
+        // "Custom" personalization mode the two can differ (e.g. dark taskbar
+        // + light apps), and the window theme would pick an icon that is
+        // invisible against the taskbar.
+        #[cfg(target_os = "windows")]
+        if let Some(theme) = windows_taskbar_theme() {
+            return theme;
+        }
+
         // On other platforms, map system theme to our app theme
         if let Some(main_window) = app.get_webview_window("main") {
             match main_window.theme().unwrap_or(Theme::Dark) {
@@ -42,6 +79,27 @@ pub fn get_current_theme(app: &AppHandle) -> AppTheme {
             AppTheme::Dark
         }
     }
+}
+
+/// Reads the Windows taskbar theme from the registry.
+///
+/// Returns None if the value is missing (older Windows 10 builds default to a
+/// dark taskbar there, but falling back to the window theme is safer than
+/// guessing).
+#[cfg(target_os = "windows")]
+fn windows_taskbar_theme() -> Option<AppTheme> {
+    use winreg::enums::HKEY_CURRENT_USER;
+    use winreg::RegKey;
+
+    let personalize = RegKey::predef(HKEY_CURRENT_USER)
+        .open_subkey("Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize")
+        .ok()?;
+    let system_uses_light: u32 = personalize.get_value("SystemUsesLightTheme").ok()?;
+    Some(if system_uses_light == 1 {
+        AppTheme::Light
+    } else {
+        AppTheme::Dark
+    })
 }
 
 /// Gets the appropriate icon path for the given theme and state
@@ -63,11 +121,14 @@ pub fn get_icon_path(theme: AppTheme, state: TrayIconState) -> &'static str {
 }
 
 pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
+    app.state::<CurrentTrayIconState>().set(icon.clone());
+
     let tray = app.state::<TrayIcon>();
     let theme = get_current_theme(app);
 
     let icon_path = get_icon_path(theme, icon.clone());
 
+    let icon_elapsed = std::time::Instant::now();
     let _ = tray.set_icon(Some(
         Image::from_path(
             app.path()
@@ -76,9 +137,25 @@ pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
         )
         .expect("failed to set icon"),
     ));
+    let icon_elapsed = icon_elapsed.elapsed();
 
     // Update menu based on state
+    let menu_started = std::time::Instant::now();
     update_tray_menu(app, &icon, None);
+    debug!(
+        "tray icon change ({:?}): icon={} set_icon={:?} menu={:?}",
+        icon,
+        icon_path,
+        icon_elapsed,
+        menu_started.elapsed()
+    );
+}
+
+/// Re-applies the last known tray state — for when only the *theme* changed
+/// and the state itself (idle/recording/transcribing) should be preserved.
+pub fn refresh_tray_icon(app: &AppHandle) {
+    let icon = app.state::<CurrentTrayIconState>().get();
+    change_tray_icon(app, icon);
 }
 
 pub fn tray_tooltip() -> String {

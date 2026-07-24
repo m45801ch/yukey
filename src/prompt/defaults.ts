@@ -41,100 +41,97 @@ export const DEFAULT_MAIN_PROMPT = mainPrompt;
 
 export const DEFAULT_MODES: Record<
   string,
-  { name: string; description: string; content: string }
+  { nameKey: string; descriptionKey: string; content: string }
 > = {
   general: {
-    name: "一般",
-    description: "适用于日常对话与记录，修正明显口误并保持口语自然。",
+    nameKey: "prompts.modes.general.name",
+    descriptionKey: "prompts.modes.general.description",
     content: modeGeneral,
   },
   business: {
-    name: "商务",
-    description: "将随意的口述整理为正式、措辞得体的商业邮件、讯息或工作报告。",
+    nameKey: "prompts.modes.business.name",
+    descriptionKey: "prompts.modes.business.description",
     content: modeBusiness,
   },
   meeting: {
-    name: "会议",
-    description: "将会议转写内容整理为条理清晰、重点分明的会议记录。",
+    nameKey: "prompts.modes.meeting.name",
+    descriptionKey: "prompts.modes.meeting.description",
     content: modeMeeting,
   },
   verbatim: {
-    name: "逐字稿",
-    description: "完整保留所有口语、赘字、语气词与停顿，仅修正错别字。",
+    nameKey: "prompts.modes.verbatim.name",
+    descriptionKey: "prompts.modes.verbatim.description",
     content: modeVerbatim,
   },
   chat: {
-    name: "聊天",
-    description: "适合轻松随意的对话，保留口语情绪语气，修正错字并适当断句。",
+    nameKey: "prompts.modes.chat.name",
+    descriptionKey: "prompts.modes.chat.description",
     content: modeChat,
   },
   email: {
-    name: "Email",
-    description: "将口述内容整理为适合电子邮件发送的正式书信格式。",
+    nameKey: "prompts.modes.email.name",
+    descriptionKey: "prompts.modes.email.description",
     content: modeEmail,
   },
   line: {
-    name: "LINE",
-    description: "适合即时通讯的简洁口语风格，保留语气与温度。",
+    nameKey: "prompts.modes.line.name",
+    descriptionKey: "prompts.modes.line.description",
     content: modeLine,
   },
   social: {
-    name: "社群贴文",
-    description: "将语音整理为适合社群媒体的活泼、有感贴文风格。",
+    nameKey: "prompts.modes.social.name",
+    descriptionKey: "prompts.modes.social.description",
     content: modeSocial,
   },
   teaching: {
-    name: "教学",
-    description: "保留教学逻辑与层次，专有名词精确，适合学习者阅读。",
+    nameKey: "prompts.modes.teaching.name",
+    descriptionKey: "prompts.modes.teaching.description",
     content: modeTeaching,
   },
   notes: {
-    name: "笔记",
-    description: "精简浓缩为条列式笔记，保留核心资讯，去除口语赘词。",
+    nameKey: "prompts.modes.notes.name",
+    descriptionKey: "prompts.modes.notes.description",
     content: modeNote,
   },
   official: {
-    name: "公文",
-    description: "转换为正式公文格式与用语，适合签呈、函文等正式文书。",
+    nameKey: "prompts.modes.official.name",
+    descriptionKey: "prompts.modes.official.description",
     content: modeOfficial,
   },
 };
 
 export const DEFAULT_DICTIONARIES: Record<
   string,
-  { name: string; description: string; content: string }
+  { nameKey: string; descriptionKey: string; content: string }
 > = {
   ai: {
-    name: "AI 人工智能",
-    description:
-      "导入人工智能、深度学习、大语言模型 (LLM) 等相关专业领域术语与英文缩写。",
+    nameKey: "prompts.dicts.ai.name",
+    descriptionKey: "prompts.dicts.ai.description",
     content: dictAi,
   },
   coding: {
-    name: "程式开发",
-    description:
-      "导入前端、后端、API、Git 版本控制、软件部署与测试等计算机专业词汇。",
+    nameKey: "prompts.dicts.coding.name",
+    descriptionKey: "prompts.dicts.coding.description",
     content: dictCoding,
   },
   medical: {
-    name: "医疗保健",
-    description: "导入医学检验、常见疾病、临床诊断与医院科别之医疗专业名词。",
+    nameKey: "prompts.dicts.medical.name",
+    descriptionKey: "prompts.dicts.medical.description",
     content: dictMedical,
   },
   legal: {
-    name: "法律合规",
-    description: "导入合约条款、智慧财产权、诉讼争议解决与合规之法律专有名词。",
+    nameKey: "prompts.dicts.legal.name",
+    descriptionKey: "prompts.dicts.legal.description",
     content: dictLegal,
   },
   engineering: {
-    name: "工程专案",
-    description:
-      "导入产品研发、结构设计、工程蓝图、物料制造与专案管理专业术语。",
+    nameKey: "prompts.dicts.engineering.name",
+    descriptionKey: "prompts.dicts.engineering.description",
     content: dictEngineering,
   },
   education: {
-    name: "教育学习",
-    description: "导入课纲教案、教学方法、辅导咨商与学校行政之教育相关词汇。",
+    nameKey: "prompts.dicts.education.name",
+    descriptionKey: "prompts.dicts.education.description",
     content: dictEducation,
   },
 };
