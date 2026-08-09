@@ -132,6 +132,7 @@ const settingUpdaters: {
         ? "default"
         : (value as string),
     ),
+  selected_channel: (value) => commands.setSelectedChannel(value as number | null),
   microphone_gain_enabled: (value) =>
     commands.setMicrophoneGainEnabled(value as boolean),
   microphone_gain_value: (value) =>

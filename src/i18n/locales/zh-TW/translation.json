@@ -265,10 +265,10 @@
   },
   "onboarding": {
     "subtitle": "首先，請選擇一種模型",
-    "existingModelsTitle": "Compatible Models",
-    "downloadModelsTitle": "Available to Download",
-    "showAllModels": "Show all {{total}} models",
-    "showFewerModels": "Show fewer models",
+    "existingModelsTitle": "相容的模型",
+    "downloadModelsTitle": "可供下載",
+    "showAllModels": "顯示全部 {{total}} 個模型",
+    "showFewerModels": "顯示較少模型",
     "recommended": "推薦",
     "customModelDescription": "官方不支援",
     "modelCard": {
@@ -346,7 +346,7 @@
       }
     },
     "errors": {
-      "selectModel": "Failed to select model"
+      "selectModel": "選擇模型失敗"
     },
     "permissions": {
       "title": "需要權限",
@@ -395,7 +395,7 @@
     "capabilities": {
       "languageSelection": "支援多種輸入語言",
       "singleLanguage": "僅支援此語言",
-      "languageCount": "{{total}} languages",
+      "languageCount": "{{total}} 種語言",
       "languageOnly": "僅 {{language}}",
       "translation": "可翻譯為英語",
       "translate": "翻譯為英語",
@@ -531,6 +531,12 @@
         "gainLabel": "麥克風增益",
         "gainTooltip": "若您使用的是高品質或高靈敏度的麥克風，建議關閉增益效果以避免背景雜音被放大或音訊飽和（爆音）。",
         "gainValueLabel": "增益數值"
+      },
+      "channel": {
+        "title": "輸入聲道",
+        "description": "多聲道麥克風可選擇要使用的輸入聲道，避免其他聲道的背景音樂或雜音混入轉錄。",
+        "average": "平均所有聲道",
+        "channel": "聲道 {{n}}"
       },
       "audioFeedback": {
         "label": "聲音回饋",
@@ -935,8 +941,10 @@
     "preparing": "準備中...",
     "checkForUpdates": "檢查更新",
     "portableUpdateTitle": "需要手動更新",
-    "portableUpdateMessage": "可攜式安裝無法自動更新。更新方法：從 GitHub Releases 下載最新的 NSIS 安裝程式，安裝到相同資料夾，然後將舊版本的 Data/ 資料夾（設定、模型、錄音）複製到新版本。",
-    "portableUpdateButton": "開啟 GitHub Releases"
+    "portableUpdateMessage": "可攜式安裝無法自動更新。更新方法：從下方下載最新的 NSIS 安裝程式，安裝到相同資料夾，然後將舊版本的 Data/ 資料夾（設定、模型、錄音）複製到新版本。",
+    "portableUpdateButton": "下載安裝程式",
+    "portableUpdateBrowseMessage": "可攜式安裝無法自動更新。更新方法：從 GitHub Releases 下載最新的 NSIS 安裝程式，安裝到相同資料夾，然後將舊版本的 Data/ 資料夾（設定、模型、錄音）複製到新版本。",
+    "portableUpdateBrowseButton": "瀏覽 GitHub Releases"
   },
   "common": {
     "loading": "載入中...",

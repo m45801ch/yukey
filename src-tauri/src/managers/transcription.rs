@@ -973,7 +973,7 @@ impl TranscriptionManager {
                                     update.audio_committed_ms,
                                     update.buffered_ms,
                                 );
-                                Some(stream.text().display())
+                                Some(stream.text().full)
                             }
                             Err(e) => {
                                 perf.record_compute(finalize_start.elapsed());
@@ -2066,7 +2066,7 @@ mod tests {
     #[test]
     fn transcribe_cpp_run_plan_translates_supported_non_english() {
         let plan = transcribe_cpp_run_plan(
-            "transcribe",
+            "translate",
             true,
             "en",
             "es",

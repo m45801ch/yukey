@@ -15,6 +15,7 @@ import Footer from "./components/footer";
 import Onboarding, { AccessibilityOnboarding } from "./components/onboarding";
 import { Sidebar, SidebarSection } from "./components/Sidebar";
 import { SettingsModal } from "./components/SettingsModal";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { WhatsNewGate } from "./components/whats-new";
 import { Overview } from "./components/pages/Overview";
 import { HistoryPage } from "./components/pages/HistoryPage";
@@ -361,7 +362,9 @@ function App() {
         dir={direction}
         className="h-screen flex flex-col select-none cursor-default"
       >
-        <WhatsNewGate />
+        <ErrorBoundary fallback={null}>
+          <WhatsNewGate />
+        </ErrorBoundary>
 
       {/* 全螢幕設定 Modal 覆蓋層 */}
       {isSettingsOpen && (

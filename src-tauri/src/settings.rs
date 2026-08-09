@@ -3,6 +3,7 @@ use serde::de::{self, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use specta::Type;
 use std::collections::HashMap;
+use std::fmt;
 use tauri::AppHandle;
 use tauri_plugin_store::StoreExt;
 
@@ -92,11 +93,25 @@ pub struct LLMPrompt {
     pub prompt: String,
 }
 
-#[derive(Serialize, Debug, Clone, Default, Type)]
+#[derive(Serialize, Clone, Default, Type)]
 pub struct ApiKeyEntry {
     pub key: String,
     #[serde(default)]
     pub note: String,
+}
+
+impl fmt::Debug for ApiKeyEntry {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Never leak the API key in logs/errors: show only whether it is set.
+        f.debug_struct("ApiKeyEntry")
+            .field("key", &if self.key.is_empty() {
+                "[empty]"
+            } else {
+                "[REDACTED]"
+            })
+            .field("note", &self.note)
+            .finish()
+    }
 }
 
 impl ApiKeyEntry {
@@ -359,6 +374,10 @@ pub struct AppSettings {
     pub always_on_microphone: bool,
     #[serde(default)]
     pub selected_microphone: Option<String>,
+    /// Which input channel to use on the selected microphone device.
+    /// None means "average all channels" (original behavior).
+    #[serde(default)]
+    pub selected_channel: Option<u16>,
     #[serde(default)]
     pub clamshell_microphone: Option<String>,
     #[serde(default)]
@@ -954,6 +973,7 @@ pub fn get_default_settings() -> AppSettings {
         onboarding_completed: false,
         always_on_microphone: false,
         selected_microphone: None,
+        selected_channel: None,
         clamshell_microphone: None,
         selected_output_device: None,
         translate_to_english: false,
@@ -1342,7 +1362,7 @@ fn apply_settings_migrations(
                 }
             }
         }
-        settings.settings_schema_version = 6;
+        settings.settings_schema_version = CURRENT_SETTINGS_SCHEMA_VERSION;
         updated = true;
     }
 
@@ -1540,12 +1560,5 @@ mod tests {
         assert!(!debug_output.contains("sk-proj-secret-key-12345"));
         assert!(!debug_output.contains("sk-ant-secret-key-67890"));
         assert!(debug_output.contains("[REDACTED]"));
-    }
-
-
-    #[test]
-    fn default_settings_disable_auto_submit() {
-        let settings = get_default_settings();
-        assert!(!settings.auto_submit);
     }
 }

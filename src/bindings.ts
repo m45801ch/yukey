@@ -428,20 +428,20 @@ async updateCustomWords(words: string[]) : Promise<Result<null, string>> {
  * Temporarily unregister a binding while the user is editing it in the UI.
  * This avoids firing the action while keys are being recorded.
  */
-async suspendBinding(id: string) : Promise<Result<null, string>> {
+async suspendAllBindings() : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("suspend_binding", { id }) };
+    return { status: "ok", data: await TAURI_INVOKE("suspend_all_bindings") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
 /**
- * Re-register the binding after the user has finished editing.
+ * Re-register all bindings after the user has finished recording.
  */
-async resumeBinding(id: string) : Promise<Result<null, string>> {
+async resumeAllBindings() : Promise<Result<null, string>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("resume_binding", { id }) };
+    return { status: "ok", data: await TAURI_INVOKE("resume_all_bindings") };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -914,6 +914,22 @@ async setMicrophoneGainValue(value: number) : Promise<Result<null, string>> {
     else return { status: "error", error: e  as any };
 }
 },
+async getMicrophoneChannels(deviceName: string) : Promise<Result<number, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_microphone_channels", { deviceName }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setSelectedChannel(channel: number | null) : Promise<Result<null, string>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_selected_channel", { channel }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async setModelUnloadTimeout(timeout: ModelUnloadTimeout) : Promise<void> {
     await TAURI_INVOKE("set_model_unload_timeout", { timeout });
 },
@@ -1106,7 +1122,7 @@ settings_schema_version?: number; bindings: Partial<{ [key in string]: ShortcutB
  * upgrading from before this key existed are blanked by the migration so they
  * see the current release's notes — see `apply_settings_migrations`.
  */
-whats_new_last_seen_version?: string; selected_model?: string; onboarding_completed?: boolean; always_on_microphone?: boolean; selected_microphone?: string | null; clamshell_microphone?: string | null; selected_output_device?: string | null; translate_to_english?: boolean; translate_target_language?: string; translate_using_llm?: boolean; selected_language?: string; overlay_position?: OverlayPosition; debug_mode?: boolean; log_level?: LogLevel; custom_words?: string[]; model_unload_timeout?: ModelUnloadTimeout; word_correction_threshold?: number; history_limit?: number; audio_history_limit?: number; recording_retention_period?: RecordingRetentionPeriod; paste_method?: PasteMethod; clipboard_handling?: ClipboardHandling; auto_submit?: boolean; auto_submit_key?: AutoSubmitKey; post_process_enabled?: boolean; post_process_provider_id?: string; post_process_providers?: PostProcessProvider[]; post_process_api_key_list?: Partial<{ [key in string]: ApiKeyEntry[] }>; post_process_api_key_index?: Partial<{ [key in string]: number }>; post_process_api_key_daily_usage?: Partial<{ [key in string]: number[] }>; post_process_api_key_last_reset?: Partial<{ [key in string]: string }>; post_process_models?: Partial<{ [key in string]: string }>; post_process_auto_switch_model_enabled?: boolean; post_process_auto_switch_model_threshold?: number; post_process_prompts?: LLMPrompt[]; post_process_selected_prompt_id?: string | null; mute_while_recording?: boolean; append_trailing_space?: boolean; app_language?: string; experimental_enabled?: boolean; lazy_stream_close?: boolean; keyboard_implementation?: KeyboardImplementation; show_tray_icon?: boolean; paste_delay_ms?: number; paste_delay_after_ms?: number; typing_tool?: TypingTool; external_script_path: string | null; custom_filler_words?: string[] | null; transcribe_accelerator?: TranscribeAcceleratorSetting; ort_accelerator?: OrtAcceleratorSetting; transcribe_gpu_device?: number; extra_recording_buffer_ms?: number; vad_enabled?: boolean; 
+whats_new_last_seen_version?: string; selected_model?: string; onboarding_completed?: boolean; always_on_microphone?: boolean; selected_microphone?: string | null; selected_channel?: number | null; clamshell_microphone?: string | null; selected_output_device?: string | null; translate_to_english?: boolean; translate_target_language?: string; translate_using_llm?: boolean; selected_language?: string; overlay_position?: OverlayPosition; debug_mode?: boolean; log_level?: LogLevel; custom_words?: string[]; model_unload_timeout?: ModelUnloadTimeout; word_correction_threshold?: number; history_limit?: number; audio_history_limit?: number; recording_retention_period?: RecordingRetentionPeriod; paste_method?: PasteMethod; clipboard_handling?: ClipboardHandling; auto_submit?: boolean; auto_submit_key?: AutoSubmitKey; post_process_enabled?: boolean; post_process_provider_id?: string; post_process_providers?: PostProcessProvider[]; post_process_api_key_list?: Partial<{ [key in string]: ApiKeyEntry[] }>; post_process_api_key_index?: Partial<{ [key in string]: number }>; post_process_api_key_daily_usage?: Partial<{ [key in string]: number[] }>; post_process_api_key_last_reset?: Partial<{ [key in string]: string }>; post_process_models?: Partial<{ [key in string]: string }>; post_process_auto_switch_model_enabled?: boolean; post_process_auto_switch_model_threshold?: number; post_process_prompts?: LLMPrompt[]; post_process_selected_prompt_id?: string | null; mute_while_recording?: boolean; append_trailing_space?: boolean; app_language?: string; experimental_enabled?: boolean; lazy_stream_close?: boolean; keyboard_implementation?: KeyboardImplementation; show_tray_icon?: boolean; paste_delay_ms?: number; paste_delay_after_ms?: number; typing_tool?: TypingTool; external_script_path: string | null; custom_filler_words?: string[] | null; transcribe_accelerator?: TranscribeAcceleratorSetting; ort_accelerator?: OrtAcceleratorSetting; transcribe_gpu_device?: number; extra_recording_buffer_ms?: number; vad_enabled?: boolean; 
 /**
  * Which recording overlay to show: None / Minimal / Live. Streaming mode is
  * not gated on this — that follows model capability. Migrated from the old

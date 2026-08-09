@@ -589,8 +589,8 @@ pub fn run(cli_args: CliArgs) {
             shortcut::delete_post_process_prompt,
             shortcut::set_post_process_selected_prompt,
             shortcut::update_custom_words,
-            shortcut::suspend_binding,
-            shortcut::resume_binding,
+            shortcut::suspend_all_bindings,
+            shortcut::resume_all_bindings,
             shortcut::change_mute_while_recording_setting,
             shortcut::change_append_trailing_space_setting,
             shortcut::change_lazy_stream_close_setting,
@@ -648,6 +648,8 @@ pub fn run(cli_args: CliArgs) {
             commands::audio::set_clamshell_microphone,
             commands::audio::get_clamshell_microphone,
             commands::audio::is_recording,
+            commands::audio::get_microphone_channels,
+            commands::audio::set_selected_channel,
             commands::audio::set_microphone_gain_enabled,
             commands::audio::set_microphone_gain_value,
             commands::transcription::set_model_unload_timeout,
@@ -838,7 +840,7 @@ pub fn run(cli_args: CliArgs) {
                     .inner_size(1226.0, 800.0)
                     .min_inner_size(1226.0, 800.0)
                     .resizable(true)
-                    .maximizable(false)
+                    .maximizable(true)
                     .visible(false);
 
             if let Some(data_dir) = portable::data_dir() {

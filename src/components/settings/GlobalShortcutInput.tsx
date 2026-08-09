@@ -147,7 +147,7 @@ export const GlobalShortcutInput: React.FC<GlobalShortcutInputProps> = ({
             toast.error(t("settings.general.shortcut.errors.restore"));
           }
         } else if (editingShortcutId) {
-          commands.resumeBinding(editingShortcutId).catch(console.error);
+          commands.resumeAllBindings().catch(console.error);
         }
         setEditingShortcutId(null);
         setKeyPressed([]);
@@ -181,7 +181,7 @@ export const GlobalShortcutInput: React.FC<GlobalShortcutInputProps> = ({
     if (editingShortcutId === id) return; // Already editing this shortcut
 
     // Suspend current binding to avoid firing while recording
-    await commands.suspendBinding(id).catch(console.error);
+    await commands.suspendAllBindings().catch(console.error);
 
     // Store the original binding to restore if canceled
     setOriginalBinding(bindings[id]?.current_binding || "");
