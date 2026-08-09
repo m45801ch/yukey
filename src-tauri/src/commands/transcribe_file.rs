@@ -219,7 +219,7 @@ pub fn transcribe_queue(
         const CHUNK_SEC: usize = 60;
         let sample_rate = 16000usize;
         let chunk_samples = CHUNK_SEC * sample_rate;
-        let total_chunks = (samples.len() + chunk_samples - 1) / chunk_samples;
+        let total_chunks = samples.len().div_ceil(chunk_samples);
 
         info!(
             "Transcribing '{}': {} samples, {} seconds, {} chunks",

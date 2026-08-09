@@ -25,14 +25,6 @@ impl Default for CurrentTrayIconState {
 }
 
 impl CurrentTrayIconState {
-    pub fn get(&self) -> TrayIconState {
-        match self.current.load(Ordering::Relaxed) {
-            0 => TrayIconState::Idle,
-            1 => TrayIconState::Recording,
-            _ => TrayIconState::Transcribing,
-        }
-    }
-
     pub fn set(&self, state: TrayIconState) {
         self.current.store(state as u32, Ordering::Relaxed);
     }
@@ -149,13 +141,6 @@ pub fn change_tray_icon(app: &AppHandle, icon: TrayIconState) {
         icon_elapsed,
         menu_started.elapsed()
     );
-}
-
-/// Re-applies the last known tray state — for when only the *theme* changed
-/// and the state itself (idle/recording/transcribing) should be preserved.
-pub fn refresh_tray_icon(app: &AppHandle) {
-    let icon = app.state::<CurrentTrayIconState>().get();
-    change_tray_icon(app, icon);
 }
 
 pub fn tray_tooltip() -> String {

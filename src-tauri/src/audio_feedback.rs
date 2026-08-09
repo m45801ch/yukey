@@ -36,7 +36,7 @@ fn resolve_sound_path(
     };
 
     // Fallback for custom sound files that might not exist yet
-    if resolved.as_ref().map_or(true, |p| !p.exists()) {
+    if resolved.as_ref().is_none_or(|p| !p.exists()) {
         match sound_type {
             SoundType::AiStart | SoundType::TranslateStart | SoundType::PostProcessStart => {
                 resolve_sound_path(app, settings, SoundType::Start)
