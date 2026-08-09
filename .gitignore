@@ -64,3 +64,6 @@ docs/superpowers/
 # Helper scripts
 _add_*.py
 _check_*.py
+
+tauri-dev.log
+tauri-dev.log.err
