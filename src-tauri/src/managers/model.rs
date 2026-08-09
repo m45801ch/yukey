@@ -4,17 +4,17 @@ use super::model_capabilities::{
 use crate::settings::{get_settings, write_settings};
 use anyhow::Result;
 use flate2::read::GzDecoder;
-use futures_util::StreamExt;
 use hf_hub::api::tokio::{ApiBuilder, CancellationToken, Progress};
 use hf_hub::{Cache, Repo, RepoType};
 use log::{debug, info, warn};
+use model_download::{DownloadConfig, DownloadOutcome, ProgressReporter, VerificationPhase};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use specta::Type;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
@@ -270,6 +270,53 @@ pub struct DownloadProgress {
     pub downloaded: u64,
     pub total: u64,
     pub percentage: f64,
+}
+
+/// Bridges the `model-download` crate's progress callbacks to the app's
+/// `model-download-progress` event, throttled to 10/sec like the inline
+/// loop it replaces.
+struct UrlDownloadReporter {
+    app: AppHandle,
+    model_id: String,
+    last_emit: Mutex<Instant>,
+}
+
+impl UrlDownloadReporter {
+    fn new(app: AppHandle, model_id: String) -> Self {
+        Self {
+            app,
+            model_id,
+            last_emit: Mutex::new(Instant::now()),
+        }
+    }
+}
+
+impl ProgressReporter for UrlDownloadReporter {
+    fn on_progress(&self, downloaded: u64, total: Option<u64>) {
+        let total = total.unwrap_or(0);
+        let percentage = if total > 0 {
+            (downloaded as f64 / total as f64) * 100.0
+        } else {
+            0.0
+        };
+        let mut last = self.last_emit.lock().unwrap();
+        if last.elapsed() >= Duration::from_millis(100) {
+            let progress = DownloadProgress {
+                model_id: self.model_id.clone(),
+                downloaded,
+                total,
+                percentage,
+            };
+            let _ = self.app.emit("model-download-progress", &progress);
+            *last = Instant::now();
+        }
+    }
+
+    fn on_source_switch(&self, _source_index: usize, url: &str, reason: &str) {
+        warn!("Download source {url} failed ({reason}), trying next mirror");
+    }
+
+    fn on_verification(&self, _phase: VerificationPhase) {}
 }
 
 /// Resolve a Hugging Face model file in the shared HF cache, if already present.
@@ -1860,15 +1907,15 @@ impl ModelManager {
             return Ok(());
         }
 
-        // Check if we have a partial download to resume
-        let mut resume_from = if partial_path.exists() {
+        // Check if we have a partial download to resume. The model-download
+        // crate re-derives the offset from the partial file itself; we only
+        // log the intent here.
+        if partial_path.exists() {
             let size = partial_path.metadata()?.len();
             info!("Resuming download of model {} from byte {}", model_id, size);
-            size
         } else {
             info!("Starting fresh download of model {} from {}", model_id, url);
-            0
-        };
+        }
 
         // Mark as downloading
         {
@@ -1894,147 +1941,27 @@ impl ModelManager {
             disarmed: false,
         };
 
-        // Create HTTP client with range request for resuming
-        let client = reqwest::Client::new();
-        let mut request = client.get(&url);
-
-        if resume_from > 0 {
-            request = request.header("Range", format!("bytes={}-", resume_from));
-        }
-
-        let mut response = request.send().await?;
-
-        // If we tried to resume but server returned 200 (not 206 Partial Content),
-        // the server doesn't support range requests. Delete partial file and restart
-        // fresh to avoid file corruption (appending full file to partial).
-        if resume_from > 0 && response.status() == reqwest::StatusCode::OK {
-            warn!(
-                "Server doesn't support range requests for model {}, restarting download",
-                model_id
-            );
-            drop(response);
-            let _ = fs::remove_file(&partial_path);
-
-            // Reset resume_from since we're starting fresh
-            resume_from = 0;
-
-            // Restart download without range header
-            response = client.get(&url).send().await?;
-        }
-
-        // Check for success or partial content status
-        if !response.status().is_success()
-            && response.status() != reqwest::StatusCode::PARTIAL_CONTENT
-        {
-            return Err(anyhow::anyhow!(
-                "Failed to download model: HTTP {}",
-                response.status()
-            ));
-        }
-
-        let total_size = if resume_from > 0 {
-            // For resumed downloads, add the resume point to content length
-            resume_from + response.content_length().unwrap_or(0)
-        } else {
-            response.content_length().unwrap_or(0)
+        // Use the model-download crate for a hardened transport: stall
+        // watchdog, retry backoff, EOF-completeness check, and a cancel path
+        // that keeps the partial file for later resume. SHA256 verification
+        // stays below so its events and error messages are unchanged.
+        let reporter = UrlDownloadReporter::new(self.app_handle.clone(), model_id.to_string());
+        let md_req = model_download::DownloadRequest {
+            urls: vec![url],
+            dest: partial_path.clone(),
+            expected_sha256: None, // verification happens below, unchanged
         };
-
-        let mut downloaded = resume_from;
-        let mut stream = response.bytes_stream();
-
-        // Open file for appending if resuming, or create new if starting fresh
-        let mut file = if resume_from > 0 {
-            std::fs::OpenOptions::new()
-                .create(true)
-                .append(true)
-                .open(&partial_path)?
-        } else {
-            std::fs::File::create(&partial_path)?
-        };
-
-        // Emit initial progress
-        let initial_progress = DownloadProgress {
-            model_id: model_id.to_string(),
-            downloaded,
-            total: total_size,
-            percentage: if total_size > 0 {
-                (downloaded as f64 / total_size as f64) * 100.0
-            } else {
-                0.0
-            },
-        };
-        let _ = self
-            .app_handle
-            .emit("model-download-progress", &initial_progress);
-
-        // Throttle progress events to max 10/sec (100ms intervals)
-        let mut last_emit = Instant::now();
-        let throttle_duration = Duration::from_millis(100);
-
-        // Download with progress
-        while let Some(chunk) = stream.next().await {
-            // Check if download was cancelled
-            if cancel_token.is_cancelled() {
-                drop(file);
+        let md_cfg = DownloadConfig::default();
+        match model_download::download(&md_req, &md_cfg, &reporter, &cancel_token).await {
+            Ok(DownloadOutcome::Completed) => {}
+            Ok(DownloadOutcome::Cancelled) => {
+                // User cancelled. Keep the partial file for resume; the guard
+                // resets is_downloading and cancel_flags on drop.
                 info!("Download cancelled for: {}", model_id);
-                // Keep partial file for resume functionality.
-                // Guard handles is_downloading + cancel_flags cleanup on drop.
                 return Ok(());
             }
-
-            let chunk = chunk?;
-
-            file.write_all(&chunk)?;
-            downloaded += chunk.len() as u64;
-
-            let percentage = if total_size > 0 {
-                (downloaded as f64 / total_size as f64) * 100.0
-            } else {
-                0.0
-            };
-
-            // Emit progress event (throttled to avoid UI freeze)
-            if last_emit.elapsed() >= throttle_duration {
-                let progress = DownloadProgress {
-                    model_id: model_id.to_string(),
-                    downloaded,
-                    total: total_size,
-                    percentage,
-                };
-                let _ = self.app_handle.emit("model-download-progress", &progress);
-                last_emit = Instant::now();
-            }
-        }
-
-        // Emit final progress to ensure 100% is shown
-        let final_progress = DownloadProgress {
-            model_id: model_id.to_string(),
-            downloaded,
-            total: total_size,
-            percentage: if total_size > 0 {
-                (downloaded as f64 / total_size as f64) * 100.0
-            } else {
-                100.0
-            },
-        };
-        let _ = self
-            .app_handle
-            .emit("model-download-progress", &final_progress);
-
-        file.flush()?;
-        drop(file); // Ensure file is closed before moving
-
-        // Verify downloaded file size matches expected size
-        if total_size > 0 {
-            let actual_size = partial_path.metadata()?.len();
-            if actual_size != total_size {
-                // Download is incomplete/corrupted - delete partial and return error
-                let _ = fs::remove_file(&partial_path);
-                return Err(anyhow::anyhow!(
-                    "Download incomplete: expected {} bytes, got {} bytes",
-                    total_size,
-                    actual_size
-                ));
+            Err(e) => {
+                return Err(anyhow::anyhow!("Failed to download model: {}", e));
             }
         }
 
