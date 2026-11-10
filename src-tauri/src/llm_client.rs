@@ -150,6 +150,15 @@ async fn send_anthropic_message(
         .await
         .map_err(|e| report_reqwest_error("Failed to parse API response", &e))?;
 
+    // A response cut off at the token budget is incomplete; pasting it would
+    // silently drop the end of the dictation.
+    if completion.stop_reason.as_deref() == Some("max_tokens") {
+        return Err(format!(
+            "Response was truncated at the {} token limit",
+            ANTHROPIC_MAX_TOKENS
+        ));
+    }
+
     Ok(completion.into_text())
 }
 
@@ -542,4 +551,92 @@ pub async fn fetch_models(
     }
 
     Ok(models)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn provider(api_format: PostProcessApiFormat) -> PostProcessProvider {
+        PostProcessProvider {
+            id: "custom".to_string(),
+            label: "Custom".to_string(),
+            base_url: "https://example.com/v1".to_string(),
+            allow_base_url_edit: true,
+            models_endpoint: None,
+            supports_structured_output: false,
+            api_format,
+        }
+    }
+
+    #[test]
+    fn anthropic_format_uses_api_key_headers() {
+        let headers = build_headers(&provider(PostProcessApiFormat::Anthropic), "key").unwrap();
+        assert_eq!(headers.get("x-api-key").unwrap(), "key");
+        assert_eq!(
+            headers.get("anthropic-version").unwrap(),
+            "2023-06-01"
+        );
+        assert!(headers.get("authorization").is_none());
+    }
+
+    #[test]
+    fn openai_format_uses_bearer_header() {
+        let headers = build_headers(&provider(PostProcessApiFormat::OpenAI), "key").unwrap();
+        assert_eq!(headers.get("authorization").unwrap(), "Bearer key");
+        assert!(headers.get("x-api-key").is_none());
+    }
+
+    #[test]
+    fn anthropic_response_keeps_only_text_blocks() {
+        let response: AnthropicMessagesResponse = serde_json::from_str(
+            r#"{
+                "content": [
+                    { "type": "text", "text": "Hello" },
+                    { "type": "thinking", "thinking": "ignored" }
+                ],
+                "stop_reason": "end_turn"
+            }"#,
+        )
+        .unwrap();
+        assert_eq!(response.into_text().as_deref(), Some("Hello"));
+    }
+
+    #[test]
+    fn anthropic_response_without_text_is_empty() {
+        let response: AnthropicMessagesResponse = serde_json::from_str(
+            r#"{
+                "content": [{ "type": "thinking", "thinking": "ignored" }],
+                "stop_reason": "end_turn"
+            }"#,
+        )
+        .unwrap();
+        assert_eq!(response.into_text(), None);
+    }
+
+    #[test]
+    fn anthropic_truncation_is_detected() {
+        let response: AnthropicMessagesResponse = serde_json::from_str(
+            r#"{
+                "content": [{ "type": "text", "text": "cut off" }],
+                "stop_reason": "max_tokens"
+            }"#,
+        )
+        .unwrap();
+        assert_eq!(response.stop_reason.as_deref(), Some("max_tokens"));
+    }
+
+    #[test]
+    fn openai_truncation_is_detected() {
+        let completion: ChatCompletionResponse = serde_json::from_str(
+            r#"{
+                "choices": [
+                    { "message": { "content": "cut off" }, "finish_reason": "length" }
+                ]
+            }"#,
+        )
+        .unwrap();
+        let choice = completion.choices.into_iter().next().unwrap();
+        assert_eq!(choice.finish_reason.as_deref(), Some("length"));
+    }
 }
