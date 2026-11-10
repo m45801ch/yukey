@@ -131,9 +131,7 @@ winreg = "0.55"
 [target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
 # NOTE: requires Vulkan SDK installed or VULKAN_SDK env var set.
 #       Fall back to CPU-only by changing "vulkan" to an empty features list.
-# TEMP (local test build): CPU-only, because ggml-vulkan's shader generator
-# deadlocks on this machine. Revert to ["vulkan"] before any real build.
-transcribe-cpp = { version = "0.1.0", default-features = false, features = [] }
+transcribe-cpp = { version = "0.1.0", default-features = false, features = ["vulkan"] }
 
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies]
 transcribe-cpp = { version = "0.1.0", default-features = false }
