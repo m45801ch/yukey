@@ -73,7 +73,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY5MTVCRDM5MUQxMzY5MUUKUldRZWFSTWRPYjBWYVYrNTJqSnhLcGJjWlNxK04rVDRRWVhLME80Rm5ILzJzTUtvazJPODRCbGEK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1vbmlzaWduIHB1YmxpYyBrZXk6IDA1MENGNTdFMEEwOUU1NDIKUldSQzVRa0tmdlVNQmFRYzdSVGR5ajU3OEtENCtwNTVEUDJCK0NaeThmS0Fvb2dUN2NtbG1CMnAK",
       "endpoints": [
         "https://github.com/m45801ch/yukey/releases/latest/download/latest.json"
       ]

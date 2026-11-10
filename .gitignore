@@ -67,3 +67,7 @@ _check_*.py
 
 tauri-dev.log
 tauri-dev.log.err
+
+# Updater signing keys (never commit these)
+private.key
+*.key
