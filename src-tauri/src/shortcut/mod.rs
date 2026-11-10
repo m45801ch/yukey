@@ -23,8 +23,8 @@ use tauri_plugin_autostart::ManagerExt;
 use crate::settings::APPLE_INTELLIGENCE_DEFAULT_MODEL_ID;
 use crate::settings::{
     self, get_settings, AutoSubmitKey, ClipboardHandling, KeyboardImplementation, LLMPrompt,
-    OverlayPosition, OverlayStyle, PasteMethod, PostProcessProvider, ShortcutBinding, SoundTheme,
-    TypingTool, APPLE_INTELLIGENCE_PROVIDER_ID,
+    OverlayPosition, OverlayStyle, PasteMethod, PostProcessApiFormat, PostProcessProvider,
+    ShortcutBinding, SoundTheme, TypingTool, APPLE_INTELLIGENCE_PROVIDER_ID,
 };
 use crate::tray;
 
@@ -1429,6 +1429,7 @@ pub async fn test_post_process_connection(
         allow_base_url_edit: false,
         models_endpoint: None,
         supports_structured_output: false,
+        api_format: PostProcessApiFormat::OpenAI,
     };
     crate::llm_client::test_connection(&provider, api_key).await
 }

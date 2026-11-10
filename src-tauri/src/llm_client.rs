@@ -1,4 +1,4 @@
-use crate::settings::PostProcessProvider;
+use crate::settings::{PostProcessApiFormat, PostProcessProvider};
 use log::{debug, error};
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, CONTENT_TYPE, REFERER, USER_AGENT};
 use serde::{Deserialize, Serialize};
@@ -54,11 +54,103 @@ struct ChatCompletionResponse {
 #[derive(Debug, Deserialize)]
 struct ChatChoice {
     message: ChatMessageResponse,
+    finish_reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 struct ChatMessageResponse {
     content: Option<String>,
+}
+
+/// Output budget for Anthropic Messages requests, where `max_tokens` is
+/// required. Ample for a cleaned-up dictation.
+const ANTHROPIC_MAX_TOKENS: u32 = 4096;
+
+#[derive(Debug, Serialize)]
+struct AnthropicMessagesRequest {
+    model: String,
+    max_tokens: u32,
+    messages: Vec<ChatMessage>,
+}
+
+#[derive(Debug, Deserialize)]
+struct AnthropicMessagesResponse {
+    content: Vec<AnthropicContentBlock>,
+    stop_reason: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(tag = "type", rename_all = "lowercase")]
+enum AnthropicContentBlock {
+    Text { text: String },
+    /// Thinking and any other non-text blocks
+    #[serde(other)]
+    Other,
+}
+
+impl AnthropicMessagesResponse {
+    fn into_text(self) -> Option<String> {
+        let text: String = self
+            .content
+            .into_iter()
+            .filter_map(|block| match block {
+                AnthropicContentBlock::Text { text } => Some(text),
+                AnthropicContentBlock::Other => None,
+            })
+            .collect();
+        (!text.is_empty()).then_some(text)
+    }
+}
+
+/// Send a single-prompt request to an Anthropic Messages API (`/messages`).
+/// Used by every provider with the Anthropic format (the built-in Anthropic
+/// provider and a custom provider set to it). None of them use structured
+/// output, and thinking is off unless requested, so no reasoning fields are
+/// needed.
+async fn send_anthropic_message(
+    provider: &PostProcessProvider,
+    api_key: String,
+    model: &str,
+    prompt: String,
+) -> Result<Option<String>, String> {
+    let base_url = provider.base_url.trim_end_matches('/');
+    let url = format!("{}/messages", base_url);
+
+    debug!("Sending Anthropic message request to: {}", sanitized_url_for_log(&url));
+
+    let client = create_client(provider, &api_key)?;
+
+    let request_body = AnthropicMessagesRequest {
+        model: model.to_string(),
+        max_tokens: ANTHROPIC_MAX_TOKENS,
+        messages: vec![ChatMessage {
+            role: "user".to_string(),
+            content: prompt,
+        }],
+    };
+
+    let response = client
+        .post(&url)
+        .json(&request_body)
+        .send()
+        .await
+        .map_err(|e| report_reqwest_error("HTTP request failed", &e))?;
+
+    let status = response.status();
+    if !status.is_success() {
+        let error_text = response
+            .text()
+            .await
+            .unwrap_or_else(|e| report_reqwest_error("Failed to read error response", &e));
+        return Err(format!("API request failed with status {}: {}", status, error_text));
+    }
+
+    let completion: AnthropicMessagesResponse = response
+        .json()
+        .await
+        .map_err(|e| report_reqwest_error("Failed to parse API response", &e))?;
+
+    Ok(completion.into_text())
 }
 
 /// Build headers for API requests based on provider type
@@ -79,19 +171,25 @@ fn build_headers(provider: &PostProcessProvider, api_key: &str) -> Result<Header
 
     // Provider-specific auth headers
     if !api_key.is_empty() {
-        if provider.id == "anthropic" {
-            headers.insert(
-                "x-api-key",
-                HeaderValue::from_str(api_key)
-                    .map_err(|e| format!("Invalid API key header value: {}", e))?,
-            );
-            headers.insert("anthropic-version", HeaderValue::from_static("2023-06-01"));
-        } else {
-            headers.insert(
-                AUTHORIZATION,
-                HeaderValue::from_str(&format!("Bearer {}", api_key))
-                    .map_err(|e| format!("Invalid authorization header value: {}", e))?,
-            );
+        match provider.api_format {
+            PostProcessApiFormat::Anthropic => {
+                headers.insert(
+                    "x-api-key",
+                    HeaderValue::from_str(api_key)
+                        .map_err(|e| format!("Invalid API key header value: {}", e))?,
+                );
+                headers.insert(
+                    "anthropic-version",
+                    HeaderValue::from_static("2023-06-01"),
+                );
+            }
+            PostProcessApiFormat::OpenAI => {
+                headers.insert(
+                    AUTHORIZATION,
+                    HeaderValue::from_str(&format!("Bearer {}", api_key))
+                        .map_err(|e| format!("Invalid authorization header value: {}", e))?,
+                );
+            }
         }
     }
 
@@ -261,6 +359,19 @@ pub async fn send_chat_completion_with_schema(
     reasoning: Option<ReasoningConfig>,
 ) -> Result<Option<String>, String> {
     let base_url = provider.base_url.trim_end_matches('/');
+
+    // Anthropic Messages API uses a different endpoint / auth shape and does
+    // not support structured output; route those providers there.
+    if provider.api_format == PostProcessApiFormat::Anthropic {
+        return send_anthropic_message(
+            provider,
+            api_key,
+            model,
+            user_content,
+        )
+        .await;
+    }
+
     let url = format!("{}/chat/completions", base_url);
 
     debug!("Sending chat completion request to: {}", sanitized_url_for_log(&url));
@@ -327,10 +438,18 @@ pub async fn send_chat_completion_with_schema(
         .await
         .map_err(|e| report_reqwest_error("Failed to parse API response", &e))?;
 
-    Ok(completion
-        .choices
-        .first()
-        .and_then(|choice| choice.message.content.clone()))
+    let Some(choice) = completion.choices.into_iter().next() else {
+        return Ok(None);
+    };
+
+    // A response cut off at the provider's output limit is incomplete; pasting
+    // it would silently drop the end of the dictation (or, for structured
+    // output, paste unparseable JSON).
+    if choice.finish_reason.as_deref() == Some("length") {
+        return Err("Response was truncated at the provider's output token limit".to_string());
+    }
+
+    Ok(choice.message.content)
 }
 
 /// Test an API connection by hitting the models endpoint

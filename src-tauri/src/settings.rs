@@ -139,11 +139,26 @@ impl<'de> Deserialize<'de> for ApiKeyEntry {
     }
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, Type)]
+#[serde(rename_all = "snake_case")]
+pub enum PostProcessApiFormat {
+    OpenAI,
+    Anthropic,
+}
+
+impl Default for PostProcessApiFormat {
+    fn default() -> Self {
+        PostProcessApiFormat::OpenAI
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Type)]
 pub struct PostProcessProvider {
     pub id: String,
     pub label: String,
     pub base_url: String,
+    #[serde(default)]
+    pub api_format: PostProcessApiFormat,
     #[serde(default)]
     pub allow_base_url_edit: bool,
     #[serde(default)]
@@ -657,6 +672,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         },
         PostProcessProvider {
             id: "google".to_string(),
@@ -665,6 +681,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         },
         PostProcessProvider {
             id: "anthropic".to_string(),
@@ -673,6 +690,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: false,
+            api_format: PostProcessApiFormat::Anthropic,
         },
         PostProcessProvider {
             id: "openrouter".to_string(),
@@ -681,6 +699,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         },
         PostProcessProvider {
             id: "groq".to_string(),
@@ -689,6 +708,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: false,
+            api_format: PostProcessApiFormat::OpenAI,
         },
         PostProcessProvider {
             id: "cerebras".to_string(),
@@ -697,6 +717,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         },
         PostProcessProvider {
             id: "zai".to_string(),
@@ -705,6 +726,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: Some("/models".to_string()),
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         },
     ];
 
@@ -721,6 +743,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
             allow_base_url_edit: false,
             models_endpoint: None,
             supports_structured_output: true,
+            api_format: PostProcessApiFormat::OpenAI,
         });
     }
 
@@ -732,6 +755,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
         allow_base_url_edit: false,
         models_endpoint: Some("/models".to_string()),
         supports_structured_output: true,
+        api_format: PostProcessApiFormat::OpenAI,
     });
 
     // Custom provider always comes last
@@ -742,6 +766,7 @@ fn default_post_process_providers() -> Vec<PostProcessProvider> {
         allow_base_url_edit: true,
         models_endpoint: Some("/models".to_string()),
         supports_structured_output: false,
+        api_format: PostProcessApiFormat::OpenAI,
     });
 
     providers
