@@ -1,1 +1,1001 @@
-{  "tray": {    "settings": "Indstillinger...",    "checkUpdates": "Tjek for opdateringer...",    "copyLastTranscript": "Kopiér seneste transskription",    "unloadModel": "Frigør model",    "model": "Model",    "quit": "Afslut",    "cancel": "Annuller",    "secureInputWarning": "⚠ Genveje blokeret af Secure Input",    "language": "Sprog",    "autoLanguage": "Automatisk",    "otherLanguages": "Andre sprog"  },  "sidebar": {    "general": "Generelt",    "models": "Modeller",    "advanced": "Avanceret",    "postProcessing": "Efterbehandling",    "history": "Historik",    "debug": "Fejlfinding",    "about": "Om"  },  "onboarding": {    "customModelDescription": "Ikke officielt understøttet",    "migration": {      "title": "Dine modeller skal opdateres",      "description": "Handy bruger nu en nyere type model. Download den nye version for at fortsætte med at transskribere. Gamle versioner vil blive fjernet.",      "replaces": "Erstatter {{name}}",      "oldFormat": "Gammelt format",      "failed": "Download mislykkedes",      "retry": "Prøv igen",      "chooseAnother": "Vælg en anden model",      "download": "Download modeller ({{size}})",      "continue": "Fortsæt"    },    "models": {      "small": {        "name": "Whisper Small",        "description": "Hurtig og ret nøjagtig."      },      "medium": {        "name": "Whisper Medium",        "description": "God nøjagtighed, middel hastighed"      },      "turbo": {        "name": "Whisper Turbo",        "description": "Afbalanceret nøjagtighed og hastighed."      },      "large": {        "name": "Whisper Large",        "description": "God nøjagtighed, men langsom."      },      "breeze-asr": {        "name": "Breeze ASR",        "description": "Optimeret til taiwansk mandarin. Understøtter kodeskift."      }    },    "errors": {      "selectModel": "Kunne ikke vælge model"    },    "permissions": {      "microphone": {        "name": "Mikrofon",        "why": "Så Handy kan høre dig. Lyd bliver omdannet til tekst på denne computer og uploades aldrig."      },      "accessibility": {        "name": "Hjælpemidler",        "why": "Så din genvej virker i alle apps, og Handy kan skrive teksten dér, hvor din markør er."      },      "errors": {        "checkFailed": "Kunne ikke tjekke tilladelser. Prøv igen.",        "requestFailed": "Kunne ikke anmode om tilladelse. Prøv igen."      },      "titleMac": "To tilladelser, så er du klar",      "titleWindows": "Én tilladelse, så er du klar",      "subtitleMac": "macOS spørger, før en app må lytte eller skrive.",      "subtitleWindows": "Windows spørger, før en app må lytte.",      "allow": "Tillad",      "openSettings": "Åbn indstillinger",      "allowed": "Tilladt",      "waiting": "Venter",      "turnOnMac": "Slå Handy til i Systemindstillinger, og kom så tilbage hertil.",      "turnOnWindows": "Slå adgang til mikrofonen til i Windows-indstillinger, og kom så tilbage hertil.",      "hintBoth": "Tillad begge for at fortsætte",      "hintMicrophone": "Tillad mikrofonen for at fortsætte",      "welcomeBack": "Velkommen tilbage. Vi fortsætter, hvor du slap.",      "relaunch": "Reagerer genvejen ikke efter dette? <relaunch>Genstart Handy</relaunch>, så lander du lige her igen."    },    "shell": {      "back": "Tilbage",      "continue": "Fortsæt",      "progress": "Trin {{step}} af {{count}}"    },    "welcome": {      "title": "Tal i stedet for at skrive, i enhver app",      "subtitle": "Vælg de sprog, du vil diktere på",      "languagesLabel": "Sprog",      "noMatch": "Intet sprog matcher »{{query}}«. Handys modeller dækker omkring 100 sprog; flere findes i indstillingerne.",      "appLanguage": "Appens sprog",      "menusIn": "Menuer på <b>{{language}}</b>",      "chinese": {        "question": "Du taler {{languages}}. Hvilke tegn skal Handy skrive?",        "label": "Kinesiske tegn",        "zh-Hans": "Forenklet",        "zh-Hant": "Taiwan",        "zh-HK": "Hongkong"      },      "hint": {        "pickOne": "Vælg mindst ét sprog",        "weak_one": "{{languages}}: ingen model forstår det godt endnu",        "weak_other": "{{languages}}: ingen model forstår dem godt endnu"      }    },    "download": {      "checking": "Kontrollerer download…",      "ready": "{{name}} er klar",      "failed": "Download stoppede",      "downloading": "Downloader {{name}}",      "progress": "{{done}} af {{total}}",      "progressLeft": "{{done}} af {{total}}, {{time}} tilbage",      "checkingName": "Kontrollerer {{name}}",      "checkingDetail": "Sikrer, at download er fuldført",      "stopped": "Download af {{name}} stoppede",      "retryDetail": "Forsøger igen fra det sted, hvor den stoppede",      "retryDownload": "Prøv download igen",      "cardProgress": "Downloader {{percent}} %, {{done}} af {{total}}",      "timeLeft": "{{time}} tilbage",      "speedLeft": "{{speed}}, {{time}} tilbage"    },    "model": {      "title": "Vælg en talemodel",      "subtitle": "Talemodellen omdanner din tale til tekst, direkte på denne computer",      "label": "Talemodel",      "lines": {        "recommended": "Den bedste balance mellem hastighed og nøjagtighed for dine sprog",        "faster": "Hurtigere, med lidt flere fejl",        "accurate": "Færrest fejl, men langsommere"      },      "shorts": {        "recommended": "Bedste balance for dig",        "faster": "Hurtigere, lidt flere fejl",        "accurate": "Færrest fejl, men langsommere"      },      "model": "Model",      "showAll": "Vis alle {{count}} modeller",      "download": "Download {{size}}",      "downloadInstead": "Download {{size}} i stedet",      "pauses": "{{name}} holder pause ved {{percent}} %",      "resumeLater": "Vælg den igen for at fortsætte, hvor den slap",      "hint": "Downloader, mens du gør opsætningen færdig"    },    "demo": {      "title": "Tal i enhver app med én genvej",      "hold": "<0>Klik dér, hvor du vil skrive.</0> <1>Hold din genvej nede, og tal.</1> <2>Slip, og dine ord dukker op.</2>",      "tap": "<0>Klik dér, hvor du vil skrive.</0> <1>Tryk på din genvej, og tal.</1> <2>Tryk igen, og dine ord dukker op.</2>",      "apps": {        "messages": "Beskeder",        "notes": "Noter"      },      "chat": "Kommer du stadig i aften?",      "noteTitle": "Weekendplaner",      "screenLabel": "En bærbar computer: Nogen klikker ind i en app, trykker på genvejen og taler, og ordene dukker op, hvor der blev klikket.",      "change": "Skift",      "yourShortcut": "Din genvej er",      "pressKeys": "Tryk på de nye taster",      "addKey": "Tilføj nu en tast",      "cancel": "Annuller",      "tryIt": "Prøv selv"    },    "try": {      "title": "Giv det et forsøg!",      "subtitle": "Handy er i hjørnet og hjælper dig igennem",      "noteLabel": "Note",      "placeholder": "Ny note",      "hold": "Hold <keys/> nede, og tal.",      "tapNext": "Tryk nu på <keys/> én gang, og tal.",      "letGo": "Slip <keys/>, når du er færdig.",      "tapAgain": "Tryk på <keys/> igen, når du er færdig.",      "watch": "Se på noten.",      "changeKeys": "Skift din genvej, {{keys}}",      "doneHold": "Highfive! Det var at holde nede.",      "doneHoldNext": "Nu til den håndfri måde.",      "doneTap": "Highfive! Det var at trykke.",      "doneTapNext": "Prøv nu at holde dem nede, mens du taler.",      "giveFive": "Du fik det til! Highfive",      "highFive": "Highfive",      "slowLine": "{{name}} brugte {{wait}} på denne computer. <faster>Prøv en hurtigere model</faster>",      "nothingTyped": "Hmm, der kom ikke noget.",      "nothingTypedSub": "Klik først ind i noten, og prøv så igen.",      "silent": "Jeg hørte ingenting.",      "silentSub": "Der kom ingen lyd fra denne mikrofon. Prøv en anden:",      "noWords": "Jeg fangede ingen ord.",      "noWordsSub": "Prøv igen, og sig en hel sætning.",      "finish": "Afslut",      "skip": "Spring over",      "seconds": "{{value}} sek."    },    "done": {      "title": "Så er du klar",      "subMac": "Handy ligger nu i din menulinje. Hold eller tryk på <keys/> i en vilkårlig app for at tale.",      "subTray": "Handy ligger nu i dit meddelelsesområde. Hold eller tryk på <keys/> i en vilkårlig app for at tale.",      "hint": "Du kan ændre disse senere i Indstillinger",      "highFiveLabel": "Highfive",      "atLogin": "Start Handy, når jeg logger ind",      "finish": "Færdig",      "panel": {        "name": "Handy",        "ready": "Klar",        "languages": "Sprog",        "model": "Talemodel",        "shortcut": "Genvej",        "changeLanguages": "Skift sprog, {{languages}}",        "changeModel": "Skift talemodel, {{model}}"      }    },    "linux": {      "tryIt": "Virker det ikke? <guide>Linux-opsætningsguide</guide>",      "done": "Virker det ikke i andre apps? <guide>Linux-opsætningsguide</guide>"    }  },  "modelTable": {    "tags": {      "preview": "Live-forhåndsvisning",      "previewTitle": "Viser dine ord i Live-overlayet, mens du taler, og skriver dem, når du stopper",      "translate": "Oversætter",      "translateTitle": "Kan omdanne det, du siger, til engelsk tekst. Slå det til i indstillingerne"    },    "rubric": {      "gradeTitle": "Nøjagtighed for {{language}}: {{grade}}",      "accuracyTitle": "Nøjagtighed for {{language}}",      "overallTitle": "Nøjagtighed på dine sprog: {{grade}}",      "overall": "Nøjagtighed på dine sprog",      "meaning": {        "A": "Meget få fejl: dine ord kommer som regel ud, som du sagde dem",        "B": "Nogle fejl: regn med at rette et ord hist og her",        "C": "Hyppige fejl: nogle detaljer kan gå tabt",        "D": "Mange fejl: regn med at tjekke og rette det, der bliver skrevet",        "F": "Ofte uklar: meget af det, du siger, kan blive forkert"      },      "unsupported": "Denne model forstår ikke {{language}}, så den kan ikke skrive det",      "unrated": "Denne model forstår {{language}}, men vi har ikke målt, hvor godt endnu",      "under": "under {{max}} %",      "between": "{{min}} til {{max}} %",      "over": "{{min}} % eller mere",      "speedTitle": "Hastighed: {{speed}}",      "speedName": {        "0": "Meget langsom",        "1": "Langsom",        "2": "Middel",        "3": "Hurtig",        "4": "Meget hurtig"      },      "speedMeaning": {        "0": "Dine ord dukker op efter lang ventetid",        "1": "Dine ord dukker op efter en ventetid",        "2": "Dine ord dukker op efter kort ventetid",        "3": "Dine ord dukker op næsten med det samme",        "4": "Dine ord dukker op med det samme"      },      "speedPreview": "{{meaning}}, med live-forhåndsvisning, mens du taler",      "untimed": "Vi har ikke målt, hvor hurtig den er endnu",      "underSeconds": "under {{max}} sek.",      "betweenSeconds": "{{min}} til {{max}} sek.",      "overSeconds": "{{min}} sek. eller mere"    },    "roles": {      "recommended": "Anbefalet",      "faster": "Hurtigere",      "accurate": "Mere nøjagtig",      "fromAll": "Fra alle modeller"    },    "speed": "Hastighed",    "size": "Størrelse",    "accuracy": "Nøjagtighed",    "search": "Søg efter modeller",    "allLabel": "Talemodeller",    "noMatch": "Intet matcher »{{query}}«. Prøv et sprog eller en familie som Whisper eller Parakeet",    "noFilterMatch": "Ingen modeller matcher disse filtre",    "speedUntested": "Hastighed er ikke målt endnu",    "speedWords": {      "0": "Meget langsom, ordene dukker op efter lang ventetid",      "1": "Langsom, ordene dukker op efter en ventetid",      "2": "Middel, ordene dukker op efter kort ventetid",      "3": "Hurtig, ordene dukker op næsten med det samme",      "4": "Meget hurtig, ordene dukker op med det samme"    },    "speedWordsPreview": {      "0": "Meget langsom, med live-forhåndsvisning, mens du taler",      "1": "Langsom, med live-forhåndsvisning, mens du taler",      "2": "Middel, med live-forhåndsvisning, mens du taler",      "3": "Hurtig, med live-forhåndsvisning, mens du taler",      "4": "Meget hurtig, med live-forhåndsvisning, mens du taler"    },    "missingLanguage": "Mangler et sprog",    "allLanguages": "Alle",    "downloadingLine": "Downloader {{percent}} % af {{total}}",    "customLine": "Tilføjet fra din modelmappe. Ikke bedømt.",    "legacyLine": "En ældre download. Ikke bedømt."  },  "languagePicker": {    "search": "Søg efter sprog",    "addAnother": "Tilføj et til",    "remove": "Fjern {{language}}",    "alreadyAdded_one": "{{languages}} er allerede tilføjet.",    "alreadyAdded_other": "{{languages}} er allerede tilføjet."  },  "modelSelector": {    "custom": "Brugerdefineret",    "streaming": "Streaming",    "active": "Aktiv",    "noModelsAvailable": "Ingen modeller tilgængelige",    "verifying": "Verificerer {{modelName}}...",    "verifyingGeneric": "Verificerer...",    "downloading": "Downloader {{percentage}}%",    "downloadingMultiple": "Downloader {{count}} modeller...",    "modelReady": "Model klar",    "loading": "Indlæser {{modelName}}...",    "loadingGeneric": "Indlæser...",    "modelError": "Modelfejl",    "modelUnloaded": "Model frigjort",    "noModelDownloadRequired": "Ingen model - download påkrævet",    "downloadSpeed": "{{speed}} MB/s",    "lockedWhileTranscribing": "Du kan skifte model, når transskriberingen i Historik er færdig."  },  "settings": {    "modelSettings": {      "title": "{{model}}-indstillinger"    },    "general": {      "title": "Generelt",      "shortcut": {        "title": "Handy-genveje",        "description": "Konfigurer tastaturgenveje til at udløse tale-til-tekst-optagelse",        "loading": "Indlæser genveje...",        "none": "Ingen genveje konfigureret",        "notFound": "Genvej ikke fundet",        "pressKeys": "Tryk på ønskede taster...",        "bindings": {          "transcribe": {            "name": "Transskriptionsgenvej",            "description": "Tastaturgenvejen til at optage og transskribere din stemme."          },          "cancel": {            "name": "Annulleringsgenvej",            "description": "Tastaturgenvejen til at annullere den aktuelle optagelse."          },          "transcribe_with_post_process": {            "name": "Genvej til efterbehandling",            "description": "Valgfrit: En dedikeret genvej, der altid anvender AI-efterbehandling på din transskription."          }        },        "errors": {          "set": "Kunne ikke indstille genvej: {{error}}"        }      },      "language": {        "title": "Sprog",        "description": "Vælg sproget til talegenkendelse. Auto tyder automatisk sproget, mens valg af et specifikt sprog kan forbedre nøjagtigheden for det pågældende sprog.",        "searchPlaceholder": "Søg efter sprog...",        "noResults": "Ingen sprog fundet",        "auto": "Automatisk",        "autoUnavailable": {          "title": "Automatisk er slået fra",          "oneLanguage": "Kun ét af dine sprog virker med denne model",          "undetectable": "Ikke tilgængelig med {{languages}}",          "noMatch": "Ingen af dine sprog virker med denne model"        },        "detectorMissingTitle": "Automatisk kræver en separat download",        "detectorMissing": "Denne model kan ikke afgøre, hvilket sprog du taler. Automatisk har brug for en lille sprogregistrering til at finde ud af det",        "stopDetectorDownload": "Stop download af sprogregistreringen"      },      "preferredLanguages": {        "title": "Foretrukne sprog",        "description": "De sprog, du taler. Handy bruger dem til at anbefale modeller.",        "noMatch": "Intet sprog matcher »{{query}}«",        "weak": "Ingen model genkender {{languages}} godt endnu."      },      "shortcutActivation": {        "title": "Genvejens adfærd",        "description": "Vælg, hvordan transskriptionsgenvejen starter og stopper optagelsen.",        "options": {          "holdOrToggle": "Automatisk",          "pushToTalk": "Hold",          "toggle": "Skift"        },        "descriptions": {          "hold_or_toggle": "Hold nede for at optage, eller tryk kort for at slå til/fra",          "push_to_talk": "Optager, mens du holder genvejen nede",          "toggle": "Tryk på genvejen for at starte optagelsen, tryk igen for at stoppe"        }      }    },    "models": {      "title": "Modeller",      "changeLanguages": "Skift sprog",      "sections": {        "yours": "På denne computer",        "fits": "Til dine sprog",        "untested": "Ikke testet"      },      "untestedNote": "Ikke testet med Handy. De kan være langsommere eller lave flere fejl.",      "untestedHidden_one": "{{count}} model mere er ikke tilpasset diktering. Søg for at finde den.",      "untestedHidden_other": "{{count}} modeller mere er ikke tilpasset diktering. Søg for at finde dem.",      "emptyYours": "Ingen modeller endnu. Vælg en nedenfor: den downloades, og så bruger Handy den.",      "showMore": "Vis {{count}} flere",      "showFewer": "Vis færre",      "download": "Download og brug",      "downloadingThenUse": "{{percent}} % af {{total}}, så skiftes der",      "loading": "Indlæser…",      "deleteAsk": "Slet {{name}}? Det frigør {{size}}.",      "deleteAskActive": "Slet {{name}}? Handy kan ikke transskribere, før du vælger en anden.",      "cancel": "Annuller",      "deleteModel": "Slet {{name}}",      "cancelDownload": "Stop download af {{name}}",      "legend": {        "open": "Sådan bedømmes modeller",        "accuracyNote": "For hvert af dine sprog: hvor mange ord en model fik forkert i vores testoptagelser.",        "speedNote": {          "accelerated": "Hvor lang tid 30 sekunders tale tager at skrive ud på vores testcomputers grafikchip. Denne computer kan afvige.",          "cpu": "Hvor lang tid 30 sekunders tale tager at skrive ud på vores testcomputers processor. Denne computer kan afvige."        },        "marks": "? er ikke målt endnu. — forstår ikke det sprog."      },      "retiredNotice": {        "title": "Gamle modeller virker ikke længere med Handy",        "description": "De fylder {{size}} på din computer.",        "delete": "Slet modeller",        "deleteFailed": "Nogle gamle modeller kunne ikke slettes. Se loggen for detaljer."      },      "rescan": {        "label": "Søg igen",        "tooltip": "Søg igen efter modeller, der er tilføjet til modelmappen eller Hugging Face-cachen uden for Handy"      }    },    "languages": {      "title": "Sprog"    },    "sound": {      "title": "Lyd",      "microphone": {        "title": "Mikrofon",        "description": "Vælg din foretrukne mikrofonenhed",        "placeholder": "Vælg mikrofon...",        "loading": "Indlæser..."      },      "channel": {        "title": "Inputkanal",        "description": "Vælg, hvilken inputkanal der skal optages fra. Brug dette, hvis din lydgrænseflade har flere indgange.",        "average": "Gennemsnit af alle kanaler",        "channel": "Kanal {{n}}"      },      "audioFeedback": {        "label": "Lydfeedback",        "description": "Afspil lyd, når optagelse starter og stopper"      },      "outputDevice": {        "title": "Outputenhed",        "description": "Vælg din foretrukne lydoutputenhed til feedbacklyde",        "placeholder": "Vælg outputenhed...",        "loading": "Indlæser..."      },      "volume": {        "title": "Lydstyrke",        "description": "Juster lydstyrken for lydfeedback"      }    },    "advanced": {      "groups": {        "app": "App",        "output": "Output",        "transcription": "Transskription",        "history": "Historik",        "experimental": "Eksperimentel"      },      "experimentalToggle": {        "label": "Eksperimentelle funktioner",        "description": "Aktivér eksperimentelle funktioner, der stadig er under udvikling."      },      "lazyStreamClose": {        "label": "Hold mikrofon åben mellem transskriptioner",        "description": "Holder mikrofonstrømmen åben i 30 sekunder, efter at optagelsen stopper, hvilket reducerer ventetid ved transskriptioner lige efter hinanden. Kan forringe Bluetooth-lydkvaliteten, mens den er aktiv."      },      "airpodsMode": {        "label": "AirPods-tilstand",        "description": "Skifter automatisk AirPods til Mac'en til transskription, når en iPhone afspiller lyd. Uden dette kan optagelser blive helt tavse."      },      "acceleration": {        "transcribe": {          "title": "Hardwareacceleration",          "description": "Vælg den hardware, der bruges til transskription. Automatisk bruger GPU'en, når den er tilgængelig, og falder ellers tilbage til CPU'en."        },        "gpuDevice": {          "auto": "Automatisk"        }      },      "startHidden": {        "label": "Start skjult",        "description": "Vis på meddelelsesområdet uden at åbne vinduet."      },      "autostart": {        "label": "Start ved opstart",        "description": "Start Handy automatisk, når du logger ind på din computer."      },      "showTrayIcon": {        "label": "Vis proceslinjeikon",        "description": "Vis Handy-ikonet i meddelelsesområdet."      },      "overlay": {        "style": {          "title": "Overlay",          "description": "Vælg optagelses-overlay: Ingen skjuler det, Minimal viser en kompakt pille, Live viser transskription i realtid, mens du taler (kun modeller med streaming-understøttelse — se efter Streaming-mærket i modelvælgeren). På Linux anbefales 'Ingen'.",          "options": {            "none": "Ingen",            "minimal": "Minimal",            "live": "Live"          }        },        "position": {          "title": "Overlay-placering",          "description": "Hvor overlayet vises på skærmen under optagelse og transskription.",          "options": {            "bottom": "Bund",            "top": "Top"          }        }      },      "pasteMethod": {        "title": "Indsætningsmetode",        "description": "Vælg, hvordan tekst indsættes. Direkte: simulerer tastetryk via systeminput. Ingen: springer indsætning over, opdaterer kun historik/udklipsholder.",        "options": {          "clipboard": "Udklipsholder ({{modifier}}+V)",          "clipboardCtrlShiftV": "Udklipsholder (Ctrl+Shift+V)",          "clipboardShiftInsert": "Udklipsholder (Shift+Insert)",          "direct": "Direkte",          "none": "Ingen",          "externalScript": "Eksternt script"        },        "externalScriptPlaceholder": "/sti/til/dit/script.sh"      },      "typingTool": {        "title": "Skriveværktøj",        "description": "Vælg hvilket Linux-skriveværktøj der skal bruges til Direkte indsætningsmetode. Auto registrerer og bruger automatisk det bedste tilgængelige værktøj til dit system.",        "options": {          "auto": "Auto (anbefalet)"        }      },      "clipboardHandling": {        "title": "Håndtering af udklipsholder",        "description": "Rør ikke ved udklipsholder bevarer dit nuværende udklipsholderindhold efter transskription. Kopiér til udklipsholder efterlader transskriptionsresultatet i din udklipsholder efter indsætning.",        "options": {          "dontModify": "Rør ikke ved udklipsholder",          "copyToClipboard": "Kopiér til udklipsholder"        }      },      "autoSubmit": {        "title": "Automatisk indsendelse",        "description": "Send automatisk den valgte tastekombination efter tekstindsættelse. Cmd+Enter gælder på macOS, mens Windows/Linux bruger Super+Enter.",        "options": {          "off": "Fra",          "enter": "Enter",          "cmdEnter": "Cmd+Enter",          "superEnter": "Super+Enter",          "ctrlEnter": "Ctrl+Enter"        }      },      "translateToEnglish": {        "label": "Oversæt til engelsk",        "description": "Oversæt automatisk tale fra andre sprog til engelsk under transskription."      },      "modelUnload": {        "title": "Frigør model",        "description": "Frigør automatisk GPU-/CPU-hukommelse, når modellen ikke har været brugt i den angivne tid",        "options": {          "never": "Aldrig",          "immediately": "Med det samme",          "min2": "Efter 2 minutter",          "min5": "Efter 5 minutter",          "min10": "Efter 10 minutter",          "min15": "Efter 15 minutter",          "hour1": "Efter 1 time",          "sec15": "Efter 15 sekunder (fejlfinding)"        }      },      "customWords": {        "title": "Brugerdefinerede ord",        "description": "Hjælp understøttede modeller med at genkende navne og specialiserede udtryk. Fuzzy-korrektion er i øjeblikket begrænset til ord, der bruger A-Z og tal.",        "placeholder": "Tilføj et ord",        "add": "Tilføj",        "remove": "Fjern {{word}}",        "duplicate": "\"{{word}}\" findes allerede"      },      "voiceActivityDetection": {        "title": "Stemmeaktivitetsdetektion",        "description": "Filtrer stilhed fra optagelser. Streaming-modeller bruger en længere VAD-hale; deaktivering af VAD optager rå lyd."      },      "longFormChunking": {        "title": "Opdeling af lang lyd",        "description": "Deler lange optagelser ved pauser før transskribering, hvilket typisk forbedrer transskriptionen. Transskriberede filer og lange gentransskriberinger deles altid."      },      "languageDetection": {        "title": "Begræns Automatisk til mine sprog",        "description": "Automatisk vælger kun blandt dine foretrukne sprog ved hjælp af en lille sprogregistrering. Slå det til, hvis Automatisk bliver ved med at vælge et sprog, du ikke taler",        "downloadHint": "Når du slår det til, downloades en lille sprogregistrering",        "downloadingHint": "Sprogregistreringen downloades. Slå det fra for at annullere"      },      "vadBackend": {        "title": "Stemmedetektions-backend",        "description": "Vælg den detektor, der bruges til at filtrere stilhed. Earshot er eksperimentel; skift tilbage til Silero, hvis tale klippes eller støj bevares.",        "options": {          "silero": "Silero",          "earshot": "Earshot"        }      },      "fillerWordRemoval": {        "title": "Fjern fyldord",        "description": "Fjerner almindelige tøveord fra transskriptioner. Slå fra for at beholde dem."      },      "chineseScript": {        "title": "Kinesisk skrift",        "description": "Skriver mandarin- og kantonesiske transskriptioner med forenklede tegn eller med traditionelle tegn, som de skrives i Taiwan eller Hongkong. Andre sprog forbliver uændrede.",        "options": {          "asTranscribed": "Som transskriberet",          "simplified": "Forenklet",          "traditionalTw": "Traditionelle (Taiwan)",          "traditionalHk": "Traditionelle (Hongkong)"        }      }    },    "postProcessing": {      "hotkey": {        "title": "Genvejstast"      },      "api": {        "title": "API",        "provider": {          "title": "Udbyder",          "description": "Vælg en OpenAI- eller Anthropic-kompatibel udbyder."        },        "apiFormat": {          "title": "API-format",          "description": "Det anmodningsformat, som det brugerdefinerede endpoint forventer.",          "options": {            "openai": "OpenAI-kompatibel (Chat Completions)",            "anthropic": "Anthropic Messages"          }        },        "appleIntelligence": {          "unavailable": "Apple Intelligence er ikke tilgængelig på denne enhed. Kræver en Apple Silicon Mac med macOS Tahoe (26.0) eller nyere med Apple Intelligence aktiveret i Systemindstillinger."        },        "baseUrl": {          "title": "Basis-URL",          "description": "API-basis-URL for den valgte udbyder. Kun den brugerdefinerede udbyder kan redigeres.",          "placeholder": "https://api.openai.com/v1",          "placeholderAnthropic": "https://api.anthropic.com/v1"        },        "apiKey": {          "title": "API-nøgle",          "description": "API-nøgle til den valgte udbyder.",          "placeholder": "sk-..."        },        "model": {          "title": "Model",          "descriptionCustom": "Angiv den modelidentifikator, som det brugerdefinerede endpoint forventer.",          "descriptionDefault": "Vælg en model, der udbydes af den valgte udbyder.",          "placeholderWithOptions": "Søg eller vælg en model",          "placeholderNoOptions": "Skriv et modelnavn",          "refreshModels": "Opdater modeller"        }      },      "prompts": {        "title": "Prompt",        "selectedPrompt": {          "title": "Valgt prompt",          "description": "Vælg en skabelon til at forfine transskriptioner, eller opret en ny. Brug ${output} i promptteksten for at referere til den fangede transskription."        },        "noPrompts": "Ingen prompts tilgængelige",        "selectPrompt": "Vælg en prompt",        "createNew": "Opret ny prompt",        "promptLabel": "Promptnavn",        "promptLabelPlaceholder": "Indtast promptnavn",        "promptInstructions": "Promptinstruktioner",        "promptInstructionsPlaceholder": "Skriv de instruktioner, der skal køres efter transskription. Eksempel: Forbedr grammatik og klarhed for følgende tekst: ${output}",        "promptTip": "Tip: Brug <code>${output}</code> til at indsætte den transskriberede tekst i din prompt.",        "updatePrompt": "Opdater prompt",        "deletePrompt": "Slet prompt",        "createPrompt": "Opret prompt",        "cancel": "Annuller",        "selectToEdit": "Vælg en prompt ovenfor for at se og redigere dens detaljer.",        "createFirst": "Klik på 'Opret ny prompt' ovenfor for at oprette din første efterbehandlingsprompt."      }    },    "history": {      "title": "Historik",      "openFolder": "Åbn optagelsesmappe",      "loading": "Indlæser historik...",      "empty": "Ingen transskriptioner endnu. Start optagelse for at opbygge din historik!",      "copyToClipboard": "Kopiér transskription til udklipsholder",      "copyError": "Kunne ikke kopiere transskriptionen til udklipsholderen.",      "save": "Gem transskription",      "unsave": "Fjern fra gemte",      "delete": "Slet post",      "deleteError": "Kunne ikke slette posten. Prøv igen.",      "retranscribe": "Transskribér igen",      "cancelTranscription": "Annuller transskription",      "transcribing": "Transskriberer...",      "transcriptionFailed": "Transskription mislykkedes. Du kan transskribere igen ved hjælp af genforsøgsikonet.",      "notTranscribed": "Ikke transskriberet. Du kan transskribere den ved hjælp af genforsøgsikonet.",      "transcribeFile": "Transskriber fil",      "mediaFiles": "Lyd og video",      "fileUnsupported": "Kunne ikke læse lyd fra {{name}}.",      "transcribeFailed": "Transskriptionen mislykkedes. Prøv igen.",      "waiting": "Venter på transskription",      "transcribingPercent": "Transskriberer, {{percent}} %",      "readingFile": "Læser fil...",      "showMore": "Vis mere",      "showLess": "Vis mindre",      "dropTitle": "Slip for at transskribere",      "dropDescription": "Den vises i historikken."    },    "debug": {      "title": "Fejlfinding",      "logDirectory": {        "title": "Logmappe",        "description": "Placering af logfiler"      },      "logLevel": {        "title": "Logniveau",        "description": "Detaljeringsgrad for logning"      },      "liveLogs": {        "title": "Live logs",        "description": "Stream applikationslogs i realtid for at diagnosticere problemer uden at åbne logfilen. Kun logs udsendt, mens dette panel er åbent, vises; respekterer indstillingen Logniveau ovenfor.",        "live": "Live",        "paused": "På pause",        "pause": "Pause",        "resume": "Genoptag",        "copied": "Kopieret",        "lineCount": "{{count}} linjer",        "empty": "Venter på logs… Poster vises her, når appen udsender dem."      },      "updateChecks": {        "label": "Tjek for opdateringer",        "description": "Tjek automatisk for nye versioner af Handy",        "lockedDescription": "Deaktiveret af systemkonfiguration (HANDY_DISABLE_UPDATER)"      },      "whatsNewPreview": {        "title": "Forhåndsvisning af nyheder",        "description": "Åbn de seneste medfølgende udgivelsesnoter uden at markere dem som set",        "button": "Forhåndsvisning"      },      "onboardingPreview": {        "title": "Forhåndsvis introduktion",        "description": "Forhåndsvis introduktionsskærmene uden at ændre tilladelser, modeller eller fuldførelsesstatus",        "exitButton": "Afslut forhåndsvisning",        "choose": "Vælg en skærm",        "screens": {          "welcome": "Velkommen",          "permissions": "Tilladelser",          "model": "Model",          "demo": "Demo",          "try": "Prøv det",          "done": "Klar"        }      },      "onboardingRun": {        "title": "Kør introduktion",        "description": "Gennemgå introduktionen for alvor fra start: den beder om tilladelser, downloader modeller og gemmer dine valg",        "button": "Start"      },      "modelMigration": {        "title": "Modelmigrering",        "description": "Åbn opdateringsskærmen for modeller i det gamle format for alvor: den downloader erstatninger, skifter model og sletter gamle filer",        "button": "Åbn"      },      "soundTheme": {        "label": "Lydtema",        "description": "Vælg et lydtema til feedback ved start og stop af optagelse"      },      "wordCorrectionThreshold": {        "title": "Tærskel for ordkorrektion",        "description": "Følsomhed for brugerdefinerede ordkorrektioner"      },      "historyLimit": {        "title": "Historikgrænse",        "description": "Maksimalt antal historikposter, der skal beholdes",        "entries": "poster"      },      "recordingRetention": {        "title": "Automatisk sletning af optagelser",        "description": "Slet automatisk gamle optagelser for at spare plads",        "never": "Aldrig",        "preserveLimit": "Behold de seneste {{count}}",        "days3": "Efter 3 dage",        "weeks2": "Efter 2 uger",        "months3": "Efter 3 måneder",        "placeholder": "Vælg opbevaringsperiode..."      },      "alwaysOnMicrophone": {        "label": "Altid aktiv mikrofon",        "description": "Hold mikrofonen aktiv for hurtigere reaktion"      },      "clamshellMicrophone": {        "title": "Clamshell-mikrofon",        "description": "Mikrofon, der skal bruges, når den bærbares låg er lukket"      },      "postProcessingToggle": {        "label": "Efterbehandling",        "description": "Aktivér AI-drevet tekstforbedring efter transskription"      },      "muteWhileRecording": {        "label": "Mute under optagelse",        "description": "Sluk for systemlyd under optagelse"      },      "appendTrailingSpace": {        "label": "Tilføj efterfølgende mellemrum",        "description": "Tilføj et mellemrum efter indsat transskription"      },      "keyboardImplementation": {        "title": "Tastaturimplementering",        "description": "Vælg backend til tastaturgenveje.",        "bindingsReset": "Tastaturgenveje var inkompatible og blev nulstillet til standard"      },      "pasteDelay": {        "title": "Forsinkelse af indsættelse (før)",        "description": "Forsinkelse (i millisekunder) efter kopiering af tekst, før tastetrykket for indsætning sendes. Øg, hvis intet bliver indsat."      },      "pasteDelayAfter": {        "title": "Forsinkelse af indsættelse (efter)",        "description": "Forsinkelse (i millisekunder) efter tastetrykket for indsætning, før din tidligere udklipsholder gendannes. Øg, hvis dit gamle udklipsholderindhold bliver indsat i stedet for transskriptionen."      },      "holdThreshold": {        "title": "Holdetærskel",        "description": "Kun i automatisk tilstand: hvor længe (i millisekunder) genvejen skal holdes nede, før det tæller som et hold i stedet for et tryk. Sænk værdien, hvis korte hold lader optagelsen køre videre; hæv den, hvis bevidste tryk behandles som hold."      },      "reliablePaste": {        "title": "Pålidelig indsættelse (Beta)",        "description": "Gendan først din udklipsholder, når målappen faktisk har læst transskriptionen, i stedet for efter en fast forsinkelse. Skal afhjælpe, at gammelt udklipsholderindhold indsættes, når systemet er belastet. Kræver en indsætningsmetode via udklipsholderen; kun macOS og Windows."      },      "recordingBuffer": {        "title": "Ekstra optagelsesbuffer",        "description": "Ekstra tid (i millisekunder) til at fortsætte optagelsen, efter du slipper tasten, for at fange efterfølgende lyd. 0 = ingen ekstra buffer."      },      "languageDetectionWindow": {        "title": "Lyd til sprogregistrering",        "description": "Sekunder tale, som sprogregistreringen hører. Længere er mere præcist, men langsommere."      },      "keyboardDiagnostic": {        "title": "Tastaturdiagnostik",        "description": "Kontrollerer, om tastaturhændelser når frem til Handy. Kun antallet af hændelser registreres — aldrig hvilke taster du trykker på.",        "run": "Kør 10 s diagnostik",        "running": "Lytter… tryk på din genvej et par gange (f.eks. Option+Space)",        "secureInputLabel": "Secure Input",        "enabled": "aktiveret",        "disabled": "deaktiveret",        "holder": "holdes af {{name}} (pid {{pid}})",        "holderUnknown": "ingen synlig indehaver",        "keyDown": "Tast ned",        "keyUp": "Tast op",        "flagsChanged": "Modifikatorer",        "mouse": "Mus",        "verdictBlocked": "Secure Input blokerer tastehændelser — genveje med en almindelig tast kan ikke fungere, før det er løst.",        "verdictSuspicious": "Der kom modifikatorhændelser, men ingen tastehændelser — noget undertrykker taster, selvom Secure Input rapporteres som deaktiveret. Rapportér det gerne på GitHub.",        "verdictOk": "Tastehændelser når frem til Handy som normalt.",        "verdictNoEvents": "Ingen hændelser registreret — trykkede du på nogen taster under testen?",        "failed": "Diagnostik mislykkedes: {{error}}"      }    },    "about": {      "title": "Om",      "version": {        "title": "Version",        "description": "Nuværende version af Handy"      },      "whatsNewUpdates": {        "label": "Vis nyheder",        "description": "Vis udgivelsesnoter, efter Handy opdateres"      },      "appDataDirectory": {        "title": "Appdatamappe",        "description": "Placering, hvor Handy gemmer sine data"      },      "sourceCode": {        "title": "Kildekode",        "description": "Se kildekode og bidrag",        "button": "Vis på GitHub"      },      "supportDevelopment": {        "title": "Støt udviklingen",        "description": "Hjælp os med at fortsætte udviklingen af Handy",        "button": "Donér"      },      "acknowledgments": {        "title": "Anerkendelser",        "ggml": {          "title": "ggml",          "description": "Højtydende tensor-bibliotek til maskinlæringsinferens på enheden",          "details": "Handys lokale tale-til-tekst funktionalitet er bygget på transcribe.cpp og ggml. Tak for det fantastiske arbejde af Georgi Gerganov og bidragyderne."        }      }    }  },  "footer": {    "checkingUpdates": "Tjekker for opdateringer...",    "updateAvailableShort": "Opdatering tilgængelig",    "upToDate": "Opdateret",    "updateCheckingDisabled": "Tjek for opdateringer deaktiveret",    "downloading": "Downloader... {{progress}}%",    "installing": "Installerer...",    "preparing": "Forbereder...",    "checkForUpdates": "Tjek for opdateringer",    "portableUpdateTitle": "Manuel opdatering påkrævet",    "portableUpdateMessage": "Flytbare installationer kan ikke opdateres automatisk. Download installeren til dit system nedenfor, kør den, og installer i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",    "portableUpdateButton": "Download installer",    "portableUpdateBrowseMessage": "Flytbare installationer kan ikke opdateres automatisk. Download den nyeste version til dit system fra GitHub Releases, og installer den i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",    "portableUpdateBrowseButton": "Åbn GitHub Releases"  },  "whatsNew": {    "title": "Nyt i Handy v{{version}}"  },  "common": {    "playbackPosition": "Afspilningsposition",    "resetSetting": "Nulstil {{setting}} til standardværdien",    "loading": "Indlæser...",    "delete": "Slet",    "close": "Luk",    "open": "Åbn",    "copy": "Kopiér",    "clear": "Ryd",    "noOptionsFound": "Ingen muligheder fundet"  },  "errors": {    "loadDirectory": "Fejl ved indlæsning af mappe: {{error}}",    "micPermissionDeniedTitle": "Mikrofonadgang nægtet",    "micPermissionDenied": {      "generic": "Mikrofonadgang blev nægtet af operativsystemet. Giv venligst mikrofontilladelse i dine systemindstillinger.",      "windows": "Aktivér mikrofonadgang under Indstillinger → Privatliv og sikkerhed → Mikrofon (inklusive adgang for skrivebordsapps).",      "macos": "Giv mikrofonadgang under Systemindstillinger → Privatliv og sikkerhed → Mikrofon.",      "linux": "Giv mikrofonadgang i dit systems lyd- eller privatlivsindstillinger."    },    "noInputDeviceTitle": "Ingen mikrofon fundet",    "noInputDevice": "Ingen lydinputenhed blev registreret. Tilslut en mikrofon eller et headset, og prøv igen.",    "recordingFailedTitle": "Kunne ikke starte optagelse",    "modelLoadFailed": "Handy kunne ikke indlæse denne model. Prøv igen, eller vælg en anden.",    "modelLoadFailedTitle": "Kunne ikke indlæse model",    "modelDownloadFailed": "Download mislykkedes",    "pasteFailedTitle": "Kunne ikke indsætte tekst",    "pasteFailed": "Teksten kunne ikke indsættes i det aktive program.",    "postProcessFailedTitle": "Indsat uden efterbehandling",    "postProcessFailed": "Efterbehandlingen blev ikke færdig, så transskriptionen blev indsat, som den er.",    "filePostProcessFailedTitle": "Transskriberet uden efterbehandling",    "filePostProcessFailed": "Efterbehandlingen blev ikke færdig, så transskriptionen blev gemt, som den er.",    "fileTranscriptionFailedTitle": "Transskription af fil mislykkedes",    "transcriptionFailedTitle": "Transskription mislykkedes"  },  "notices": {    "errorOne": "{{n}} fejl",    "errorMany": "{{n}} fejl",    "warningOne": "{{n}} advarsel",    "warningMany": "{{n}} advarsler",    "errorsAndWarnings": "{{errors}}, {{warnings}}"  },  "appLanguage": {    "title": "Applikationssprog",    "description": "Skift sproget for Handy-grænsefladen"  },  "theme": {    "title": "Applikationstema",    "description": "Vælg om Handy skal følge dit systemtema eller forblive lyst eller mørkt",    "options": {      "system": "System",      "light": "Lys",      "dark": "Mørk"    }  },  "overlay": {    "transcribing": "Transskriberer...",    "processing": "Behandler...",    "loadingModel": "Indlæser model..."  },  "secureInput": {    "blockedWithCulprit_one": "{{name}} blokerer muligvis 1 genvej",    "blockedWithCulprit_other": "{{name}} blokerer muligvis {{count}} genveje",    "blockedNoCulprit_one": "macOS blokerer midlertidigt 1 genvej",    "blockedNoCulprit_other": "macOS blokerer midlertidigt {{count}} genveje",    "recorderBlockedWithCulprit": "{{name}} blokerer muligvis ændringer af genveje",    "recorderBlockedNoCulprit": "macOS blokerer midlertidigt ændringer af genveje",    "learnMore": "Sådan løser du det",    "recorderBlocked": "Genveje kan ikke optages lige nu — macOS Secure Input blokerer tastehændelser. Løs advarslen om Secure Input først.",    "dismiss": "Afvis"  }}
+{
+  "tray": {
+    "settings": "Indstillinger...",
+    "checkUpdates": "Tjek for opdateringer...",
+    "copyLastTranscript": "Kopiér seneste transskription",
+    "unloadModel": "Frigør model",
+    "model": "Model",
+    "quit": "Afslut",
+    "cancel": "Annuller"
+  },
+  "sidebar": {
+    "overview": "Overview",
+    "general": "Generelt",
+    "models": "Modeller",
+    "advanced": "Avanceret",
+    "postProcessing": "Efterbehandling",
+    "history": "Historik",
+    "debug": "Fejlfinding",
+    "about": "Om",
+    "vocab": "Vocabulary",
+    "style": "Style",
+    "transcribeFile": "Transcribe File",
+    "settings": "Settings",
+    "center": "Settings Center"
+  },
+  "pages": {
+    "overview": {
+      "title": "Today's Overview",
+      "notEnabled": "Not Enabled",
+      "noModel": "No model loaded",
+      "aiModel": "AI Refinement Model",
+      "todayChars": "Today's Characters",
+      "todayDuration": "Today's Duration",
+      "avgChars": "Avg Chars/Segment",
+      "totalCount": "Total Records",
+      "weeklyChart": "Last 7 Days Distribution",
+      "recentEntries": "Recent Transcriptions",
+      "noEntries": "No transcriptions yet",
+      "charCount": "{{count}} chars",
+      "durationZero": "0 sec",
+      "durationMin": "{{m}} min {{s}} sec",
+      "durationSec": "{{s}} sec"
+    },
+    "history": {
+      "title": "History",
+      "entryList": "Entries",
+      "openFolder": "Recordings Folder",
+      "filterAll": "All",
+      "filterAudio": "With Audio",
+      "filterSaved": "Saved",
+      "loading": "Loading...",
+      "emptyAll": "No history entries yet",
+      "emptySaved": "No saved entries yet",
+      "detailTitle": "Details",
+      "statsText": "Text: {{count}} / {{limit}} entries",
+      "statsAudio": "Audio: {{count}} / {{limit}} files",
+      "statsTextTooltip": "Text history entries count and limit (click to filter all)",
+      "statsAudioTooltip": "Audio files count and limit (click to filter entries with audio)",
+      "clearAll": "Clear All",
+      "clearSaved": "Clear Saved",
+      "clearAllTooltip": "Clear all history entries and audio files",
+      "clearSavedTooltip": "Clear all saved entries and audio files",
+      "searchPlaceholder": "Search history entries...",
+      "timestamp": "Timestamp",
+      "copyTooltipDefault": "Copy (default: raw text)",
+      "copyTooltipRaw": "Copy selected raw text",
+      "copyTooltipPolished": "Copy selected polished text",
+      "copyTooltip": "Copy text",
+      "toggleSave": "Save",
+      "toggleUnsave": "Unsave",
+      "delete": "Delete",
+      "rawText": "Raw Text (Raw ASR)",
+      "polishedText": "Polished Text (Polished)",
+      "clickToSelect": "Click to select & copy",
+      "selectedAndCopied": "Selected & copied",
+      "audioPlayback": "Audio Playback",
+      "downloadAudio": "Download Audio",
+      "noSelection": "Select an entry from the list to view details",
+      "toastDeleteSuccess": "Entry deleted successfully",
+      "toastClearConfirm": "Are you sure you want to clear all history entries and audio files? (Saved items will be preserved. This action cannot be undone.)",
+      "toastClearTitle": "Clear All History",
+      "toastClearError": "Failed to clear history: {{error}}",
+      "toastClearSuccess": "Successfully cleared history entries and audio files (saved items preserved)",
+      "toastClearGenericError": "Error clearing history",
+      "toastClearSavedConfirm": "Are you sure you want to clear all saved history entries and audio files? (This will permanently delete them and cannot be undone.)",
+      "toastClearSavedTitle": "Clear All Saved",
+      "toastClearSavedError": "Failed to clear saved entries: {{error}}",
+      "toastClearSavedSuccess": "Successfully cleared all saved entries and audio files",
+      "toastClearSavedGenericError": "Error clearing saved entries",
+      "toastDownloadSuccess": "Audio file downloaded!",
+      "toastDownloadError": "Failed to download audio: {{error}}",
+      "toastDownloadGenericError": "Error downloading audio file",
+      "correctionHint": "Replace typo with correct spelling",
+      "correctionPatternPlaceholder": "Original typo",
+      "correctionPlaceholder": "Correct text...",
+      "correctionConfirm": "Confirm",
+      "correctionCancel": "Cancel",
+      "correctionAdded": "Correction rule added"
+    },
+    "vocab": {
+      "title": "Vocabulary",
+      "infoTitle": "Vocabulary & Correction Rules",
+      "infoHotwords": "Custom hotwords: enter proper nouns, names, product names, etc. These are sent as hints to the ASR engine (Whisper) to improve recognition accuracy for your specific terms.",
+      "infoRules": "Correction rules: only applied during AI polishing (post-processing), does NOT affect raw transcription output. Requires a configured AI provider in Services and using a post-processing hotkey during transcription to automatically replace misrecognized words with the correct spelling (e.g. \"face-bookie\" → \"Facebook\").",
+      "hotwordsTitle": "Custom Hotwords",
+      "hotwordsDescription": "Enter words you want the ASR engine to recognize accurately:",
+      "hotwordsPlaceholder": "e.g. Kubernetes",
+      "addHotword": "Add Hotword",
+      "noHotwords": "No hotwords added yet",
+      "rulesTitle": "Correction Rules",
+      "rulesDescription": "Replace misrecognized words during AI polishing (does not affect raw transcription):",
+      "rulePatternPlaceholder": "Wrong word/sound",
+      "ruleReplacementPlaceholder": "Correct word",
+      "addRule": "Add",
+      "noRules": "No correction rules added yet",
+      "toastWordExists": "Hotword \"{{word}}\" already exists",
+      "toastWordAdded": "Hotword added successfully",
+      "toastFieldEmpty": "Fields cannot be empty",
+      "toastRuleExists": "Correction rule \"{{pattern}} → {{replacement}}\" already exists",
+      "toastRuleAdded": "Correction rule added",
+      "toastRuleRemoved": "Correction rule removed"
+    },
+    "style": {
+      "title": "AI Style",
+      "description": "Modular settings to precisely control AI speech-to-text refinement behavior and vocabulary. All changes save and apply automatically.",
+      "tabs": {
+        "mainPrompt": "Main Prompt",
+        "modes": "Refinement Modes",
+        "hotwords": "Hotwords",
+        "dicts": "Domain Dict",
+        "customRules": "Custom Rules",
+        "backup": "Backup & Restore"
+      },
+      "mainPrompt": {
+        "title": "Core System Prompt",
+        "hint": "Tip: Click a card to apply; double-click to view or edit.",
+        "addButton": "New Main Prompt",
+        "defaultBadge": "Default (Read-only)",
+        "customBadge": "Custom",
+        "inUse": "In Use",
+        "viewTooltip": "Double-click to view",
+        "editTooltip": "Double-click to edit",
+        "viewAction": "View",
+        "editAction": "Edit",
+        "deleteAction": "Delete"
+      },
+      "modes": {
+        "title": "Context Refinement Modes",
+        "hint": "Tip: Click a card to switch; double-click to edit.",
+        "addButton": "New Mode",
+        "editTooltip": "Double-click to edit",
+        "modifiedBadge": "Modified",
+        "builtinBadge": "Built-in",
+        "inUse": "In Use",
+        "editAction": "Edit",
+        "deleteAction": "Delete Mode",
+        "resetAction": "Reset to Default"
+      },
+      "hotwords": {
+        "title": "Hotword Management",
+        "description": "Enter frequently used English terms, company names, people names, etc. Changes sync to both the ASR engine (Whisper) and AI refinement prompts.",
+        "placeholder": "e.g. Kubernetes (no spaces)",
+        "addButton": "Add Hotword",
+        "noHotwords": "No custom hotwords yet. Add them here or in the Vocabulary page."
+      },
+      "dicts": {
+        "title": "Domain Dictionaries",
+        "hint": "Tip: Click cards to toggle; double-click to edit content.",
+        "addButton": "New Dictionary",
+        "editTooltip": "Double-click to edit",
+        "modifiedBadge": "Modified",
+        "builtinBadge": "Built-in",
+        "enabled": "Enabled",
+        "editAction": "Edit",
+        "deleteAction": "Delete Dictionary",
+        "resetAction": "Reset to Default",
+        "expand": "Expand",
+        "collapse": "Collapse",
+        "customEntries": "Custom Terms",
+        "termLabel": "Term",
+        "explanationLabel": "Explanation",
+        "addEntry": "Add",
+        "deleteEntry": "Remove",
+        "noEntries": "No custom terms yet.",
+        "entryAdded": "Custom term added!",
+        "entryDeleted": "Custom term removed!"
+      },
+      "customRules": {
+        "title": "Custom Rules",
+        "description": "Enter your personal formatting and refinement preferences. For example: \"Avoid using dashes\", \"Replace informal terms with formal equivalents\".",
+        "placeholder": "Enter custom rules..."
+      },
+      "backup": {
+        "title": "Data Backup & Migration",
+        "description": "One-click export of your custom styles, dictionaries, hotwords, and correction rules as a ZIP file, or restore from a backup.",
+        "exportButton": "Export as ZIP",
+        "importButton": "Import from ZIP"
+      },
+      "editor": {
+        "viewTitle": "View Core Prompt",
+        "editTitleMain": "Edit Main Prompt",
+        "editTitleMode": "Edit Refinement Mode",
+        "editTitleDict": "Edit Domain Dictionary",
+        "newTitleMain": "New Main Prompt",
+        "newTitleMode": "New Refinement Mode",
+        "newTitleDict": "New Domain Dictionary",
+        "nameLabel": "Name",
+        "namePlaceholderMain": "e.g. Custom Core Rules",
+        "namePlaceholderMode": "e.g. Speech Mode",
+        "namePlaceholderDict": "e.g. Biotechnology",
+        "descLabel": "Card Description (shown on UI card)",
+        "descPlaceholder": "Brief description of this item...",
+        "contentLabelMain": "Prompt Content",
+        "contentLabelMode": "Mode Instructions & Tone (AI prompt)",
+        "contentLabelDict": "Vocabulary List (AI reference)",
+        "contentPlaceholderMain": "Write core role settings and base instructions...",
+        "contentPlaceholderMode": "Describe the tone the AI should use...",
+        "contentPlaceholderDict": "e.g. NounA, NounB, NounC...",
+        "closeButton": "Close",
+        "cancelButton": "Cancel",
+        "saveButton": "Save"
+      },
+      "toast": {
+        "rulesAutoSaved": "Custom rules saved and applied!",
+        "changesApplied": "Changes applied!",
+        "confirmDelete": "Are you sure you want to delete this item?",
+        "itemDeleted": "Item deleted and reapplied!",
+        "confirmReset": "Are you sure you want to reset this default item to factory settings?",
+        "resetDone": "Default settings restored and applied!",
+        "wordExists": "Hotword \"{{word}}\" already exists",
+        "wordAdded": "Hotword added and applied",
+        "wordRemoved": "Hotword removed and reapplied"
+      },
+      "descFallback": "Description for {{name}}."
+    },
+    "models": {
+      "sortName": "Sort by Name",
+      "sortAccuracy": "Sort by Accuracy",
+      "sortSpeed": "Sort by Speed",
+      "sortSize": "Sort by Size",
+      "sortPrefix": "Sort: "
+    },
+    "translate": {
+      "languages": {
+        "en": "English",
+        "zh-TW": "Traditional Chinese",
+        "zh-CN": "Simplified Chinese",
+        "ja": "Japanese",
+        "ko": "Korean",
+        "es": "Spanish",
+        "fr": "French",
+        "de": "German"
+      }
+    }
+  },
+  "onboarding": {
+    "subtitle": "To get started, choose a transcription model",
+    "existingModelsTitle": "Compatible Models",
+    "downloadModelsTitle": "Available to Download",
+    "showAllModels": "Show all {{total}} models",
+    "showFewerModels": "Show fewer models",
+    "recommended": "Recommended",
+    "customModelDescription": "Ikke officielt understøttet",
+    "modelCard": {
+      "accuracy": "accuracy",
+      "speed": "speed"
+    },
+    "models": {
+      "small": {
+        "name": "Whisper Small",
+        "description": "Hurtig og ret nøjagtig."
+      },
+      "medium": {
+        "name": "Whisper Medium",
+        "description": "God nøjagtighed, middel hastighed"
+      },
+      "turbo": {
+        "name": "Whisper Turbo",
+        "description": "Afbalanceret nøjagtighed og hastighed."
+      },
+      "large": {
+        "name": "Whisper Large",
+        "description": "God nøjagtighed, men langsom."
+      },
+      "parakeet-tdt-0.6b-v2": {
+        "name": "Parakeet V2",
+        "description": "English only. The best model for English speakers."
+      },
+      "parakeet-tdt-0.6b-v3": {
+        "name": "Parakeet V3",
+        "description": "Fast and accurate"
+      },
+      "moonshine-base": {
+        "name": "Moonshine Base",
+        "description": "Very fast, English only. Handles accents well."
+      },
+      "moonshine-tiny-streaming-en": {
+        "name": "Moonshine V2 Tiny",
+        "description": "Ultra-fast, English only"
+      },
+      "moonshine-small-streaming-en": {
+        "name": "Moonshine V2 Small",
+        "description": "Fast, English only. Good balance of speed and accuracy."
+      },
+      "moonshine-medium-streaming-en": {
+        "name": "Moonshine V2 Medium",
+        "description": "English only. High quality."
+      },
+      "breeze-asr": {
+        "name": "Breeze ASR",
+        "description": "Optimeret til taiwansk mandarin. Understøtter kodeskift."
+      },
+      "breeze-asr-26": {
+        "name": "Breeze ASR 26",
+        "description": "Optimized for Taiwanese Hokkien (Taigi). Best for Taiwanese speech."
+      },
+      "sense-voice-int8": {
+        "name": "SenseVoice",
+        "description": "Very fast. Chinese, English, Japanese, Korean, Cantonese."
+      },
+      "gigaam-v3-e2e-ctc": {
+        "name": "GigaAM v3",
+        "description": "Russian speech recognition. Fast and accurate."
+      },
+      "canary-180m-flash": {
+        "name": "Canary 180M Flash",
+        "description": "Very fast. English, German, Spanish, French. Supports translation."
+      },
+      "canary-1b-v2": {
+        "name": "Canary 1B v2",
+        "description": "Accurate multilingual. 25 European languages. Supports translation."
+      },
+      "cohere-int8": {
+        "name": "Cohere",
+        "description": "A large, slower, but very accurate multilingual model."
+      }
+    },
+    "errors": {
+      "selectModel": "Kunne ikke vælge model"
+    },
+    "permissions": {
+      "title": "Permissions Required",
+      "description": "yukey needs a couple of permissions to work properly.",
+      "microphone": {
+        "title": "Microphone Access",
+        "description": "Required to hear your voice for transcription."
+      },
+      "accessibility": {
+        "title": "Accessibility Access",
+        "description": "Required to type transcribed text into your applications."
+      },
+      "grant": "Grant Permission",
+      "granted": "Granted",
+      "waiting": "Venter",
+      "allGranted": "All set!",
+      "errors": {
+        "checkFailed": "Kunne ikke tjekke tilladelser. Prøv igen.",
+        "requestFailed": "Kunne ikke anmode om tilladelse. Prøv igen."
+      }
+    }
+  },
+  "modelSelector": {
+    "custom": "Brugerdefineret",
+    "legacy": "Legacy",
+    "streaming": "Streaming",
+    "active": "Aktiv",
+    "switching": "Switching...",
+    "noModelsAvailable": "Ingen modeller tilgængelige",
+    "verifying": "Verificerer {{modelName}}...",
+    "verifyingGeneric": "Verificerer...",
+    "extracting": "Extracting {{modelName}}...",
+    "extractingMultiple": "Extracting {{count}} models...",
+    "extractingGeneric": "Extracting...",
+    "downloading": "Downloader {{percentage}}%",
+    "downloadingMultiple": "Downloader {{count}} modeller...",
+    "modelReady": "Model klar",
+    "loading": "Indlæser {{modelName}}...",
+    "loadingGeneric": "Indlæser...",
+    "modelError": "Modelfejl",
+    "modelUnloaded": "Model frigjort",
+    "noModelDownloadRequired": "Ingen model - download påkrævet",
+    "deleteModel": "Delete {{modelName}}",
+    "downloadSpeed": "{{speed}} MB/s",
+    "cancel": "Cancel",
+    "cancelDownload": "Cancel download",
+    "capabilities": {
+      "languageSelection": "Supports multiple input languages",
+      "singleLanguage": "Supports this language only",
+      "languageCount": "{{total}} languages",
+      "languageOnly": "{{language}} only",
+      "translation": "Can translate to English",
+      "translate": "Translate",
+      "streaming": "Shows live transcription as you speak"
+    }
+  },
+  "settings": {
+    "modelSettings": {
+      "title": "{{model}}-indstillinger"
+    },
+    "general": {
+      "title": "Generelt",
+      "shortcut": {
+        "title": "Handy-genveje",
+        "description": "Konfigurer tastaturgenveje til at udløse tale-til-tekst-optagelse",
+        "loading": "Indlæser genveje...",
+        "none": "Ingen genveje konfigureret",
+        "notFound": "Genvej ikke fundet",
+        "pressKeys": "Tryk på ønskede taster...",
+        "bindings": {
+          "transcribe": {
+            "name": "Transskriptionsgenvej",
+            "description": "Tastaturgenvejen til at optage og transskribere din stemme."
+          },
+          "cancel": {
+            "name": "Annulleringsgenvej",
+            "description": "Tastaturgenvejen til at annullere den aktuelle optagelse."
+          },
+          "transcribe_with_post_process": {
+            "name": "Genvej til efterbehandling",
+            "description": "Valgfrit: En dedikeret genvej, der altid anvender AI-efterbehandling på din transskription."
+          },
+          "translate": {
+            "name": "Translate Shortcut",
+            "description": "Translates your speech into the target language."
+          },
+          "ask_ai": {
+            "name": "Ask AI Shortcut",
+            "description": "Sends your speech to AI and types the answer."
+          }
+        },
+        "errors": {
+          "restore": "Failed to restore original shortcut",
+          "set": "Kunne ikke indstille genvej: {{error}}",
+          "reset": "Failed to reset shortcut to original value",
+          "conflictFallback": "other function",
+          "conflictMessage": "This shortcut conflicts with \"{{name}}\". Overwrite and clear \"{{name}}\"?"
+        }
+      },
+      "language": {
+        "title": "Sprog",
+        "description": "Vælg sproget til talegenkendelse. Auto tyder automatisk sproget, mens valg af et specifikt sprog kan forbedre nøjagtigheden for det pågældende sprog.",
+        "searchPlaceholder": "Søg efter sprog...",
+        "noResults": "Ingen sprog fundet",
+        "auto": "Automatisk"
+      },
+      "pushToTalk": {
+        "label": "Push To Talk",
+        "description": "Hold to record, release to stop"
+      },
+      "copyFormat": "Default copy format",
+      "copyFormatPlain": "Plain text",
+      "copyFormatMarkdown": "Markdown",
+      "copyFormatDesc": "Choose how transcription text is formatted when copied"
+    },
+    "models": {
+      "title": "Modeller",
+      "description": "Select a transcription model or download additional models. Different models offer varying levels of accuracy and speed.",
+      "searchPlaceholder": "Search models by name…",
+      "yourModels": "Downloaded Models",
+      "availableModels": "Available to Download",
+      "deleteConfirm": "Are you sure you want to delete {{modelName}}? You will need to download it again to use it.",
+      "deleteActiveConfirm": "{{modelName}} is your active model. Deleting it will stop transcriptions until you select a new model. Are you sure?",
+      "deleteTitle": "Delete Model",
+      "filters": {
+        "allLanguages": "All Languages"
+      },
+      "rescan": {
+        "label": "Søg igen",
+        "tooltip": "Søg igen efter modeller, der er tilføjet til modelmappen eller Hugging Face-cachen uden for Handy"
+      },
+      "tabs": {
+        "local": "Local Models",
+        "cloud": "Cloud Model"
+      },
+      "cloud": {
+        "enable": {
+          "label": "Use Cloud Model for Transcription",
+          "description": "Enable to route ASR to cloud provider instead of local Whisper."
+        },
+        "provider": "ASR Provider",
+        "apiKey": "API Key",
+        "apiKeyPlaceholder": "Enter your API Key",
+        "baseUrl": "API Base URL / Endpoint",
+        "model": "Model Name",
+        "selectFromPulled": "Select from pulled list",
+        "manualInput": "Manual Text Input",
+        "copy": "Copy Content",
+        "pullButton": "Pull ASR Models",
+        "verifyButton": "Verify Connection",
+        "copied": "Copied to clipboard!",
+        "pullSuccess": "Models pulled successfully!",
+        "pullFailed": "Failed to pull models. Please check your API key and base URL.",
+        "pullError": "An error occurred while pulling models.",
+        "verifySuccess": "Connection verified successfully!",
+        "verifyFailed": "Connection verification failed. Please check your settings.",
+        "verifyError": "An error occurred during verification.",
+        "providerOption": {
+          "groq": "Groq (Free ASR Tier)",
+          "gemini": "Gemini (Google AI Studio Free Tier)",
+          "openai": "OpenAI (ASR Compatible)",
+          "openrouter": "OpenRouter (Whisper & Multi-model)",
+          "huggingface": "Hugging Face (Serverless Inference)",
+          "cloudflare": "Cloudflare (Workers AI)",
+          "deepgram": "Deepgram (Credit Free Tier)"
+        }
+      },
+      "noModelsMatch": "No models match this filter."
+    },
+    "overlay_and_theme": {
+      "title": "Overlay & Theme"
+    },
+    "sound": {
+      "title": "Lyd",
+      "microphone": {
+        "title": "Mikrofon",
+        "description": "Vælg din foretrukne mikrofonenhed",
+        "placeholder": "Vælg mikrofon...",
+        "loading": "Indlæser...",
+        "gainLabel": "Microphone Gain",
+        "gainTooltip": "If you are using a high-quality or high-sensitivity microphone, it is recommended to disable gain to avoid amplifying background noise or causing audio clipping.",
+        "gainValueLabel": "Gain Value"
+      },
+      "audioFeedback": {
+        "label": "Lydfeedback",
+        "description": "Afspil lyd, når optagelse starter og stopper"
+      },
+      "outputDevice": {
+        "title": "Outputenhed",
+        "description": "Vælg din foretrukne lydoutputenhed til feedbacklyde",
+        "placeholder": "Vælg outputenhed...",
+        "loading": "Indlæser..."
+      },
+      "volume": {
+        "title": "Lydstyrke",
+        "description": "Juster lydstyrken for lydfeedback"
+      }
+    },
+    "advanced": {
+      "groups": {
+        "app": "App",
+        "output": "Output",
+        "transcription": "Transskription",
+        "history": "Historik",
+        "experimental": "Eksperimentel"
+      },
+      "experimentalToggle": {
+        "label": "Eksperimentelle funktioner",
+        "description": "Aktivér eksperimentelle funktioner, der stadig er under udvikling."
+      },
+      "lazyStreamClose": {
+        "label": "Hold mikrofon åben mellem transskriptioner",
+        "description": "Holder mikrofonstrømmen åben i 30 sekunder, efter at optagelsen stopper, hvilket reducerer ventetid ved transskriptioner lige efter hinanden. Kan forringe Bluetooth-lydkvaliteten, mens den er aktiv."
+      },
+      "acceleration": {
+        "transcribe": {
+          "title": "Hardwareacceleration",
+          "description": "Vælg den hardware, der bruges til transskription. Automatisk bruger GPU'en, når den er tilgængelig, og falder ellers tilbage til CPU'en."
+        },
+        "ort": {
+          "title": "ONNX Acceleration",
+          "description": "Hardware acceleration for ONNX models (Parakeet, Canary, Moonshine, etc.). DirectML on Windows is experimental. Models may fail to transcribe."
+        },
+        "gpuDevice": {
+          "auto": "Automatisk"
+        }
+      },
+      "startHidden": {
+        "label": "Start skjult",
+        "description": "Vis på meddelelsesområdet uden at åbne vinduet."
+      },
+      "autostart": {
+        "label": "Start ved opstart",
+        "description": "Start Handy automatisk, når du logger ind på din computer."
+      },
+      "showTrayIcon": {
+        "label": "Vis proceslinjeikon",
+        "description": "Vis Handy-ikonet i meddelelsesområdet."
+      },
+      "overlay": {
+        "style": {
+          "title": "Overlay",
+          "description": "Vælg optagelses-overlay: Ingen skjuler det, Minimal viser en kompakt pille, Live viser transskription i realtid, mens du taler (kun modeller med streaming-understøttelse — se efter Streaming-mærket i modelvælgeren). På Linux anbefales 'Ingen'.",
+          "options": {
+            "none": "Ingen",
+            "minimal": "Minimal",
+            "live": "Live"
+          }
+        },
+        "position": {
+          "title": "Overlay-placering",
+          "description": "Hvor overlayet vises på skærmen under optagelse og transskription.",
+          "options": {
+            "bottom": "Bund",
+            "top": "Top"
+          }
+        }
+      },
+      "pasteMethod": {
+        "title": "Indsætningsmetode",
+        "description": "Vælg, hvordan tekst indsættes. Direkte: simulerer tastetryk via systeminput. Ingen: springer indsætning over, opdaterer kun historik/udklipsholder.",
+        "options": {
+          "clipboard": "Udklipsholder ({{modifier}}+V)",
+          "clipboardCtrlShiftV": "Udklipsholder (Ctrl+Shift+V)",
+          "clipboardShiftInsert": "Udklipsholder (Shift+Insert)",
+          "direct": "Direkte",
+          "none": "Ingen",
+          "externalScript": "Eksternt script"
+        },
+        "externalScriptPlaceholder": "/sti/til/dit/script.sh"
+      },
+      "typingTool": {
+        "title": "Skriveværktøj",
+        "description": "Vælg hvilket Linux-skriveværktøj der skal bruges til Direkte indsætningsmetode. Auto registrerer og bruger automatisk det bedste tilgængelige værktøj til dit system.",
+        "options": {
+          "auto": "Auto (anbefalet)"
+        }
+      },
+      "clipboardHandling": {
+        "title": "Håndtering af udklipsholder",
+        "description": "Rør ikke ved udklipsholder bevarer dit nuværende udklipsholderindhold efter transskription. Kopiér til udklipsholder efterlader transskriptionsresultatet i din udklipsholder efter indsætning.",
+        "options": {
+          "dontModify": "Rør ikke ved udklipsholder",
+          "copyToClipboard": "Kopiér til udklipsholder"
+        }
+      },
+      "autoSubmit": {
+        "title": "Automatisk indsendelse",
+        "description": "Send automatisk den valgte tastekombination efter tekstindsættelse. Cmd+Enter gælder på macOS, mens Windows/Linux bruger Super+Enter.",
+        "options": {
+          "off": "Fra",
+          "enter": "Enter",
+          "cmdEnter": "Cmd+Enter",
+          "superEnter": "Super+Enter",
+          "ctrlEnter": "Ctrl+Enter"
+        }
+      },
+      "translateToEnglish": {
+        "label": "Oversæt til engelsk",
+        "description": "Oversæt automatisk tale fra andre sprog til engelsk under transskription."
+      },
+      "translateLanguage": {
+        "label": "Translate Language",
+        "description": "Use cloud service to perform translation."
+      },
+      "translateUsingLlm": {
+        "label": "Use cloud service to translate",
+        "description": "Enable custom target language translation using configured AI service providers.",
+        "localSupportedDesc": "Defaults to using the local model to translate speech into English. Enable to switch to the cloud service LLM for multi-language translation."
+      },
+      "cloudTranslation": {
+        "label": "Cloud Service Translation",
+        "description": "Use cloud service to perform translation."
+      },
+      "translateTargetLanguage": {
+        "label": "Translation Target Language",
+        "description": "Select the target language for LLM translation."
+      },
+      "modelUnload": {
+        "title": "Frigør model",
+        "description": "Frigør automatisk GPU-/CPU-hukommelse, når modellen ikke har været brugt i den angivne tid",
+        "options": {
+          "never": "Aldrig",
+          "immediately": "Med det samme",
+          "min2": "Efter 2 minutter",
+          "min5": "Efter 5 minutter",
+          "min10": "Efter 10 minutter",
+          "min15": "Efter 15 minutter",
+          "hour1": "Efter 1 time",
+          "sec15": "Efter 15 sekunder (fejlfinding)"
+        }
+      },
+      "customWords": {
+        "title": "Brugerdefinerede ord",
+        "description": "Hjælp understøttede modeller med at genkende navne og specialiserede udtryk. Fuzzy-korrektion er i øjeblikket begrænset til ord, der bruger A-Z og tal.",
+        "placeholder": "Tilføj et ord",
+        "add": "Tilføj",
+        "remove": "Fjern {{word}}",
+        "duplicate": "\"{{word}}\" findes allerede"
+      },
+      "voiceActivityDetection": {
+        "title": "Stemmeaktivitetsdetektion",
+        "description": "Filtrer stilhed fra optagelser. Streaming-modeller bruger en længere VAD-hale; deaktivering af VAD optager rå lyd."
+      }
+    },
+    "postProcessing": {
+      "hotkey": {
+        "title": "Genvejstast"
+      },
+      "api": {
+        "title": "API",
+        "provider": {
+          "title": "Udbyder",
+          "description": "Vælg en OpenAI- eller Anthropic-kompatibel udbyder."
+        },
+        "appleIntelligence": {
+          "unavailable": "Apple Intelligence er ikke tilgængelig på denne enhed. Kræver en Apple Silicon Mac med macOS Tahoe (26.0) eller nyere med Apple Intelligence aktiveret i Systemindstillinger."
+        },
+        "baseUrl": {
+          "title": "Basis-URL",
+          "description": "API-basis-URL for den valgte udbyder. Kun den brugerdefinerede udbyder kan redigeres.",
+          "placeholder": "https://api.openai.com/v1"
+        },
+        "apiKey": {
+          "title": "API-nøgle",
+          "description": "API-nøgle til den valgte udbyder.",
+          "placeholder": "sk-...",
+          "notePlaceholder": "Note (optional)",
+          "addApiKey": "Add API Key",
+          "removeKey": "Remove key",
+          "dailyUsage": "{{count}} today",
+          "testConnection": "Test Connection",
+          "testing": "Testing...",
+          "testSuccess": "Connection test successful",
+          "testFailed": "Connection test failed: {{error}}",
+          "noBaseUrl": "Please set the API URL first",
+          "noApiKey": "Please enter an API Key"
+        },
+        "autoSwitchApi": {
+          "title": "Auto-switch API",
+          "description": "Automatically rotate to the next API key after N uses of the current key.",
+          "after": "After",
+          "uses": "uses"
+        },
+        "model": {
+          "title": "Model",
+          "descriptionCustom": "Angiv den modelidentifikator, som det brugerdefinerede endpoint forventer.",
+          "descriptionDefault": "Vælg en model, der udbydes af den valgte udbyder.",
+          "placeholderWithOptions": "Søg eller vælg en model",
+          "placeholderNoOptions": "Skriv et modelnavn",
+          "refreshModels": "Opdater modeller"
+        }
+      },
+      "prompts": {
+        "title": "Prompt",
+        "selectedPrompt": {
+          "title": "Valgt prompt",
+          "description": "Vælg en skabelon til at forfine transskriptioner, eller opret en ny. Brug ${output} i promptteksten for at referere til den fangede transskription."
+        },
+        "noPrompts": "Ingen prompts tilgængelige",
+        "selectPrompt": "Vælg en prompt",
+        "createNew": "Opret ny prompt",
+        "promptLabel": "Promptnavn",
+        "promptLabelPlaceholder": "Indtast promptnavn",
+        "promptInstructions": "Promptinstruktioner",
+        "promptInstructionsPlaceholder": "Skriv de instruktioner, der skal køres efter transskription. Eksempel: Forbedr grammatik og klarhed for følgende tekst: ${output}",
+        "promptTip": "Tip: Brug <code>${output}</code> til at indsætte den transskriberede tekst i din prompt.",
+        "updatePrompt": "Opdater prompt",
+        "deletePrompt": "Slet prompt",
+        "createPrompt": "Opret prompt",
+        "cancel": "Annuller",
+        "selectToEdit": "Vælg en prompt ovenfor for at se og redigere dens detaljer.",
+        "createFirst": "Klik på 'Opret ny prompt' ovenfor for at oprette din første efterbehandlingsprompt."
+      }
+    },
+    "history": {
+      "title": "Historik",
+      "copied": "Copied to clipboard",
+      "openFolder": "Åbn optagelsesmappe",
+      "loading": "Indlæser historik...",
+      "empty": "Ingen transskriptioner endnu. Start optagelse for at opbygge din historik!",
+      "copyToClipboard": "Kopiér transskription til udklipsholder",
+      "save": "Gem transskription",
+      "unsave": "Fjern fra gemte",
+      "delete": "Slet post",
+      "deleteError": "Kunne ikke slette posten. Prøv igen.",
+      "retranscribe": "Transskribér igen",
+      "retranscribeError": "Failed to re-transcribe. Please try again.",
+      "transcribing": "Transskriberer...",
+      "transcriptionFailed": "Transskription mislykkedes. Du kan transskribere igen ved hjælp af genforsøgsikonet."
+    },
+    "debug": {
+      "title": "Fejlfinding",
+      "logDirectory": {
+        "title": "Logmappe",
+        "description": "Placering af logfiler"
+      },
+      "logLevel": {
+        "title": "Logniveau",
+        "description": "Detaljeringsgrad for logning"
+      },
+      "liveLogs": {
+        "title": "Live logs",
+        "description": "Stream applikationslogs i realtid for at diagnosticere problemer uden at åbne logfilen. Kun logs udsendt, mens dette panel er åbent, vises; respekterer indstillingen Logniveau ovenfor.",
+        "live": "Live",
+        "paused": "På pause",
+        "pause": "Pause",
+        "resume": "Genoptag",
+        "copied": "Kopieret",
+        "lineCount": "{{count}} linjer",
+        "empty": "Venter på logs… Poster vises her, når appen udsender dem."
+      },
+      "updateChecks": {
+        "label": "Tjek for opdateringer",
+        "description": "Tjek automatisk for nye versioner af Handy"
+      },
+      "whatsNewPreview": {
+        "title": "Forhåndsvisning af nyheder",
+        "description": "Åbn de seneste medfølgende udgivelsesnoter uden at markere dem som set",
+        "button": "Forhåndsvisning",
+        "noNotes": "No bundled release notes found",
+        "error": "Failed to preview release notes"
+      },
+      "soundTheme": {
+        "label": "Lydtema",
+        "description": "Vælg et lydtema til feedback ved start og stop af optagelse"
+      },
+      "wordCorrectionThreshold": {
+        "title": "Tærskel for ordkorrektion",
+        "description": "Følsomhed for brugerdefinerede ordkorrektioner"
+      },
+      "historyLimit": {
+        "title": "Historikgrænse",
+        "description": "Maksimalt antal historikposter, der skal beholdes",
+        "entries": "poster"
+      },
+      "audioHistoryLimit": {
+        "title": "Audio Recording Limit",
+        "description": "Maximum number of audio files to retain (oldest audio files beyond this limit will be deleted, but text history remains)",
+        "entries": "entries"
+      },
+      "recordingRetention": {
+        "title": "Automatisk sletning af optagelser",
+        "description": "Slet automatisk gamle optagelser for at spare plads",
+        "never": "Aldrig",
+        "preserveLimit": "Behold de seneste {{count}}",
+        "days3": "Efter 3 dage",
+        "weeks2": "Efter 2 uger",
+        "months3": "Efter 3 måneder",
+        "placeholder": "Vælg opbevaringsperiode..."
+      },
+      "alwaysOnMicrophone": {
+        "label": "Altid aktiv mikrofon",
+        "description": "Hold mikrofonen aktiv for hurtigere reaktion"
+      },
+      "clamshellMicrophone": {
+        "title": "Clamshell-mikrofon",
+        "description": "Mikrofon, der skal bruges, når den bærbares låg er lukket"
+      },
+      "postProcessingToggle": {
+        "label": "Efterbehandling",
+        "description": "Aktivér AI-drevet tekstforbedring efter transskription"
+      },
+      "muteWhileRecording": {
+        "label": "Mute under optagelse",
+        "description": "Sluk for systemlyd under optagelse"
+      },
+      "appendTrailingSpace": {
+        "label": "Tilføj efterfølgende mellemrum",
+        "description": "Tilføj et mellemrum efter indsat transskription"
+      },
+      "keyboardImplementation": {
+        "title": "Tastaturimplementering",
+        "description": "Vælg backend til tastaturgenveje.",
+        "bindingsReset": "Tastaturgenveje var inkompatible og blev nulstillet til standard",
+        "optionTauri": "Tauri Global Shortcut",
+        "optionDirect": "Direct Hooks"
+      },
+      "paths": {
+        "appData": "App Data:",
+        "models": "Models:",
+        "settings": "Settings:"
+      },
+      "pasteDelay": {
+        "title": "Forsinkelse af indsættelse (før)",
+        "description": "Forsinkelse (i millisekunder) efter kopiering af tekst, før tastetrykket for indsætning sendes. Øg, hvis intet bliver indsat."
+      },
+      "recordingBuffer": {
+        "title": "Ekstra optagelsesbuffer",
+        "description": "Ekstra tid (i millisekunder) til at fortsætte optagelsen, efter du slipper tasten, for at fange efterfølgende lyd. 0 = ingen ekstra buffer."
+      }
+    },
+    "about": {
+      "title": "Om",
+      "version": {
+        "title": "Version",
+        "description": "Nuværende version af Handy"
+      },
+      "whatsNewUpdates": {
+        "label": "Vis nyheder",
+        "description": "Vis udgivelsesnoter, efter Handy opdateres"
+      },
+      "appDataDirectory": {
+        "title": "Appdatamappe",
+        "description": "Placering, hvor Handy gemmer sine data"
+      },
+      "sourceCode": {
+        "title": "Kildekode",
+        "description": "Se kildekode og bidrag",
+        "button": "Vis på GitHub"
+      },
+      "supportDevelopment": {
+        "title": "Støt udviklingen",
+        "description": "Hjælp os med at fortsætte udviklingen af Handy",
+        "button": "Donér"
+      },
+      "acknowledgments": {
+        "title": "Anerkendelser",
+        "ggml": {
+          "title": "ggml",
+          "description": "Højtydende tensor-bibliotek til maskinlæringsinferens på enheden",
+          "details": "Handys lokale tale-til-tekst funktionalitet er bygget på transcribe.cpp og ggml. Tak for det fantastiske arbejde af Georgi Gerganov og bidragyderne."
+        },
+        "handyTitle": "Acknowledgments to Original Project (Handy)",
+        "handyDescription": "This project yukey is derived from CJ Pais's excellent open-source project Handy with deep customization and modifications. We are grateful for the original author's open-source spirit and outstanding technical architecture contributions to local speech-to-text applications.",
+        "author": "Original Author: CJ Pais",
+        "license": "License: MIT License"
+      }
+    }
+  },
+  "footer": {
+    "checkingUpdates": "Tjekker for opdateringer...",
+    "updateAvailableShort": "Opdatering tilgængelig",
+    "upToDate": "Opdateret",
+    "updateCheckingDisabled": "Tjek for opdateringer deaktiveret",
+    "downloading": "Downloader... {{progress}}%",
+    "installing": "Installerer...",
+    "preparing": "Forbereder...",
+    "checkForUpdates": "Tjek for opdateringer",
+    "portableUpdateTitle": "Manuel opdatering påkrævet",
+    "portableUpdateMessage": "Flytbare installationer kan ikke opdateres automatisk. Download installeren til dit system nedenfor, kør den, og installer i den samme mappe — din Data/-mappe (indstillinger, modeller, optagelser) bliver bevaret.",
+    "portableUpdateButton": "Download installer"
+  },
+  "whatsNew": {
+    "title": "Nyt i Handy v{{version}}"
+  },
+  "common": {
+    "loading": "Indlæser...",
+    "delete": "Slet",
+    "close": "Luk",
+    "open": "Åbn",
+    "copy": "Kopiér",
+    "clear": "Ryd",
+    "default": "Default",
+    "noOptionsFound": "Ingen muligheder fundet"
+  },
+  "accessibility": {
+    "permissionsDescription": "yukey needs accessibility permissions to type transcribed text.",
+    "openSettings": "Open System Settings"
+  },
+  "errors": {
+    "loadDirectory": "Fejl ved indlæsning af mappe: {{error}}",
+    "micPermissionDeniedTitle": "Mikrofonadgang nægtet",
+    "micPermissionDenied": {
+      "generic": "Mikrofonadgang blev nægtet af operativsystemet. Giv venligst mikrofontilladelse i dine systemindstillinger.",
+      "windows": "Aktivér mikrofonadgang under Indstillinger → Privatliv og sikkerhed → Mikrofon (inklusive adgang for skrivebordsapps).",
+      "macos": "Giv mikrofonadgang under Systemindstillinger → Privatliv og sikkerhed → Mikrofon.",
+      "linux": "Giv mikrofonadgang i dit systems lyd- eller privatlivsindstillinger."
+    },
+    "noInputDeviceTitle": "Ingen mikrofon fundet",
+    "noInputDevice": "Ingen lydinputenhed blev registreret. Tilslut en mikrofon eller et headset, og prøv igen.",
+    "recordingFailed": "Failed to start recording: {{error}}",
+    "modelLoadFailed": "Handy kunne ikke indlæse denne model. Prøv igen, eller vælg en anden.",
+    "modelLoadFailedUnknown": "unknown model",
+    "pasteFailedTitle": "Kunne ikke indsætte tekst",
+    "pasteFailed": "Teksten kunne ikke indsættes i det aktive program.",
+    "transcriptionFailedTitle": "Transskription mislykkedes",
+    "noProvider": "Please configure an AI post-processing provider in settings.",
+    "noModel": "Please select a post-processing AI model in settings.",
+    "noApiKey": "Please enter your API key in settings to use the Ask AI feature.",
+    "cloudAsrFailedTitle": "Cloud ASR Unavailable",
+    "cloudAsrFallback": {
+      "no_api_key": "API Key is missing. System automatically switched to local model for transcription.",
+      "network_error": "Failed to connect to Cloud ASR. System automatically switched to local model for transcription."
+    },
+    "postProcessFailedTitle": "Indsat uden efterbehandling",
+    "postProcessFailed": "Efterbehandlingen blev ikke færdig, så transskriptionen blev indsat, som den er."
+  },
+  "appLanguage": {
+    "title": "Applikationssprog",
+    "description": "Skift sproget for Handy-grænsefladen"
+  },
+  "overlay": {
+    "transcribing": "Transskriberer...",
+    "processing": "Behandler...",
+    "ai_listening": "Asking AI...",
+    "ai_processing": "AI Thinking...",
+    "translate_listening": "Translating speech...",
+    "translate_processing": "Translating...",
+    "post_process_processing": "Post-processing..."
+  },
+  "transcribeFile": {
+    "title": "Transcribe File",
+    "dropHint": "Drop audio files here or click to select (WAV, MP3)",
+    "transcribeAll": "Transcribe All ({{count}})",
+    "transcribing": "Transcribing...",
+    "queued": "Queued",
+    "copy": "Copy",
+    "remove": "Remove",
+    "noFiles": "No files selected"
+  },
+  "notices": {
+    "title": "Notices",
+    "empty": "No issues right now",
+    "errorOne": "{{n}} fejl",
+    "errorMany": "{{n}} fejl",
+    "warningOne": "{{n}} advarsel",
+    "warningMany": "{{n}} advarsler",
+    "dismiss": "Dismiss",
+    "dismissAll": "Clear all"
+  }
+}

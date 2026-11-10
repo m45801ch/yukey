@@ -620,5 +620,15 @@
   },
   "whatsNew": {
     "title": "Neu in yukey v{{version}}"
+  },
+  "notices": {
+    "title": "Notices",
+    "empty": "No issues right now",
+    "errorOne": "{{n}} error",
+    "errorMany": "{{n}} errors",
+    "warningOne": "{{n}} warning",
+    "warningMany": "{{n}} warnings",
+    "dismiss": "Dismiss",
+    "dismissAll": "Clear all"
   }
 }

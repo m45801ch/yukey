@@ -595,7 +595,7 @@
         "description": "在系統匣中顯示 yukey 圖示"
       },
       "overlay": {
-    "style": {
+        "style": {
           "title": "懸浮窗風格",
           "description": "選擇錄音懸浮窗顯示樣式：『無』隱藏懸浮窗，『極簡』顯示緊湊的小藥丸，『即時』在您說話時即時顯示轉錄文字（僅支援串流的模型 — 請在模型選取器中尋找有『Streaming』標籤的模型）。在 Linux 上建議選擇『無』。",
           "options": {
@@ -1081,5 +1081,15 @@
         "description": "匯入課綱教案、教學方法、輔導諮商與學校行政之教育相關詞彙。"
       }
     }
+  },
+  "notices": {
+    "title": "問題通知",
+    "empty": "目前沒有問題",
+    "errorOne": "{{n}} 個錯誤",
+    "errorMany": "{{n}} 個錯誤",
+    "warningOne": "{{n}} 個警告",
+    "warningMany": "{{n}} 個警告",
+    "dismiss": "關閉",
+    "dismissAll": "全部清除"
   }
 }

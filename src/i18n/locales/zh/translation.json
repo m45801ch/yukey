@@ -1071,5 +1071,15 @@
         "description": "导入课纲教案、教学方法、辅导咨商与学校行政之教育相关词汇。"
       }
     }
+  },
+  "notices": {
+    "title": "问题通知",
+    "empty": "目前没有问题",
+    "errorOne": "{{n}} 个错误",
+    "errorMany": "{{n}} 个错误",
+    "warningOne": "{{n}} 个警告",
+    "warningMany": "{{n}} 个警告",
+    "dismiss": "关闭",
+    "dismissAll": "全部清除"
   }
 }
