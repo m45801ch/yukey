@@ -196,6 +196,10 @@
       "pushToTalk": {
         "label": "לחץ כדי לדבר",
         "description": "החזק כדי להקליט, שחרר כדי לעצור"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "models": {
@@ -207,7 +211,9 @@
       "deleteActiveConfirm": "{{modelName}} הוא המודל הפעיל שלך כרגע. מחיקה שלו תעצור את התמלול עד שתבחר מודל חדש. להמשיך?",
       "deleteTitle": "מחיקת מודל",
       "filters": {
-        "allLanguages": "כל השפות"
+        "allLanguages": "כל השפות",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "אין מודלים שמתאימים לסינון הזה.",
       "searchPlaceholder": "חיפוש מודלים לפי שם…",

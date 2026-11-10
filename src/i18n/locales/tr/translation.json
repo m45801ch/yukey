@@ -164,7 +164,9 @@
       "deleteActiveConfirm": "{{modelName}} aktif modelinizdir. Silmek, yeni bir model seçene kadar transkripsiyonları durduracaktır. Emin misiniz?",
       "deleteTitle": "Modeli Sil",
       "filters": {
-        "allLanguages": "Tüm Diller"
+        "allLanguages": "Tüm Diller",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "Bu filtreyle eşleşen model yok.",
       "yourModels": "İndirilen modeller",
@@ -214,6 +216,10 @@
       "pushToTalk": {
         "label": "Bas Konuş",
         "description": "Kaydetmek için basılı tutun, durdurmak için bırakın"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "sound": {

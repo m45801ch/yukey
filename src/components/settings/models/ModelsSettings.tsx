@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ask } from "@tauri-apps/plugin-dialog";
-import { ChevronDown, Globe, RefreshCw, Search, Copy, Check, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { ChevronDown, Globe, RefreshCw, Search, Copy, Check, Eye, EyeOff, CheckCircle, AudioLines, Languages } from "lucide-react";
 import i18n from "../../../i18n";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { Dropdown } from "../../ui/Dropdown";
@@ -123,6 +123,8 @@ export const ModelsSettings: React.FC = () => {
   const [switchingModelId, setSwitchingModelId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState("all");
+  const [filterStreaming, setFilterStreaming] = useState(false);
+  const [filterTranslation, setFilterTranslation] = useState(false);
   const [languageDropdownOpen, setLanguageDropdownOpen] = useState(false);
   const [languageSearch, setLanguageSearch] = useState("");
   const languageDropdownRef = useRef<HTMLDivElement>(null);
@@ -296,6 +298,8 @@ export const ModelsSettings: React.FC = () => {
       if (languageFilter !== "all") {
         if (!modelSupportsLanguage(model, languageFilter)) return false;
       }
+      if (filterStreaming && !model.supports_streaming) return false;
+      if (filterTranslation && !model.supports_translation) return false;
       if (q) {
         const haystack = `${model.name} ${model.description}`.toLowerCase();
         if (!haystack.includes(q)) return false;
@@ -321,7 +325,7 @@ export const ModelsSettings: React.FC = () => {
     });
 
     return filtered;
-  }, [models, languageFilter, searchQuery, sortBy]);
+  }, [models, languageFilter, searchQuery, sortBy, filterStreaming, filterTranslation]);
 
   // Split filtered models into downloaded (including custom) and available sections
   const { downloadedModels, availableModels } = useMemo(() => {
@@ -437,6 +441,33 @@ export const ModelsSettings: React.FC = () => {
                         className={`w-3.5 h-3.5 ${isRescanning ? "animate-spin" : ""}`}
                       />
                       <span>{t("settings.models.rescan.label")}</span>
+                    </button>
+                    {/* Capability filters */}
+                    <button
+                      type="button"
+                      aria-pressed={filterStreaming}
+                      title={t("settings.models.filters.streaming")}
+                      onClick={() => setFilterStreaming(!filterStreaming)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                        filterStreaming
+                          ? "bg-logo-primary/20 text-logo-primary"
+                          : "bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20"
+                      }`}
+                    >
+                      <AudioLines className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={filterTranslation}
+                      title={t("settings.models.filters.translation")}
+                      onClick={() => setFilterTranslation(!filterTranslation)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                        filterTranslation
+                          ? "bg-logo-primary/20 text-logo-primary"
+                          : "bg-mid-gray/10 text-text/60 hover:bg-mid-gray/20"
+                      }`}
+                    >
+                      <Languages className="w-3.5 h-3.5" />
                     </button>
                     {/* Sorting dropdown */}
                     <div className="relative font-normal" ref={sortDropdownRef}>

@@ -404,7 +404,9 @@
       "deleteActiveConfirm": "{{modelName}} 是您当前使用的模型。删除后将停止转录，直到您选择新的模型。确定要删除吗？",
       "deleteTitle": "删除模型",
       "filters": {
-        "allLanguages": "所有语言"
+        "allLanguages": "所有语言",
+        "streaming": "仅显示支持实时串流的模型",
+        "translation": "仅显示支持翻译的模型"
       },
       "noModelsMatch": "没有符合此筛选条件的模型。",
       "yourModels": "已下载的模型",
@@ -504,7 +506,11 @@
       "copyFormat": "預設複製格式",
       "copyFormatPlain": "純文字",
       "copyFormatMarkdown": "Markdown",
-      "copyFormatDesc": "選擇複製轉寫文字時的格式"
+      "copyFormatDesc": "選擇複製轉寫文字時的格式",
+      "theme": {
+        "title": "跟随系统",
+        "system": "跟随系统 (亮/暗自动切换)"
+      }
     },
     "sound": {
       "title": "声音",

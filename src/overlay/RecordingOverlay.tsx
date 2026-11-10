@@ -11,6 +11,7 @@ import type {
 } from "@/bindings";
 import i18n, { syncLanguageFromSettings } from "@/i18n";
 import { getLanguageDirection } from "@/lib/utils/rtl";
+import { applyYukeyTheme } from "@/lib/utils/yukeyTheme";
 
 type OverlayState = "recording" | "streaming" | "transcribing" | "processing";
 
@@ -18,19 +19,8 @@ type OverlayState = "recording" | "streaming" | "transcribing" | "processing";
 // every overlay form). Mic levels arrive as 16 FFT buckets; we take the first N.
 const WAVE_BARS = 9;
 
-// Apply theme on file load
-const initialTheme = localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
-document.documentElement.classList.remove(
-  "theme-dark-tech",
-  "theme-premium-light",
-  "theme-zen-natural"
-);
-document.documentElement.classList.add(initialTheme);
-if (initialTheme === "theme-dark-tech") {
-  document.documentElement.style.colorScheme = "dark";
-} else {
-  document.documentElement.style.colorScheme = "light";
-}
+// Apply theme on file load (resolves "system" against the OS preference).
+applyYukeyTheme();
 
 const RecordingOverlay: React.FC = () => {
   const { t } = useTranslation();

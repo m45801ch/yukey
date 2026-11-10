@@ -18,6 +18,7 @@ mod settings;
 mod shortcut;
 mod signal_handle;
 mod transcription_coordinator;
+mod transcription_hook;
 mod tray;
 mod tray_i18n;
 mod utils;

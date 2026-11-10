@@ -1025,13 +1025,26 @@ impl ShortcutAction for TranscribeAction {
                                 }
                             }
 
-                            if processed.final_text.is_empty() {
+                            // The user's hook only changes what gets pasted;
+                            // history above keeps the text as produced.
+                            let Some(final_text) = complete_unless_cancelled(
+                                crate::transcription_hook::apply(&ah, processed.final_text),
+                                || rm.was_cancelled_since(cancel_generation),
+                            )
+                            .await
+                            else {
+                                debug!("Transcription operation cancelled during hook");
+                                utils::hide_recording_overlay(&ah);
+                                change_tray_icon(&ah, TrayIconState::Idle);
+                                return;
+                            };
+
+                            if final_text.is_empty() {
                                 utils::hide_recording_overlay(&ah);
                                 change_tray_icon(&ah, TrayIconState::Idle);
                             } else {
                                 let ah_clone = ah.clone();
                                 let paste_time = Instant::now();
-                                let final_text = processed.final_text;
                                 let rm_for_paste = Arc::clone(&rm);
                                 ah.run_on_main_thread(move || {
                                     if rm_for_paste.was_cancelled_since(cancel_generation) {

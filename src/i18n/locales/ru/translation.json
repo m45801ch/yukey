@@ -164,7 +164,9 @@
       "deleteActiveConfirm": "{{modelName}} — ваша активная модель. Удаление остановит транскрипцию, пока вы не выберете новую модель. Вы уверены?",
       "deleteTitle": "Удалить модель",
       "filters": {
-        "allLanguages": "Все языки"
+        "allLanguages": "Все языки",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "Нет моделей, соответствующих этому фильтру.",
       "yourModels": "Загруженные модели",
@@ -214,6 +216,10 @@
       "pushToTalk": {
         "label": "Нажми и говори",
         "description": "Удерживайте, чтобы записать, отпустите, чтобы остановить"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "sound": {

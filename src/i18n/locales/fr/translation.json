@@ -164,7 +164,9 @@
       "deleteActiveConfirm": "{{modelName}} est votre modèle actif. Le supprimer arrêtera les transcriptions jusqu'à ce que vous sélectionniez un nouveau modèle. Êtes-vous sûr ?",
       "deleteTitle": "Supprimer le modèle",
       "filters": {
-        "allLanguages": "Toutes les langues"
+        "allLanguages": "Toutes les langues",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "Aucun modèle ne correspond à ce filtre.",
       "yourModels": "Modèles téléchargés",
@@ -214,6 +216,10 @@
       "pushToTalk": {
         "label": "Appuyer pour parler",
         "description": "Maintenez pour enregistrer, relâchez pour arrêter"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "sound": {

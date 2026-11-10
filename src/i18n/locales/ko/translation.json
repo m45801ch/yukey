@@ -196,6 +196,10 @@
       "pushToTalk": {
         "label": "녹음 중 단축키 홀딩",
         "description": "누르고 있으면 녹음, 놓으면 정지"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "sound": {
@@ -230,7 +234,9 @@
       "deleteActiveConfirm": "{{modelName}}은(는) 현재 활성 모델입니다. 삭제하면 새 모델을 선택할 때까지 전사가 중지됩니다. 정말 삭제하시겠습니까?",
       "deleteTitle": "모델 삭제",
       "filters": {
-        "allLanguages": "모든 언어"
+        "allLanguages": "모든 언어",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "이 필터에 맞는 모델이 없습니다.",
       "searchPlaceholder": "이름으로 모델 검색…",

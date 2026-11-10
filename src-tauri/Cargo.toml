@@ -55,7 +55,7 @@ hound = "3.5.1"
 symphonia = { version = "0.5", default-features = false, features = ["mp3"] }
 log = "0.4.25"
 env_filter = "0.1.0"
-tokio = "1.43.0"
+tokio = { version = "1.43.0", features = ["process"] }
 vad-rs = { git = "https://github.com/cjpais/vad-rs", default-features = false }
 enigo = "0.6.1"
 rodio = { git = "https://github.com/cjpais/rodio.git" }
@@ -131,7 +131,9 @@ winreg = "0.55"
 [target.'cfg(all(windows, target_arch = "x86_64"))'.dependencies]
 # NOTE: requires Vulkan SDK installed or VULKAN_SDK env var set.
 #       Fall back to CPU-only by changing "vulkan" to an empty features list.
-transcribe-cpp = { version = "0.1.0", default-features = false, features = ["vulkan"] }
+# TEMP (local test build): CPU-only, because ggml-vulkan's shader generator
+# deadlocks on this machine. Revert to ["vulkan"] before any real build.
+transcribe-cpp = { version = "0.1.0", default-features = false, features = [] }
 
 [target.'cfg(all(windows, target_arch = "aarch64"))'.dependencies]
 transcribe-cpp = { version = "0.1.0", default-features = false }

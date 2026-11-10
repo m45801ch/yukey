@@ -61,6 +61,17 @@
 - **啟用專業詞庫**：若要進行程式設計、法律或醫學等專業內容輸入，可以勾選對應的「專業領域詞庫」來提升術語精準度。
 - **一鍵備份**：當你在新電腦安裝時，可透過設定介面一鍵導出為一個 ZIP 備份檔，並在新設備上還原。
 
+### 4. Transcription hook（轉寫掛鉤，進階）
+
+在 app 資料夾的 `hooks/` 放一個可執行檔，貼上前 yukey 會把最終文字寫入它的 stdin，並改貼它的 stdout（歷史紀錄仍保留原文，不受影響）。
+
+- **Windows 路徑**：`%APPDATA%\yukey\hooks\`（可攜版為執行檔旁的 `Data\hooks\`）。
+- **檔名**：`transcription.cmd` / `.bat` / `.ps1` / `.exe`（Windows 無法執行無副檔名的腳本）。
+- 會移除一個尾端換行（含 CRLF）；輸出為空就不貼上，可用於自訂貼上方式。
+- 失敗、非 0 結束或超過 30 秒自動改貼原文；按取消捷徑會中止並砍掉子程序。
+- GUI 啟動不會繼承你 shell 的 PATH，hook 內呼叫 python / node 等請用絕對路徑。
+- 隱藏執行：不會跳出黑色主控台視窗（Windows `CREATE_NO_WINDOW`）。
+
 ---
 
 ## 🛠️ 開發、打包與建置說明 (Development & Build)

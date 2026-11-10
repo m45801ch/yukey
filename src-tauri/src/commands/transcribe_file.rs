@@ -1,4 +1,5 @@
-use crate::audio_toolkit::audio::decode_mp3;
+use crate::audio_toolkit::audio::{decode_mp3, save_wav_file};
+use crate::managers::history::HistoryManager;
 use crate::managers::transcription::TranscriptionManager;
 use crate::settings::get_settings;
 use log::{info, warn};
@@ -7,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use specta::Type;
 use std::path::Path;
 use std::sync::Arc;
-use tauri::{Emitter, State};
+use tauri::{Emitter, Manager, State};
 
 #[derive(Debug, Clone, Serialize, Type)]
 pub struct FileTranscriptionResult {
@@ -277,6 +278,40 @@ pub fn transcribe_queue(
             results.push(Err(err));
         } else {
             let text = all_text.join("\n");
+
+            // Persist the file transcription into the shared history so it shows
+            // up in the History page (and its audio can be replayed), matching
+            // how a normal dictation is stored.
+            if let Some(hm) = app.try_state::<Arc<HistoryManager>>() {
+                let stem: String = path
+                    .file_stem()
+                    .map(|s| s.to_string_lossy().into_owned())
+                    .unwrap_or_else(|| "audio".to_string())
+                    .chars()
+                    .map(|c| if c.is_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+                    .collect();
+                let wav_name = format!(
+                    "file-{}-{}.wav",
+                    chrono::Utc::now().timestamp_millis(),
+                    stem
+                );
+                let wav_path = hm.recordings_dir().join(&wav_name);
+                match save_wav_file(&wav_path, &samples) {
+                    Ok(()) => {
+                        if let Err(e) = hm.save_entry(
+                            wav_name,
+                            text.clone(),
+                            false,
+                            None,
+                            None,
+                        ) {
+                            warn!("Failed to save file transcription to history: {}", e);
+                        }
+                    }
+                    Err(e) => warn!("Failed to write WAV for file history: {}", e),
+                }
+            }
+
             let _ = app.emit(
                 "file-transcription-progress",
                 FileProgressPayload {

@@ -196,6 +196,10 @@
       "pushToTalk": {
         "label": "Натискане за говорене",
         "description": "Задръжте за запис, пуснете за спиране"
+      },
+      "theme": {
+        "title": "System",
+        "system": "System (auto light/dark)"
       }
     },
     "models": {
@@ -207,7 +211,9 @@
       "deleteActiveConfirm": "{{modelName}} е вашият активен модел. Изтриването му ще спре транскрипциите, докато не изберете нов модел. Сигурни ли сте?",
       "deleteTitle": "Изтриване на модел",
       "filters": {
-        "allLanguages": "Всички езици"
+        "allLanguages": "Всички езици",
+        "streaming": "Streaming-capable models only",
+        "translation": "Translation-capable models only"
       },
       "noModelsMatch": "Няма модели, отговарящи на този филтър.",
       "searchPlaceholder": "Търсене на модели по име…",

@@ -3,25 +3,26 @@ import ReactDOM from "react-dom/client";
 import { platform } from "@tauri-apps/plugin-os";
 import App from "./App";
 import { installCompatShims } from "./lib/compat";
+import {
+  applyYukeyTheme,
+  readThemeSelection,
+  watchSystemTheme,
+  SYSTEM_THEME,
+} from "./lib/utils/yukeyTheme";
+import { emit } from "@tauri-apps/api/event";
 
 installCompatShims();
 
 // Set platform before render so CSS can scope per-platform (e.g. scrollbar styles)
 document.documentElement.dataset.platform = platform();
 
-// Apply theme on startup
-const savedTheme = localStorage.getItem("yukey_app_theme") || "theme-zen-natural";
-document.documentElement.classList.remove(
-  "theme-dark-tech",
-  "theme-premium-light",
-  "theme-zen-natural"
-);
-document.documentElement.classList.add(savedTheme);
-if (savedTheme === "theme-dark-tech") {
-  document.documentElement.style.colorScheme = "dark";
-} else {
-  document.documentElement.style.colorScheme = "light";
-}
+// Apply theme on startup and follow OS light/dark changes when "system" is picked.
+applyYukeyTheme();
+watchSystemTheme((resolved) => {
+  if (readThemeSelection() === SYSTEM_THEME) {
+    emit("theme-changed", resolved).catch(() => {});
+  }
+});
 
 // Initialize i18n
 import "./i18n";
